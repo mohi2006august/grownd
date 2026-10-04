@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<a href="{{ m.href }}" data-cursor="VIEW" onMouseMove="{{ tilt }}" onMouseLeave="{{ untilt }}" style="position:relative;display:flex;flex-direction:column;height:100%;background:rgba(var(--raised-rgb,27,35,64),0.52);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(var(--ink-rgb,242,245,255),0.11);border-radius:24px;box-shadow:0 8px 24px rgba(var(--shadow-rgb,4,7,16),0.45),inset 0 1px 0 rgba(var(--ink-rgb,242,245,255),0.07);overflow:hidden;text-decoration:none;color:var(--ink,#F2F5FF);transition:box-shadow 150ms ease,transform 250ms cubic-bezier(.2,.7,.2,1);will-change:transform" style-hover="box-shadow:0 16px 40px rgba(var(--shadow-rgb,4,7,16),0.55);color:var(--ink,#F2F5FF)">
+<span aria-hidden="true" style="position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,-20%),rgba(var(--ink-rgb,242,245,255),0.13),transparent 45%)"></span>
+<div style="position:relative;height:200px;flex:none;background:{{ m.color }};padding:20px 24px;display:flex;flex-direction:column;justify-content:space-between;color:var(--on-accent,#0A0E1A);overflow:hidden">
+<span aria-hidden="true" class="gr-anim" style="position:absolute;inset:-20px;background-image:radial-gradient(rgba(var(--deep-rgb,10,14,26),0.16) 2px,transparent 2.6px);background-size:18px 18px;animation:grDots 18s linear infinite"></span>
+<div style="position:relative;display:flex;justify-content:space-between;gap:8px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase"><span>{{ m.code }}</span><span>{{ m.typeName }}</span></div>
+<span style="position:relative;font-family:'Space Grotesk',sans-serif;font-size:60px;line-height:0.9;font-weight:700;letter-spacing:-0.03em">{{ m.glyph }}</span>
+</div>
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:12px;flex:1">
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;background:{{ m.color }};color:var(--on-accent,#0A0E1A);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:16px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ m.typeName }}</span>
+<span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;border:1px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:16px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ m.cat }}</span>
+</div>
+<h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600;color:var(--ink,#F2F5FF)">{{ m.title }}</h3>
+<p style="margin:0;font-family:'Figtree',sans-serif;font-size:14px;line-height:22px;color:var(--muted,#9FACC9);text-wrap:pretty">{{ m.line }}</p>
+<div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:20px;font-weight:500;color:var(--ink,#F2F5FF)"><span>{{ m.agesText }}</span><span style="color:var(--hair-strong,#6B7CAB)">/</span><span>{{ m.lenText }}</span></div>
+<div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(var(--ink-rgb,242,245,255),0.10);display:flex;justify-content:space-between;align-items:center;min-height:44px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:15px;line-height:20px;font-weight:500;color:var(--ink,#F2F5FF)">{{ m.price }}</span>
+<span style="display:inline-flex;gap:6px;align-items:center;color:var(--brand-ink,#C6F534);font-family:'Figtree',sans-serif;font-size:15px;font-weight:700">View mission {{ arrow }}</span>
+</div>
+</div>
+</a>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:500},&quot;m&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const still = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return {
+      m: this.props.m || {},
+      pad: this.props.mobile ? '16px' : '24px',
+      arrow: h('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.25, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' }, h('path', { d: 'M5 12h14' }), h('path', { d: 'M13 6l6 6-6 6' })),
+      tilt: e => {
+        if (still) return;
+        const el = e.currentTarget, b = el.getBoundingClientRect();
+        const x = (e.clientX - b.left) / b.width, y = (e.clientY - b.top) / b.height;
+        el.style.transform = 'perspective(900px) rotateX(' + ((0.5 - y) * 7).toFixed(2) + 'deg) rotateY(' + ((x - 0.5) * 9).toFixed(2) + 'deg) translateY(-4px)';
+        el.style.setProperty('--gx', (x * 100).toFixed(1) + '%'); el.style.setProperty('--gy', (y * 100).toFixed(1) + '%');
+      },
+      untilt: e => { const el = e.currentTarget; el.style.transform = ''; el.style.setProperty('--gy', '-20%'); }
+    };
+  }
+}
+</script>
+</body>
+</html>

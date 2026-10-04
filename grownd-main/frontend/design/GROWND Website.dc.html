@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#0A0E1A;color:#F2F5FF;font-family:'Figtree',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+*{box-sizing:border-box}
+a{color:#C6F534}a:hover{color:#F2F5FF}
+::selection{background:#C6F534;color:#0A0E1A}
+:focus-visible{outline:3px solid #C6F534;outline-offset:2px}
+input,select,textarea,button{font:inherit}
+input::placeholder,textarea::placeholder{color:#7E8BAB}
+.gr-js [data-reveal]{opacity:0;transform:translateY(16px);transition:opacity 400ms ease,transform 400ms cubic-bezier(.2,.7,.2,1)}
+.gr-js [data-reveal].is-in{opacity:1;transform:none}
+.gr-ticker:hover{animation-play-state:paused!important}
+@keyframes grRise{0%{transform:translateY(0);opacity:.75}75%{opacity:.6}100%{transform:translateY(-90px);opacity:0}}
+@keyframes grDrift{0%,100%{transform:rotate(0deg)}50%{transform:rotate(10deg)}}
+@keyframes grBreathe{0%{transform:scaleY(.96)}100%{transform:scaleY(1.04)}}
+@keyframes grTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes grFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes grPulse{0%{box-shadow:0 0 0 0 rgba(53,208,127,.6)}100%{box-shadow:0 0 0 10px rgba(53,208,127,0)}}
+@keyframes grDrop{0%{transform:translateY(0);opacity:0}10%{opacity:.8}100%{transform:translateY(-420px);opacity:0}}
+@keyframes grBurst{0%{transform:translate(0,0) scale(.4);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.gr-js [data-reveal]{opacity:1;transform:none;transition:none}.gr-anim{animation:none!important}*{transition:none!important}}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="min-height:100vh;display:flex;flex-direction:column;background:#0A0E1A;color:#F2F5FF">
+<a href="#main" onClick="{{ skip }}" style="position:fixed;left:16px;top:-80px;z-index:100;padding:12px 16px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-weight:700;font-size:15px;text-decoration:none" style-focus="top:16px">Skip to content</a>
+
+<header style="position:sticky;top:0;z-index:50;background:{{ lay.headerBg }};border-bottom:1px solid {{ lay.headerBorder }};backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:background 300ms ease,border-color 300ms ease">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px);height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+<a href="#/" aria-label="GROWND home" style="display:inline-flex;align-items:center;gap:10px;min-height:44px;text-decoration:none">
+<span aria-hidden="true" style="width:28px;height:28px;border-radius:8px;background:#C6F534;display:inline-flex;align-items:center;justify-content:center;color:#0A0E1A">{{ ic.flaskS }}</span>
+<span style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:0.04em;color:#C6F534">GROWND</span>
+</a>
+<nav aria-label="Main" style="display:{{ lay.navDisplay }};gap:4px">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+<a href="{{ n.href }}" aria-current="{{ n.current }}" style="min-height:44px;display:inline-flex;align-items:center;padding:0 14px;font-size:15px;font-weight:600;color:{{ n.color }};text-decoration:none;box-shadow:{{ n.bar }};transition:color 150ms ease" style-hover="color:#F2F5FF">{{ n.label }}</a>
+</sc-for>
+</nav>
+<div style="display:flex;align-items:center;gap:12px">
+<a href="#/register" style="display:{{ lay.ctaDisplay }};align-items:center;min-height:48px;padding:10px 20px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:15px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-1px);color:#0A0E1A">Book a science experience</a>
+<button type="button" onClick="{{ toggleMenu }}" aria-label="{{ menuLabel }}" aria-expanded="{{ menuExpanded }}" aria-controls="gr-menu" style="display:{{ lay.burgerDisplay }};width:48px;height:48px;align-items:center;justify-content:center;border-radius:14px;border:2px solid #6B7CAB;background:transparent;color:#F2F5FF;cursor:pointer">{{ menuIcon }}</button>
+</div>
+</div>
+</header>
+
+<sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}">
+<div id="gr-menu" style="position:fixed;inset:72px 0 0 0;z-index:40;background:#0A0E1A;overflow:auto">
+<nav ref="{{ menuRef }}" aria-label="Main" style="display:flex;flex-direction:column;padding:16px 20px 32px">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+<a href="{{ n.href }}" aria-current="{{ n.current }}" style="min-height:64px;display:flex;align-items:center;justify-content:space-between;font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;letter-spacing:-0.01em;color:{{ n.color }};text-decoration:none;border-bottom:1px solid #2C3757">{{ n.label }} <span style="color:#C6F534">{{ ic.arrow }}</span></a>
+</sc-for>
+<a href="#/register" style="margin-top:28px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:17px;font-weight:700;text-decoration:none">Book a science experience</a>
+<a href="#/quiz" style="margin-top:12px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:17px;font-weight:700;text-decoration:none">Start the quiz</a>
+<p style="margin:28px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:#9FACC9">AGES 5-12 / 90-120 MIN / WE BRING EVERYTHING</p>
+</nav>
+</div>
+</sc-if>
+
+<main id="main" tabindex="-1" ref="{{ mainRef }}" style="flex:1;outline:none">
+
+<sc-if value="{{ pg.home }}" hint-placeholder-val="{{ true }}">
+<section onMouseMove="{{ heroMove }}" onMouseLeave="{{ heroLeave }}" style="position:relative;overflow:hidden;border-bottom:1px solid #2C3757">
+<div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(rgba(107,124,171,0.09) 1px,transparent 1px),linear-gradient(90deg,rgba(107,124,171,0.09) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:radial-gradient(ellipse at 70% 40%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse at 70% 40%,#000 20%,transparent 75%)"></div>
+<div aria-hidden="true" style="position:absolute;right:-10%;top:-20%;width:70vw;height:70vw;max-width:900px;max-height:900px;border-radius:50%;background:radial-gradient(circle,rgba(198,245,52,0.10),transparent 60%)"></div>
+{{ particles }}
+<div style="position:relative;width:100%;max-width:1440px;margin:0 auto;padding:clamp(40px,7vw,96px) clamp(20px,4vw,48px) clamp(48px,7vw,96px);display:grid;grid-template-columns:{{ lay.heroCols }};gap:clamp(32px,4vw,64px);align-items:center">
+<div style="display:flex;flex-direction:column;gap:24px">
+<span style="display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;font-weight:500;letter-spacing:0.08em;color:#C6F534"><span class="gr-anim" style="width:8px;height:8px;border-radius:999px;background:#35D07F;animation:grPulse 1.8s ease-out infinite"></span>MISSION CONTROL / [CITY]</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(46px,6.4vw,84px);line-height:0.95;font-weight:700;letter-spacing:-0.025em;max-width:720px;text-wrap:balance">Every child is a scientist. Some just need a <span style="position:relative;white-space:nowrap;color:#0A0E1A;padding:0 0.12em;background:#C6F534;border-radius:14px">lab.</span></h1>
+<p style="margin:0;font-size:clamp(17px,1.4vw,19px);line-height:1.55;color:#9FACC9;max-width:560px;text-wrap:pretty">Hands-on STEM missions for ages 5 to 12: birthdays, workshops, school events and coding sessions. We bring the kit, the scientists and the clean-up. You bring the children.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
+<a href="#/register" style="display:inline-flex;align-items:center;gap:8px;min-height:56px;padding:14px 26px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);color:#0A0E1A">Book a science experience</a>
+<a href="#/missions" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none;transition:border-color 150ms ease,background 150ms ease,gap 150ms ease" style-hover="border-color:#F2F5FF;background:#121829;gap:14px;color:#F2F5FF">Enter the Lab {{ ic.arrow }}</a>
+</div>
+<ul aria-label="At a glance" style="list-style:none;margin:8px 0 0;padding:20px 0 0;border-top:1px solid #2C3757;display:flex;flex-wrap:wrap;gap:10px 28px;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:20px;font-weight:500">
+<li>Ages 5-12</li><li>90-120 min</li><li>From [PRICE] / child</li><li>We bring everything</li>
+</ul>
+</div>
+<div style="position:relative;display:flex;justify-content:center">
+<div ref="{{ artRef }}" style="width:100%;max-width:580px;transition:transform 700ms cubic-bezier(.2,.7,.2,1)">{{ lab }}</div>
+<span class="gr-anim" style="position:absolute;left:0;top:12%;padding:8px 12px;border-radius:999px;background:#1B2340;border:1px solid #2C3757;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;font-weight:500;animation:grFloat 5s ease-in-out infinite;display:{{ lay.floatDisplay }};align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:#35D07F"></span>SAMPLE 01 / BIOLOGIST</span>
+<span class="gr-anim" style="position:absolute;right:0;bottom:14%;padding:8px 12px;border-radius:999px;background:#1B2340;border:1px solid #2C3757;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;font-weight:500;animation:grFloat 6s ease-in-out 1s infinite;display:{{ lay.floatDisplay }};align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:#FF5CA8"></span>REACTION / CHEMIST</span>
+</div>
+</div>
+</section>
+
+<div aria-label="All six missions" style="overflow:hidden;background:#121829;border-bottom:1px solid #2C3757;padding:18px 0;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:0.08em">{{ ticker }}</div>
+
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(64px,8vw,112px) clamp(20px,4vw,48px) clamp(48px,6vw,80px);display:flex;flex-direction:column;gap:32px">
+<div data-reveal style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">STEP 01</span>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.2vw,52px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">Choose your mission</h2>
+<p style="margin:0;font-size:17px;line-height:1.55;color:#9FACC9;max-width:520px">Six kinds of experience. Every one is hands-on, and every one comes with its own scientists.</p>
+</div>
+<a href="#/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#C6F534;font-size:16px;font-weight:700;text-decoration:none" style-hover="color:#F2F5FF">See all six missions {{ ic.arrow }}</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:16px">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+<a data-reveal href="{{ c.href }}" style="transition-delay:{{ c.delay }};display:flex;flex-direction:column;gap:12px;min-height:236px;padding:24px;border-radius:24px;background:#1B2340;border:1px solid #2C3757;box-shadow:0 8px 24px rgba(4,7,16,0.45);color:#F2F5FF;text-decoration:none" style-hover="box-shadow:0 16px 40px rgba(4,7,16,0.55);border-color:#6B7CAB;color:#F2F5FF">
+<span style="width:52px;height:52px;border-radius:14px;border:1px solid #6B7CAB;display:inline-flex;align-items:center;justify-content:center">{{ c.icon }}</span>
+<span style="margin-top:auto;font-family:'Space Grotesk',sans-serif;font-size:19px;line-height:26px;font-weight:600">{{ c.name }}</span>
+<span style="font-size:14px;line-height:22px;color:#9FACC9">{{ c.line }}</span>
+<span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">{{ c.count }}</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,96px)">
+<div data-reveal style="position:relative;overflow:hidden;padding:clamp(28px,5vw,64px);border-radius:24px;background:#121829;border:1px solid #2C3757;display:grid;grid-template-columns:{{ lay.bandCols }};gap:clamp(32px,5vw,64px);align-items:center">
+<div style="display:flex;flex-direction:column;gap:20px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:#C6F534">STEP 02 / 6 QUESTIONS / 2 MINUTES</span>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.2vw,52px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">What kind of scientist are you?</h2>
+<p style="margin:0;font-size:18px;line-height:28px;color:#9FACC9;max-width:520px">Six questions, no wrong answers. You come out as one of four scientist types, and each one points at the missions that suit it. Nothing is stored, so let them take it twice.</p>
+<a href="#/quiz" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:56px;padding:14px 26px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);color:#0A0E1A">Start the quiz {{ ic.arrow }}</a>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<sc-for list="{{ types }}" as="t" hint-placeholder-count="4">
+<a href="#/quiz" aria-label="{{ t.aria }}" style="aspect-ratio:1/0.82;border-radius:24px;background:{{ t.color }};color:#0A0E1A;padding:clamp(14px,2vw,24px);display:flex;flex-direction:column;justify-content:space-between;text-decoration:none;transition:transform 250ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:rotate(-2deg) scale(1.04);color:#0A0E1A">
+<span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,5vw,72px);line-height:0.95;font-weight:700">{{ t.initial }}</span>
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ t.name }}</span>
+</a>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,96px);display:flex;flex-direction:column;gap:20px">
+<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">NEXT MISSION</span>
+<div data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));border-radius:24px;background:#1B2340;border:1px solid #2C3757;box-shadow:0 8px 24px rgba(4,7,16,0.45);overflow:hidden">
+<div style="min-height:220px;background:{{ next.color }};color:#0A0E1A;padding:24px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">{{ next.code }}</span><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4vw,52px);line-height:1;font-weight:700;letter-spacing:-0.02em">{{ next.glyph }}</span></div>
+<div style="grid-column:span 2;min-width:0;padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;background:{{ next.color }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ next.typeName }}</span><span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;border:1px solid #6B7CAB;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ next.cat }}</span></div>
+<h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">{{ next.title }}</h3>
+<p style="margin:0;font-size:16px;line-height:26px;color:#9FACC9;max-width:560px">{{ next.line }}</p>
+<dl style="margin:4px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,auto));gap:14px 32px">
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHERE</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ next.ev.where }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHEN</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ next.ev.when }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">AGES</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ next.ages }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">PLACES</dt><dd style="margin:4px 0 0"><span style="display:inline-flex;padding:2px 10px;border-radius:999px;background:{{ next.ev.pillBg }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">{{ next.ev.pill }}</span></dd></div>
+</dl>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+<a href="{{ next.registerHref }}" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:#0A0E1A">Book mission</a>
+<a href="{{ next.href }}" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 20px;border-radius:14px;color:#C6F534;font-size:16px;font-weight:700;text-decoration:none" style-hover="color:#F2F5FF">See this mission {{ ic.arrow }}</a>
+</div>
+</div>
+</div>
+</section>
+
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(80px,9vw,128px);display:flex;flex-direction:column;gap:32px">
+<div data-reveal style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">FEATURED MISSIONS / 3 OF 6</span><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.2vw,52px);line-height:1.02;font-weight:700;letter-spacing:-0.02em;max-width:820px">A party where the cake is the second best bit.</h2></div>
+<a href="#/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#C6F534;font-size:16px;font-weight:700;text-decoration:none" style-hover="color:#F2F5FF">Browse all missions {{ ic.arrow }}</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
+<sc-for list="{{ featured }}" as="item" hint-placeholder-count="3"><div data-reveal style="transition-delay:{{ item.delay }}"><dc-import name="MissionCard" m="{{ item }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div></sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.missions }}" hint-placeholder-val="{{ false }}">
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(40px,6vw,72px) clamp(20px,4vw,48px) clamp(64px,8vw,96px);display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:900px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">MISSIONS / 6 AVAILABLE</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,4.6vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em;text-wrap:balance">Six missions. Pick the one that sounds like your kid.</h1>
+<p style="margin:0;font-size:18px;line-height:28px;color:#9FACC9">Not sure? <a href="#/quiz" style="color:#C6F534;font-weight:700">Take the two-minute scientist quiz</a> and we will point you at the right one.</p>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:16px 24px;flex-wrap:wrap;padding:16px 0;border-top:1px solid #2C3757;border-bottom:1px solid #2C3757">
+<nav aria-label="Filter by category" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ ms.chips }}" as="c" hint-placeholder-count="7">
+<a href="{{ c.href }}" aria-current="{{ c.current }}" style="display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;border-radius:999px;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.border }};font-size:15px;font-weight:600;text-decoration:none;transition:border-color 150ms ease,background 150ms ease" style-hover="border-color:#F2F5FF;color:{{ c.fg }}">{{ c.name }}</a>
+</sc-for>
+</nav>
+<label style="display:flex;align-items:center;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">CITY</span>
+<span style="position:relative;display:inline-flex;align-items:center"><select value="{{ ms.city }}" onChange="{{ ms.onCity }}" style="appearance:none;min-height:48px;min-width:200px;padding:0 44px 0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;cursor:pointer"><option value="">All cities</option><option value="city-a">[CITY A]</option><option value="city-b">[CITY B]</option><option value="city-c">[CITY C]</option></select><span style="position:absolute;right:14px;pointer-events:none;display:inline-flex">{{ ic.chev }}</span></span>
+</label>
+</div>
+<p aria-live="polite" style="margin:-12px 0 0;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">{{ ms.summary }}</p>
+<sc-if value="{{ ms.hasList }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
+<sc-for list="{{ ms.list }}" as="item" hint-placeholder-count="6"><div data-reveal style="transition-delay:{{ item.delay }}"><dc-import name="MissionCard" m="{{ item }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ ms.empty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:clamp(40px,6vw,72px) 24px;border-radius:24px;background:#121829;border:1px solid #2C3757">
+<span style="width:72px;height:72px;border-radius:24px;border:1px solid #6B7CAB;display:inline-flex;align-items:center;justify-content:center">{{ ic.flask }}</span>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">Nothing in that category yet</h2>
+<p style="margin:0;max-width:520px;font-size:16px;line-height:26px;color:#9FACC9">{{ ms.emptyLine }}</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none">Show all missions</a><a href="#/register" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none">Register interest</a></div>
+</div>
+</sc-if>
+<div data-reveal style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;padding:clamp(28px,4vw,48px) clamp(24px,4vw,56px);border-radius:24px;background:#121829;border:1px solid #2C3757;margin-top:16px">
+<div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">Still scrolling? Let the quiz decide.</h2><p style="margin:0;font-size:16px;line-height:26px;color:#9FACC9">Six questions, two minutes, one mission that fits.</p></div>
+<a href="#/quiz" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:#0A0E1A">Start the quiz {{ ic.arrow }}</a>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.lab }}" hint-placeholder-val="{{ false }}">
+<section style="width:100%;max-width:1100px;margin:0 auto;padding:clamp(56px,9vw,120px) clamp(20px,4vw,48px);display:flex;flex-direction:column;gap:24px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">THE LAB / OPENING IN PHASE TWO</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,6vw,76px);line-height:0.98;font-weight:700;letter-spacing:-0.025em;max-width:860px">The Lab is still bubbling.</h1>
+<p style="margin:0;max-width:640px;font-size:18px;line-height:28px;color:#9FACC9">Experiments of the week, home challenges and achievement badges land here after the first missions run. For now, the best experiment on the site is the quiz.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none">Start the quiz</a><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.who }}" hint-placeholder-val="{{ false }}">
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(48px,7vw,96px) clamp(20px,4vw,48px);display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:860px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:#C6F534">WHO WE ARE / 3 PEOPLE, 1 LAB</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,5.4vw,68px);line-height:1;font-weight:700;letter-spacing:-0.025em">Three scientists who think the cake should come second.</h1>
+<p style="margin:0;font-size:18px;line-height:28px;color:#9FACC9">GROWND is a small team. The person who plans your mission is the person who turns up to run it.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
+<sc-for list="{{ team }}" as="p" hint-placeholder-count="3">
+<article data-reveal style="transition-delay:{{ p.delay }};border-radius:24px;background:#1B2340;border:1px solid #2C3757;overflow:hidden">
+<div role="img" aria-label="Photo placeholder" style="height:220px;background:{{ p.color }};color:#0A0E1A;padding:20px;display:flex;align-items:flex-end;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700">[PHOTO: {{ p.photo }}]</div>
+<div style="padding:24px;display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">{{ p.role }}</span><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">{{ p.name }}</h2><p style="margin:0;font-size:15px;line-height:24px;color:#9FACC9">{{ p.line }}</p></div>
+</article>
+</sc-for>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:20px 24px;border-radius:14px;background:#121829;border:1px solid #6B7CAB"><span>{{ ic.info }}</span><p style="margin:0;font-size:15px;line-height:24px">Safety and checks: [INSURANCE AND DBS DETAILS]</p></div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.mission }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:24px clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:grid;grid-template-columns:{{ lay.missionCols }};gap:clamp(32px,4vw,56px);align-items:start">
+<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+<a href="#/missions" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#C6F534;font-size:16px;font-weight:700;text-decoration:none" style-hover="color:#F2F5FF">{{ ic.arrowL }} All missions</a>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<a href="{{ mp.m.resultHref }}" style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;background:{{ mp.m.color }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none">{{ mp.m.typeName }}</a>
+<span style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;border:1px solid #6B7CAB;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ mp.m.cat }}</span>
+<span style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;border:1px solid #6B7CAB;color:#9FACC9;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em">{{ mp.m.code }}</span>
+</div>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(46px,6.4vw,84px);line-height:0.95;font-weight:700;letter-spacing:-0.025em;text-wrap:balance">{{ mp.m.title }}</h1>
+<p style="margin:0;max-width:760px;font-size:clamp(17px,1.4vw,19px);line-height:1.55;color:#9FACC9">{{ mp.m.para }}</p>
+<div style="display:grid;grid-template-columns:{{ lay.mediaCols }};grid-template-rows:{{ lay.mediaRows }};gap:16px;margin-top:8px">
+<div role="img" aria-label="Photo placeholder" style="grid-column:{{ lay.mediaBig }};grid-row:{{ lay.mediaBigRow }};position:relative;overflow:hidden;border-radius:24px;background:{{ mp.m.color }};color:#0A0E1A;padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;justify-content:space-between">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">{{ mp.m.code }} / {{ mp.m.glyph }}</span>
+<span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em;max-width:440px">[PHOTO: children mid-experiment]</span>
+</div>
+<div role="img" aria-label="Photo placeholder" style="border-radius:24px;border:2px dashed #6B7CAB;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:#9FACC9">[PHOTO 2]</div>
+<div role="img" aria-label="Video placeholder" style="border-radius:24px;border:2px dashed #6B7CAB;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:8px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:#9FACC9"><span style="width:52px;height:52px;border-radius:999px;border:2px solid #F2F5FF;display:inline-flex;align-items:center;justify-content:center;color:#F2F5FF">{{ ic.play }}</span>[VIDEO: 20s reel]</div>
+</div>
+
+<section style="display:flex;flex-direction:column;gap:24px;margin-top:40px">
+<div data-reveal style="display:flex;flex-direction:column;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">THE SESSION / {{ mp.m.lenText }}</span><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4vw,48px);line-height:1.04;font-weight:700;letter-spacing:-0.02em">What they actually do</h2></div>
+<ol style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+<sc-for list="{{ mp.steps }}" as="s" hint-placeholder-count="4">
+<li data-reveal style="transition-delay:{{ s.delay }};display:flex;flex-direction:column;gap:12px;padding:24px;border-radius:24px;background:#1B2340;border:1px solid #2C3757;transition-property:opacity,transform,border-color" style-hover="border-color:#6B7CAB">
+<span style="width:56px;height:56px;border-radius:14px;background:{{ mp.m.color }};color:#0A0E1A;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700">{{ s.n }}</span>
+<h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:19px;line-height:26px;font-weight:600">{{ s.title }}</h3>
+<p style="margin:0;font-size:16px;line-height:26px;color:#9FACC9">{{ s.text }}</p>
+</li>
+</sc-for>
+</ol>
+</section>
+
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:16px">
+<div data-reveal style="padding:clamp(24px,3vw,32px);border-radius:24px;background:#121829;border:1px solid #2C3757;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">What is included</h2>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:26px">
+<sc-for list="{{ mp.incl }}" as="it" hint-placeholder-count="4"><li style="display:flex;gap:12px"><span style="color:#C6F534;margin-top:1px">{{ ic.check }}</span><span>{{ it }}</span></li></sc-for>
+</ul>
+</div>
+<div data-reveal style="padding:clamp(24px,3vw,32px);border-radius:24px;background:#121829;border:1px solid #2C3757;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">Worth knowing</h2>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:26px">
+<sc-for list="{{ mp.worth }}" as="it" hint-placeholder-count="4"><li style="display:flex;gap:12px"><span style="margin-top:1px">{{ ic.info }}</span><span>{{ it }}</span></li></sc-for>
+</ul>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;margin-top:32px">
+<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">UPCOMING DATES / SHOWN IN EACH EVENT'S OWN TIMEZONE</span>
+<sc-if value="{{ mp.m.hasEvents }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ mp.m.evs }}" as="e" hint-placeholder-count="3">
+<div data-reveal style="display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;padding:20px 24px;border-radius:14px;background:{{ e.rowBg }};border:1px solid #2C3757">
+<div style="min-width:200px"><div style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHEN</div><div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px">{{ e.when }}</div></div>
+<div style="min-width:180px"><div style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHERE</div><div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px">{{ e.where }}</div></div>
+<div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">AGES</div><div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px">{{ e.ages }}</div></div>
+<span style="display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;background:{{ e.pillBg }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">{{ e.pill }}</span>
+<div style="margin-left:auto">
+<sc-if value="{{ e.open }}" hint-placeholder-val="{{ true }}"><a href="{{ mp.m.registerHref }}" style="display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 22px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:15px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:#0A0E1A">Book this date</a></sc-if>
+<sc-if value="{{ e.sold }}" hint-placeholder-val="{{ false }}"><a href="{{ mp.m.registerHref }}" style="display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 18px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:15px;font-weight:700;text-decoration:none" style-hover="border-color:#F2F5FF;color:#F2F5FF">Join the waiting list</a></sc-if>
+</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ mp.m.noEvents }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding:28px 32px;border-radius:14px;background:#121829;border:1px solid #2C3757">
+<div style="display:flex;gap:18px;align-items:center"><span>{{ ic.cal }}</span><div><h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:19px;line-height:26px;font-weight:600">No dates published yet</h3><p style="margin:4px 0 0;font-size:16px;line-height:26px;color:#9FACC9">Register your interest and we will come to you with dates.</p></div></div>
+<a href="{{ mp.m.registerHref }}" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 22px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:15px;font-weight:700;text-decoration:none">Register interest</a>
+</div>
+</sc-if>
+</section>
+</div>
+
+<aside aria-label="Booking" style="position:{{ lay.bookPos }};top:96px;display:flex;flex-direction:column;gap:20px;padding:32px;border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid {{ mp.m.color }};box-shadow:0 16px 40px rgba(4,7,16,0.55)">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Space Grotesk',sans-serif;font-size:34px;line-height:38px;font-weight:700">[PRICE]</span><span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:#9FACC9">{{ mp.m.perUnit }}</span></div>
+<dl style="margin:0;padding-top:20px;border-top:1px solid #2C3757;display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:center">
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">AGES</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ mp.m.ages }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">LENGTH</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ mp.m.lenText }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">GROUP</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ mp.m.groupText }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHERE</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ mp.m.ev.where }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">NEXT</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ mp.m.nextText }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">PLACES</dt><dd style="margin:0;text-align:right"><span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;background:{{ mp.m.placesBg }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">{{ mp.m.placesText }}</span></dd>
+</dl>
+<a href="{{ mp.m.registerHref }}" style="display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);color:#0A0E1A">Book this mission</a>
+<a href="{{ mp.m.registerHref }}" style="display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:#F2F5FF;background:#121829;color:#F2F5FF">Register interest</a>
+<p style="margin:0;font-size:14px;line-height:22px;color:#9FACC9">No payment in this prototype. Register interest sends the details to the GROWND team.</p>
+</aside>
+</div>
+<section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:flex;flex-direction:column;gap:24px">
+<h2 data-reveal style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">Other missions worth a look</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
+<sc-for list="{{ mp.related }}" as="item" hint-placeholder-count="3"><div data-reveal style="transition-delay:{{ item.delay }}"><dc-import name="MissionCard" m="{{ item }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div></sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.quiz }}" hint-placeholder-val="{{ false }}">
+<section style="width:100%;max-width:1120px;margin:0 auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,48px) clamp(40px,5vw,64px);min-height:calc(100vh - 72px);display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;font-weight:500;letter-spacing:0.08em"><span aria-live="polite">QUESTION {{ qz.num }} OF 6</span><span style="color:#9FACC9">{{ qz.pctText }}</span></div>
+<div role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="{{ qz.num }}" style="height:8px;border-radius:8px;background:#2C3757;overflow:hidden"><div style="height:100%;width:{{ qz.bar }};background:#C6F534;border-radius:8px;transition:width 400ms cubic-bezier(.2,.7,.2,1)"></div></div>
+<div aria-hidden="true" style="display:flex;gap:6px"><sc-for list="{{ qz.dots }}" as="d" hint-placeholder-count="6"><span style="flex:1;height:3px;border-radius:3px;background:{{ d.bg }};transition:background 300ms ease"></span></sc-for></div>
+</div>
+<div ref="{{ qRef }}" style="display:flex;flex-direction:column">
+<sc-if value="{{ qz.playing }}" hint-placeholder-val="{{ true }}">
+<h1 style="margin:clamp(28px,5vw,56px) 0 clamp(24px,4vw,40px);font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,4.2vw,52px);line-height:1.05;font-weight:700;letter-spacing:-0.02em;max-width:900px;text-wrap:balance">{{ qz.question }}</h1>
+<div role="group" aria-label="Answers" style="display:grid;grid-template-columns:{{ lay.quizCols }};gap:16px">
+<sc-for list="{{ qz.answers }}" as="a" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{ a.pressed }}" onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:20px;min-height:{{ lay.tileH }};padding:18px 22px;border-radius:14px;background:{{ a.bg }};border:2px solid {{ a.border }};box-shadow:{{ a.shadow }};color:#F2F5FF;text-align:left;cursor:pointer;transition:box-shadow 150ms ease,border-color 150ms ease,transform 150ms ease,background 150ms ease" style-hover="border-color:#6B7CAB;transform:translateY(-3px)" style-active="transform:scale(0.98)">
+<span style="flex:none;width:52px;height:52px;border-radius:999px;background:{{ a.color }};color:#0A0E1A;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700">{{ a.letter }}</span>
+<span style="font-size:clamp(16px,1.4vw,19px);line-height:1.35;font-weight:600">{{ a.text }}</span>
+</button>
+</sc-for>
+</div>
+<p style="margin:16px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:#9FACC9;display:{{ lay.floatDisplay }}">TIP: PRESS A, B, C OR D</p>
+</sc-if>
+<sc-if value="{{ qz.done }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:clamp(28px,5vw,56px);display:grid;grid-template-columns:{{ lay.resultCols }};gap:clamp(24px,4vw,48px);align-items:center;padding:clamp(24px,4vw,48px);border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid {{ qz.result.color }}">
+<div style="width:{{ lay.resultBlock }};height:{{ lay.resultBlock }};border-radius:24px;background:{{ qz.result.color }};color:#0A0E1A;display:flex;flex-direction:column;justify-content:space-between;padding:20px"><span style="font-family:'Space Grotesk',sans-serif;font-size:{{ lay.resultInitial }};line-height:0.9;font-weight:700">{{ qz.result.initial }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;text-transform:uppercase">{{ qz.result.name }}</span></div>
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">ALL 6 ANSWERED / RESULT READY</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.4vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">{{ qz.result.sentence }}.</h1>
+<p style="margin:0;font-size:18px;line-height:28px;color:#9FACC9">{{ qz.result.tag }}</p>
+<div style="display:flex;flex-direction:column;gap:8px;padding:16px 0;border-top:1px solid #2C3757;border-bottom:1px solid #2C3757">
+<sc-for list="{{ qz.tally }}" as="t" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:110px 1fr 20px;gap:12px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500"><span>{{ t.label }}</span><span style="height:8px;border-radius:8px;background:#2C3757;overflow:hidden"><span style="display:block;height:100%;width:{{ t.width }};background:{{ t.color }};border-radius:8px"></span></span><span style="text-align:right">{{ t.n }}</span></div>
+</sc-for>
+</div>
+<a href="{{ qz.result.href }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:56px;padding:14px 26px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);color:#0A0E1A">See your scientist type {{ ic.arrow }}</a>
+</div>
+</div>
+</sc-if>
+</div>
+<div style="margin-top:auto;padding-top:40px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+<div style="display:flex;gap:12px">
+<button type="button" onClick="{{ qz.back }}" aria-disabled="{{ qz.backDisabled }}" style="display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:10px 20px;border-radius:14px;border:2px solid #6B7CAB;background:transparent;color:#F2F5FF;font-size:16px;font-weight:700;cursor:pointer;opacity:{{ qz.backOpacity }}" style-hover="border-color:#F2F5FF">{{ ic.arrowL }} Back</button>
+<button type="button" onClick="{{ qz.restart }}" style="display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:10px 16px;border-radius:14px;border:0;background:transparent;color:#C6F534;font-size:16px;font-weight:700;cursor:pointer" style-hover="color:#F2F5FF">{{ ic.refresh }} Start again</button>
+</div>
+<p style="margin:0;max-width:320px;font-size:14px;line-height:22px;color:#9FACC9">No account, no email, nothing stored. It is a quiz, not a form.</p>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ pg.result }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:flex;flex-direction:column;gap:clamp(48px,6vw,72px)">
+<section style="display:grid;grid-template-columns:{{ lay.resultCols }};gap:clamp(28px,4vw,56px);align-items:start;padding:clamp(24px,4vw,48px);border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid {{ rs.t.color }};box-shadow:0 8px 24px rgba(4,7,16,0.45)">
+<div style="position:relative;width:{{ lay.resultBlock }};height:{{ lay.resultBlock }}">
+{{ rs.burst }}
+<div ref="{{ resRef }}" style="position:relative;width:100%;height:100%;border-radius:24px;background:{{ rs.t.color }};color:#0A0E1A;display:flex;flex-direction:column;justify-content:space-between;padding:22px"><span style="font-family:'Space Grotesk',sans-serif;font-size:{{ lay.resultInitial }};line-height:0.9;font-weight:700">{{ rs.t.initial }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;text-transform:uppercase">{{ rs.t.name }}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;letter-spacing:0.08em;font-weight:500;color:#C6F534">YOUR SCIENTIST TYPE</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,6vw,80px);line-height:0.95;font-weight:700;letter-spacing:-0.025em">{{ rs.t.sentence }}</h1>
+<p style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(20px,2vw,24px);line-height:1.25;font-weight:600">{{ rs.t.tag }}</p>
+<p style="margin:0;max-width:760px;font-size:18px;line-height:28px;color:#9FACC9">{{ rs.t.desc }}</p>
+<ul aria-label="Traits" style="list-style:none;margin:0;padding:0;display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ rs.t.traits }}" as="tr" hint-placeholder-count="3"><li style="display:inline-flex;align-items:center;min-height:36px;padding:6px 16px;border-radius:999px;border:1px solid #6B7CAB;font-size:15px;font-weight:600">{{ tr }}</li></sc-for>
+</ul>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:20px">
+<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">YOUR MISSION</span>
+<a data-reveal href="{{ rs.primary.href }}" style="display:grid;grid-template-columns:{{ lay.recCols }};border-radius:24px;background:#1B2340;border:1px solid #2C3757;overflow:hidden;box-shadow:0 8px 24px rgba(4,7,16,0.45);color:#F2F5FF;text-decoration:none;transition-property:opacity,transform,box-shadow" style-hover="box-shadow:0 16px 40px rgba(4,7,16,0.55);color:#F2F5FF">
+<div style="min-height:260px;background:{{ rs.primary.color }};color:#0A0E1A;padding:28px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">{{ rs.primary.code }}</span><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,5vw,72px);line-height:0.95;font-weight:700;letter-spacing:-0.02em">{{ rs.primary.glyph }}</span></div>
+<div style="padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;background:{{ rs.primary.color }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ rs.primary.typeName }}</span><span style="display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;border:1px solid #6B7CAB;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ rs.primary.cat }}</span></div>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4vw,48px);line-height:1.04;font-weight:700;letter-spacing:-0.02em">{{ rs.primary.title }}</h2>
+<p style="margin:0;max-width:640px;font-size:18px;line-height:28px;color:#9FACC9">{{ rs.primary.line }}</p>
+<dl style="margin:4px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,auto));gap:14px 40px">
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">AGES</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ rs.primary.ages }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">LENGTH</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ rs.primary.lenText }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHERE</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ rs.primary.ev.where }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">WHEN</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ rs.primary.nextText }}</dd></div>
+</dl>
+<span style="align-self:flex-start;margin-top:8px;display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700">See this mission {{ ic.arrow }}</span>
+</div>
+</a>
+</section>
+<section style="display:flex;flex-direction:column;gap:20px">
+<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">{{ rs.also }}</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
+<div data-reveal><dc-import name="MissionCard" m="{{ rs.second }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div>
+<a data-reveal href="#/missions" style="transition-delay:80ms;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:32px;border-radius:24px;border:2px dashed #6B7CAB;color:#F2F5FF;text-decoration:none;min-height:280px" style-hover="border-color:#F2F5FF;color:#F2F5FF">
+<span style="font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">Browse all six missions</span>
+<span style="font-size:16px;line-height:26px;color:#9FACC9">Ignore us, pick your own.</span>
+<span style="color:#C6F534">{{ ic.arrow }}</span>
+</a>
+</div>
+</section>
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-top:32px;border-top:1px solid #2C3757">
+<a href="#/quiz" onClick="{{ qz.restart }}" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:#F2F5FF;color:#F2F5FF">{{ ic.refresh }} Take the quiz again</a>
+<p style="margin:0;font-size:14px;line-height:22px;color:#9FACC9">Nothing about this result is stored. Refresh and it is gone.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ pg.register }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:grid;grid-template-columns:{{ lay.regCols }};gap:clamp(32px,5vw,64px);align-items:start">
+<form noValidate onSubmit="{{ rg.submit }}" aria-labelledby="ri-title" style="display:flex;flex-direction:column;gap:28px;min-width:0">
+<div style="display:flex;flex-direction:column;gap:16px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">{{ rg.eyebrow }}</span>
+<h1 id="ri-title" style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,4.6vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">Tell us who is coming</h1>
+<p style="margin:0;max-width:640px;font-size:18px;line-height:28px;color:#9FACC9">No payment here. Send us the details and a real person replies with dates, a price and the boring logistics.</p>
+</div>
+<div style="display:grid;grid-template-columns:{{ lay.formCols }};gap:24px">
+<label style="display:flex;flex-direction:column;gap:8px"><span style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500"><span>YOUR NAME</span><span style="color:#9FACC9">REQUIRED</span></span><input type="text" required autoComplete="name" value="{{ rg.f.name }}" onChange="{{ rg.set.name }}" aria-invalid="{{ rg.e.name.inv }}" aria-describedby="err-name" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid {{ rg.e.name.border }};background:#121829;color:#F2F5FF;font-size:16px;transition:border-color 150ms ease" style-focus="border-color:#C6F534"><sc-if value="{{ rg.e.name.has }}" hint-placeholder-val="{{ false }}"><span id="err-name" role="alert" style="font-size:14px;line-height:20px;color:#FF7A7A">{{ rg.e.name.msg }}</span></sc-if></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500"><span>EMAIL</span><span style="color:#9FACC9">REQUIRED</span></span><input type="email" required autoComplete="email" value="{{ rg.f.email }}" onChange="{{ rg.set.email }}" aria-invalid="{{ rg.e.email.inv }}" aria-describedby="err-email" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid {{ rg.e.email.border }};background:#121829;color:#F2F5FF;font-size:16px;transition:border-color 150ms ease" style-focus="border-color:#C6F534"><sc-if value="{{ rg.e.email.has }}" hint-placeholder-val="{{ false }}"><span id="err-email" role="alert" style="font-size:14px;line-height:20px;color:#FF7A7A">{{ rg.e.email.msg }}</span></sc-if></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500"><span>PHONE</span><span style="color:#9FACC9">OPTIONAL</span></span><input type="tel" autoComplete="tel" value="{{ rg.f.phone }}" onChange="{{ rg.set.phone }}" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px" style-focus="border-color:#C6F534"></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">HOW MANY CHILDREN</span><input type="number" min="1" max="32" value="{{ rg.f.kids }}" onChange="{{ rg.set.kids }}" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;font-family:'JetBrains Mono',monospace" style-focus="border-color:#C6F534"></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">AGE RANGE</span><span style="position:relative;display:flex;align-items:center"><select value="{{ rg.f.age }}" onChange="{{ rg.set.age }}" style="appearance:none;width:100%;min-height:52px;padding:0 44px 0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;cursor:pointer"><option value="">Choose an age range</option><option value="5-8">5-8</option><option value="7-11">7-11</option><option value="8-12">8-12</option><option value="mixed">Mixed ages, 5-12</option></select><span style="position:absolute;right:14px;pointer-events:none;display:inline-flex">{{ ic.chev }}</span></span></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">PREFERRED DATE</span><input type="date" value="{{ rg.f.date }}" onChange="{{ rg.set.date }}" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;color-scheme:dark" style-focus="border-color:#C6F534"></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">CITY</span><input type="text" autoComplete="address-level2" value="{{ rg.f.city }}" onChange="{{ rg.set.city }}" style="min-height:52px;padding:0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px" style-focus="border-color:#C6F534"></label>
+<label style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">VENUE TYPE</span><span style="position:relative;display:flex;align-items:center"><select value="{{ rg.f.venue }}" onChange="{{ rg.set.venue }}" style="appearance:none;width:100%;min-height:52px;padding:0 44px 0 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;cursor:pointer"><option>Our home</option><option>A hall we have booked</option><option>School</option><option>Not decided yet</option></select><span style="position:absolute;right:14px;pointer-events:none;display:inline-flex">{{ ic.chev }}</span></span></label>
+<label style="grid-column:{{ lay.span2 }};display:flex;flex-direction:column;gap:8px"><span style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500"><span>ANYTHING WE SHOULD KNOW</span><span style="color:#9FACC9">OPTIONAL</span></span><textarea rows="3" value="{{ rg.f.notes }}" onChange="{{ rg.set.notes }}" placeholder="Allergies, access, one child who is scared of loud bangs, that sort of thing" style="padding:14px 16px;border-radius:8px;border:1px solid #6B7CAB;background:#121829;color:#F2F5FF;font-size:16px;line-height:26px;resize:vertical" style-focus="border-color:#C6F534"></textarea></label>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<label style="display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:14px;background:#121829;border:1px solid {{ rg.e.consent.border }};cursor:pointer"><input type="checkbox" required checked="{{ rg.f.consent }}" onChange="{{ rg.set.consent }}" aria-invalid="{{ rg.e.consent.inv }}" style="flex:none;width:24px;height:24px;margin:1px 0 0;accent-color:#C6F534;cursor:pointer"><span style="font-size:16px;line-height:26px">Yes, GROWND can email me about this mission. We do not add you to anything else, and we never store details about your child beyond what is on this form.</span></label>
+<sc-if value="{{ rg.e.consent.has }}" hint-placeholder-val="{{ false }}"><span role="alert" style="font-size:14px;line-height:20px;color:#FF7A7A">{{ rg.e.consent.msg }}</span></sc-if>
+</div>
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+<button type="submit" style="display:inline-flex;align-items:center;gap:8px;min-height:56px;padding:14px 30px;border-radius:14px;border:0;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;cursor:pointer;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px)" style-active="transform:scale(0.98)">Send my details {{ ic.arrow }}</button>
+<span style="font-size:15px;color:#9FACC9">We reply within <span style="font-family:'JetBrains Mono',monospace;color:#F2F5FF">[RESPONSE TIME]</span>.</span>
+</div>
+</form>
+<aside style="display:flex;flex-direction:column;gap:20px;position:{{ lay.bookPos }};top:96px">
+<sc-if value="{{ rg.has }}" hint-placeholder-val="{{ false }}">
+<div style="border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid {{ rg.m.color }};padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:0 8px 24px rgba(4,7,16,0.45)">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#9FACC9">YOUR MISSION</span>
+<div style="display:flex;gap:16px;align-items:center"><span style="width:64px;height:64px;flex:none;border-radius:14px;background:{{ rg.m.color }};color:#0A0E1A;display:inline-flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700">{{ rg.m.no }}</span><div><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">{{ rg.m.title }}</h2><div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:#9FACC9;margin-top:4px">{{ rg.m.agesText }} / {{ rg.m.lenText }}</div></div></div>
+<dl style="margin:0;padding-top:20px;border-top:1px solid #2C3757;display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:center">
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">SCIENTIST</dt><dd style="margin:0;text-align:right"><span style="display:inline-flex;padding:2px 10px;border-radius:999px;background:{{ rg.m.color }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ rg.m.typeName }}</span></dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">FROM</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ rg.m.price }}</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">CURRENCY</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">[CURRENCY]</dd>
+<dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">TIMEZONE</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">[TIMEZONE]</dd>
+</dl>
+<div style="padding-top:20px;border-top:1px solid #2C3757;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Not this one?</span><div style="display:flex;gap:20px;flex-wrap:wrap"><a href="#/missions" style="min-height:44px;display:inline-flex;align-items:center;color:#C6F534;font-weight:700;font-size:15px">Change mission</a><a href="#/quiz" style="min-height:44px;display:inline-flex;align-items:center;color:#C6F534;font-weight:700;font-size:15px">Retake the quiz</a></div></div>
+</div>
+</sc-if>
+<sc-if value="{{ rg.none }}" hint-placeholder-val="{{ true }}">
+<div style="border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid #6B7CAB;padding:32px;display:flex;flex-direction:column;gap:14px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#9FACC9">YOUR MISSION / NOT PICKED</span>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">No mission picked yet</h2>
+<p style="margin:0;font-size:15px;line-height:24px;color:#9FACC9">That is fine. Tell us roughly what you want in the form and we will suggest one. Or let the quiz choose.</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:15px;font-weight:700;text-decoration:none">Browse missions</a><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:15px;font-weight:700;text-decoration:none">Take the quiz</a></div>
+</div>
+</sc-if>
+<div style="display:flex;gap:14px;padding:20px;border-radius:14px;background:#121829;border:1px solid #6B7CAB"><span>{{ ic.info }}</span><p style="margin:0;font-size:14px;line-height:22px">Prototype: real booking, availability and payment arrive in phase two. Nothing is charged here.</p></div>
+</aside>
+</div>
+</sc-if>
+
+<sc-if value="{{ pg.sent }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(48px,8vw,120px) clamp(20px,4vw,48px);display:flex;justify-content:center">
+<section role="status" style="position:relative;width:100%;max-width:820px;border-radius:24px;background:#1B2340;border:1px solid #2C3757;border-top:6px solid #35D07F;padding:clamp(28px,5vw,56px);display:flex;flex-direction:column;gap:20px;box-shadow:0 16px 40px rgba(4,7,16,0.55)">
+<div style="display:flex;align-items:center;gap:12px"><span ref="{{ resRef }}" style="width:44px;height:44px;border-radius:999px;background:#35D07F;color:#0A0E1A;display:inline-flex;align-items:center;justify-content:center">{{ ic.check }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">DETAILS RECEIVED</span></div>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.4vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">Thanks. A real person takes it from here.</h1>
+<p style="margin:0;font-size:18px;line-height:28px;color:#9FACC9">We reply within <span style="font-family:'JetBrains Mono',monospace;color:#F2F5FF">[RESPONSE TIME]</span> with dates, a price and a couple of questions about the room.</p>
+<dl style="margin:0;padding:20px 0;border-top:1px solid #2C3757;border-bottom:1px solid #2C3757;display:flex;flex-wrap:wrap;gap:16px 48px">
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">MISSION</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ st.mission }}</dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">SCIENTIST</dt><dd style="margin:4px 0 0"><span style="display:inline-flex;padding:2px 10px;border-radius:999px;background:{{ st.color }};color:#0A0E1A;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em">{{ st.typeName }}</span></dd></div>
+<div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#9FACC9;font-weight:500">CHILDREN</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ st.kids }}</dd></div>
+</dl>
+<div style="display:flex;gap:14px;padding:16px 20px;border-radius:14px;background:#121829;border:1px solid #6B7CAB"><span>{{ ic.info }}</span><p style="margin:0;font-size:14px;line-height:22px">Prototype: nothing was sent and nothing was stored. In the real build, this is the moment the GROWND team gets an email.</p></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:#0A0E1A">Browse more missions</a><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:#F2F5FF;color:#F2F5FF">Take the scientist quiz</a></div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{ pg.notfound }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(48px,8vw,120px) clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(32px,5vw,64px);align-items:center">
+<div style="display:flex;flex-direction:column;gap:24px">
+<span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:#C6F534">ERROR 404 / EXPERIMENT FAILED</span>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(46px,6.4vw,84px);line-height:0.95;font-weight:700;letter-spacing:-0.025em">This one did not react.</h1>
+<p style="margin:0;max-width:600px;font-size:18px;line-height:28px;color:#9FACC9">The page you wanted is not here. Good scientists write down what went wrong, so if a GROWND link sent you here, tell us and we will fix it.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="#/" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-size:16px;font-weight:700;text-decoration:none">Back to the lab</a><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
+</div>
+<div aria-label="Lab notebook" style="padding:32px;border-radius:24px;background:#121829;border:1px solid #2C3757;display:flex;flex-direction:column;gap:14px;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:22px;font-weight:500">
+<span style="font-size:13px;letter-spacing:0.08em;color:#9FACC9">LAB NOTEBOOK / ENTRY 404</span>
+<div style="display:grid;grid-template-columns:120px 1fr;gap:10px 16px;padding-top:14px;border-top:1px solid #2C3757">
+<span style="color:#9FACC9">EXPECTED</span><span>A page</span>
+<span style="color:#9FACC9">OBSERVED</span><span>Nothing at all</span>
+<span style="color:#9FACC9">VARIABLE</span><span>The address</span>
+<span style="color:#9FACC9">RESULT</span><span><span style="display:inline-flex;padding:2px 10px;border-radius:999px;background:#FF7A7A;color:#0A0E1A;font-size:13px;font-weight:700">No reaction</span></span>
+<span style="color:#9FACC9">NEXT STEP</span><span>Try again, change one thing</span>
+</div>
+</div>
+</div>
+</sc-if>
+</main>
+
+<footer style="border-top:1px solid #2C3757;background:#121829">
+<div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(48px,6vw,72px) clamp(20px,4vw,48px) 40px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:12px;max-width:440px">
+<a href="#/" style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.04em;color:#C6F534;text-decoration:none">GROWND</a>
+<p style="margin:0;font-size:14px;line-height:22px;color:#9FACC9">Run by [TEAM LEAD] on science and experience, [TECH LEAD] on technology and [CONTENT LEAD] on content. Real experiments for ages 5 to 12.</p>
+</div>
+<nav aria-label="Footer" style="display:flex;flex-wrap:wrap;gap:0 24px">
+<a href="#/missions" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none" style-hover="color:#C6F534">Missions</a>
+<a href="#/quiz" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none" style-hover="color:#C6F534">Scientist quiz</a>
+<a href="#/lab" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none" style-hover="color:#C6F534">The Lab</a>
+<a href="#/who" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none" style-hover="color:#C6F534">Who we are</a>
+<a href="#/register" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none" style-hover="color:#C6F534">Register interest</a>
+</nav>
+</div>
+<p style="margin:0;padding-top:24px;border-top:1px solid #2C3757;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:#9FACC9">PROTOTYPE BUILD. NO PAYMENTS ARE TAKEN AND NO CHILD DATA IS STORED.</p>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  order = ['bio', 'chem', 'phys', 'eng'];
+  T = {
+    bio: { slug: 'biologist', name: 'Biologist', an: 'a', color: '#35D07F', initial: 'B', tag: 'You want to know what it is and whether it is alive.', desc: 'You are the one who notices the beetle nobody else saw. You will happily spend an hour on one leaf, and you always want to know what something eats. Biologists at GROWND get the missions with the most looking closely, and occasionally the most mud.', traits: ['Observant', 'Patient', 'Asks what it eats'], recs: ['m03', 'm06'] },
+    chem: { slug: 'chemist', name: 'Chemist', an: 'a', color: '#FF5CA8', initial: 'C', tag: 'You want to know what happens when two things meet.', desc: 'You are not scared of a bit of foam, and you are the reason the kitchen smells like that. You would rather try it and find out than read about it first. Chemists at GROWND get the loudest reactions and by far the most colours.', traits: ['Curious', 'Fearless', 'Messy on purpose'], recs: ['m01', 'm06'] },
+    phys: { slug: 'physicist', name: 'Physicist', an: 'a', color: '#38BDF8', initial: 'P', tag: 'You want to know why it moved like that.', desc: 'You drop things to see how they fall and you have opinions about which paper aeroplane is best. You like a rule you can test. Physicists at GROWND get the missions with light, speed and things that should not balance but do.', traits: ['Precise', 'Testing everything', 'Likes a rule'], recs: ['m04', 'm02'] },
+    eng: { slug: 'engineer', name: 'Engineer', an: 'an', color: '#FFA03B', initial: 'E', tag: 'You want to know how to make a better one.', desc: 'You take things apart, and roughly half of them go back together improved. A failed design does not bother you because version two is already in your head. Engineers at GROWND get the missions where something has to be built and then tested to destruction.', traits: ['Builder', 'Unbothered by failure', 'Already on version two'], recs: ['m02', 'm05'] }
+  };
+  EV = (v, c, left) => ({ d: '[DATE]', t: '[TIME]', tz: '[TIMEZONE]', v: '[VENUE ' + v + ']', c: '[CITY ' + c + ']', ck: 'city-' + c.toLowerCase(), left });
+  M = [
+    { id: 'm01', slug: 'slime-chemistry', no: '01', title: 'Slime Chemistry', type: 'chem', cat: 'Birthday', glyph: 'SLIME', ages: '5-8', mins: 90, cap: 20, unit: 'child',
+      line: 'Polymers, cross-links and a colour they choose themselves. Everyone goes home with a pot.',
+      para: 'Ninety minutes of genuine polymer chemistry, disguised as the best mess of their life. Everyone mixes their own, picks their own colour, and takes a pot home with the recipe card that made it.',
+      steps: [['Meet the polymer.', 'Two liquids go in. Something that is neither liquid nor solid comes out. We explain why, badly, then properly.'], ['Break it on purpose.', 'Pull it slowly, pull it fast. Same slime, completely different behaviour. This is the bit they remember.'], ['Run the variable.', 'Each child changes one thing: more cross-linker, glitter, foam beads. They compare results as a group.'], ['Take it home.', 'Labelled pot, their name, their recipe card. The recipe card is the bit parents thank us for.']],
+      incl: ['Two GROWND scientists for the full session', 'All equipment, materials and protective kit', 'A take-home pot and recipe card per child', 'Setup and full clean-up, including the ceiling'],
+      worth: ['We need a table per six children and a tap nearby', 'Old clothes. We provide aprons, they are not magic', 'Tell us about allergies when you book', '[INSURANCE AND DBS DETAILS]'],
+      events: [['A', 'A', 4], ['B', 'B', 11], ['C', 'C', 0]] },
+    { id: 'm02', slug: 'rocket-engineering', no: '02', title: 'Rocket Engineering', type: 'eng', cat: 'Workshop', glyph: 'LAUNCH', ages: '7-11', mins: 120, cap: 24, unit: 'child',
+      line: 'Design it, launch it, argue about why it went sideways, build a better one.',
+      para: 'Two hours of design, launch and redesign. Every child builds a rocket, launches it properly, and then works out what to change. Nobody gets it right first time, which is the entire point.',
+      steps: [['Draw the thing.', 'Fins, nose cone, mass. We give them the constraints and let them argue about the rest.'], ['Build it.', 'Cutting, taping, weighing. The first build is always too heavy and they find that out themselves.'], ['Launch it.', 'Outside, pressure launcher, measured heights. Everyone gets two launches on the board.'], ['Version two.', 'One change each, relaunch, compare. The improvement is the result, not the height.']],
+      incl: ['Two GROWND scientists and a pressure launcher', 'All build materials and safety kit', 'Their rocket to take home', 'A launch log with every height recorded'],
+      worth: ['This one needs outdoor space, roughly 15 metres clear', 'Wet weather: we run the build indoors and launch another day', 'Ear defenders available for children who want them', '[INSURANCE AND DBS DETAILS]'],
+      events: [['A', 'A', 4], ['B', 'B', 9]] },
+    { id: 'm03', slug: 'crime-scene-biology', no: '03', title: 'Crime Scene Biology', type: 'bio', cat: 'School event', glyph: 'CASE 01', ages: '8-12', mins: 90, cap: 32, unit: 'class',
+      line: 'Fingerprints, fibres and one very suspicious sandwich. The class solves it together.',
+      para: 'A staged scene, real forensic technique and a class that has to agree on an answer. They lift prints, compare fibres, and work through the evidence until only one suspect is left.',
+      steps: [['Walk the scene.', 'They see it before we say anything. First job is writing down what they noticed.'], ['Lift the prints.', 'Powder, tape, card. Then match against the suspect set, which is harder than it looks.'], ['Compare fibres.', 'Hand lenses and a fibre board. This is where the confident answer usually falls apart.'], ['Make the case.', 'The class has to agree, out loud, on who did it and which evidence proves it.']],
+      incl: ['Two GROWND scientists and a full staged scene', 'Evidence kits for the whole class', 'Suspect files and a fibre board', 'A follow-up sheet for the teacher'],
+      worth: ['Works best in a hall or a cleared classroom', 'Up to 32 children in one sitting', 'We can run it twice in a morning for two classes', '[INSURANCE AND DBS DETAILS]'],
+      events: [['B', 'B', 32], ['C', 'C', 0]] },
+    { id: 'm04', slug: 'light-and-lasers', no: '04', title: 'Light and Lasers', type: 'phys', cat: 'Workshop', glyph: 'PRISM', ages: '7-12', mins: 90, cap: 20, unit: 'child',
+      line: 'Bend light, split it, bounce it round a maze and make something glow in the dark.',
+      para: 'A dark room, a lot of mirrors and one laser maze that gets harder every round. They split white light, bend a beam through water, and finish by making something glow that should not.',
+      steps: [['Split the light.', 'Prisms and a white beam. Everyone gets a rainbow on a wall and then has to explain it.'], ['Bend the beam.', 'A laser through water, then through sugar water. Same laser, different bend, no explanation given yet.'], ['Build the maze.', 'Mirrors on a board, target at the far end. In teams, against the clock.'], ['Make it glow.', 'UV and fluorescence. They take home something that stores light and gives it back.']],
+      incl: ['Two GROWND scientists and all optical kit', 'Class-1 safe lasers only, fully supervised', 'A take-home glow item per child', 'Blackout kit if the room needs it'],
+      worth: ['We need a room we can make properly dark', 'Not suitable alongside a disco or strobe lighting', 'Tell us about photosensitivity when you book', '[INSURANCE AND DBS DETAILS]'],
+      events: [['A', 'A', 6]] },
+    { id: 'm05', slug: 'build-a-game-in-scratch', no: '05', title: 'Build a Game in Scratch', type: 'eng', cat: 'Coding', glyph: 'RUN()', ages: '8-12', mins: 120, cap: 16, unit: 'child',
+      line: 'From blank screen to a game they can actually play, in one session.',
+      para: 'Two hours from empty project to a working game with a score, a losing condition and at least one sound effect they regret. They leave with a link so they can keep building at home.',
+      steps: [['Make something move.', 'Sprite, arrow keys, movement. Five minutes in, everyone has something responding to them.'], ['Add a reason to care.', 'A score, a timer, something to collect. This is where it stops being a demo and starts being a game.'], ['Break it deliberately.', "They swap machines and try to break each other's game. Then they fix their own."], ['Ship it.', 'A shareable link each. They keep the project and can carry on the same evening.']],
+      incl: ['One GROWND scientist per eight children', 'Laptops if the venue has none', 'A shareable project link per child', 'A what-to-build-next sheet'],
+      worth: ['Needs wifi that will take sixteen devices', 'Sixteen children maximum, so everyone gets help', 'No previous coding needed, genuinely', '[INSURANCE AND DBS DETAILS]'],
+      events: [] },
+    { id: 'm06', slug: 'glow-lab', no: '06', title: 'Glow Lab', type: 'chem', cat: 'Seasonal event', glyph: 'GLOW', ages: '5-10', mins: 90, cap: 24, unit: 'child',
+      line: 'Dry ice, UV paint and reactions that look far more dangerous than they are.',
+      para: 'Our seasonal mission. Dry ice fog, UV-reactive paint and a set of colour-change reactions built for a dark room and a crowd. Loud, bright and genuinely chemistry the whole way through.',
+      steps: [['Fog the room.', 'Dry ice in warm water. We explain sublimation while they cannot see each other.'], ['Paint under UV.', 'Invisible in daylight, loud under the lamp. Everyone makes a badge for themselves.'], ['Change the colour.', 'Indicator chemistry with red cabbage. It goes through four colours and they call each one.'], ['The last reaction.', 'One big finale reaction, done by us, watched by them, from a sensible distance.']],
+      incl: ['Two GROWND scientists and all dry ice handling', 'UV lamps, paint and badges', 'A take-home glow badge per child', 'Full clean-up'],
+      worth: ['Needs ventilation and a room we can darken', 'Dry ice is handled only by GROWND staff', 'Loud finale: ear defenders available on request', '[INSURANCE AND DBS DETAILS]'],
+      events: [['A', 'A', 0], ['B', 'B', 14]] }
+  ];
+  Q = [
+    { q: 'You find a strange box buried in the garden. What do you do first?', a: ['Check whether something is living in it', 'Pour something on it and see what happens', 'Work out how heavy it is, then drop it', 'Take it apart and build a better one'] },
+    { q: 'Your experiment goes very wrong. Honestly, how do you feel?', a: ['Worried about the woodlice', 'Delighted, because it changed colour', 'Curious, because something moved oddly', 'Already sketching version two'] },
+    { q: 'Which mess is your kind of mess?', a: ['Mud, leaves and one escaped frog', 'Foam everywhere, ceiling included', 'Marbles rolling off every surface', 'Cardboard, tape and 400 lolly sticks'] },
+    { q: 'Pick a superpower, but only for one day.', a: ['Talk to animals', 'Turn anything into anything else', 'Walk through walls', 'Build anything in ten seconds'] },
+    { q: 'Best thing about a rainy Saturday?', a: ['Worms all over the path', 'Mixing everything in the kitchen', 'Racing raindrops down the window', 'Finally finishing the den'] },
+    { q: 'You get one machine for your bedroom. Which one?', a: ['A microscope', 'A fume cupboard, obviously', 'A laser maze', 'A 3D printer'] }
+  ];
+  cats = [['Birthday', 'A party where the cake is the second best bit.', 'cake'], ['Private celebration', 'Your people, your place, one very good experiment.', 'home'], ['Workshop', 'Weekend sessions that go properly deep on one idea.', 'flask'], ['School event', 'A whole class, one staged crime, one agreed answer.', 'school'], ['Coding', 'From a blank screen to a game they can play.', 'code'], ['Seasonal event', 'Dry ice, UV paint and the loudest bit of the year.', 'star']];
+  cities = { 'city-a': '[CITY A]', 'city-b': '[CITY B]', 'city-c': '[CITY C]' };
+  P = {
+    arrow: ['M5 12h14', 'M13 6l6 6-6 6'], arrowL: ['M19 12H5', 'M11 6l-6 6 6 6'], chev: ['M6 9l6 6 6-6'], check: ['M5 12.5l4.5 4.5L19 7'],
+    cake: ['M4 21h16', 'M5 21v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7', 'M5 16.5c2.3 1.4 4.7 1.4 7 0s4.7-1.4 7 0', 'M12 12V8', 'M12 5.5c.9-.8.9-1.7 0-2.5-.9.8-.9 1.7 0 2.5z'],
+    home: ['M3 11l9-7 9 7', 'M5 9.5V20h14V9.5', 'M12 17.5s-3-1.8-3-3.8a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 2-3 3.8-3 3.8z'],
+    flask: ['M9 3h6', 'M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3', 'M7.2 15h9.6'],
+    school: ['M3 21h18', 'M5 21V10l7-5 7 5v11', 'M10 21v-5h4v5', 'M12 5V2h4v2h-4'],
+    code: ['M8 8l-4 4 4 4', 'M16 8l4 4-4 4', 'M14 5l-4 14'],
+    star: ['M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z'],
+    play: ['M8 5l11 7-11 7z'], info: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M12 11v6', 'M12 7.5v.01'], cal: ['M4 6h16v14H4z', 'M4 10h16', 'M8 3v4', 'M16 3v4'],
+    menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'], close: ['M6 6l12 12', 'M18 6L6 18'], refresh: ['M20 11a8 8 0 1 0-2.3 5.7', 'M20 5v6h-6']
+  };
+  rootRef = React.createRef(); mainRef = React.createRef(); qRef = React.createRef(); artRef = React.createRef(); menuRef = React.createRef(); resRef = React.createRef();
+  state = {
+    route: this.parse() || { name: 'home', q: {}, key: '#/' },
+    w: typeof window !== 'undefined' ? window.innerWidth : 1440, scrolled: false, menu: false,
+    quiz: { step: 0, answers: [] },
+    form: { name: '', email: '', phone: '', kids: '12', age: '', date: '', city: '', venue: 'Not decided yet', notes: '', consent: false },
+    errors: {}, sent: null
+  };
+  parse() {
+    if (typeof window === 'undefined') return null;
+    const h = window.location.hash || '';
+    if (h && !h.startsWith('#/')) return null;
+    const [path, qs] = h.slice(2).split('?');
+    const parts = (path || '').split('/').filter(Boolean), q = {};
+    (qs || '').split('&').forEach(p => { if (!p) return; const i = p.indexOf('='); q[i < 0 ? p : p.slice(0, i)] = decodeURIComponent(i < 0 ? '' : p.slice(i + 1)); });
+    let name = parts[0] || 'home'; const id = parts[1];
+    if (name === 'mission') { if (!this.M.find(m => m.slug === id)) name = 'notfound'; }
+    else if (name === 'result') { if (!this.typeBySlug(id)) name = 'notfound'; }
+    else if (name === 'register') { if (id && !this.M.find(m => m.slug === id)) name = 'notfound'; }
+    else if (!['home', 'missions', 'quiz', 'sent', 'lab', 'who'].includes(name)) name = 'notfound';
+    return { name, id, q, key: h || '#/' };
+  }
+  typeBySlug(s) { return this.order.find(k => this.T[k].slug === s); }
+  rm() { return !!this.props.reduceMotion || (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  componentDidMount() {
+    this._hc = () => { const r = this.parse(); if (r) this.setState({ route: r, menu: false }); };
+    this._rs = () => this.setState({ w: window.innerWidth });
+    this._sc = () => { const s = window.scrollY > 12; if (s !== this.state.scrolled) this.setState({ scrolled: s }); };
+    this._kd = e => {
+      if (e.key === 'Escape' && this.state.menu) { this.setState({ menu: false }); return; }
+      if (this.state.route.name !== 'quiz' || this.state.quiz.step >= 6 || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tg = e.target && e.target.tagName; if (tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT') return;
+      const k = (e.key || '').toLowerCase(); let i = 'abcd'.indexOf(k); if (i < 0) i = '1234'.indexOf(k);
+      if (k.length === 1 && i >= 0) { e.preventDefault(); this.pick(i); }
+    };
+    window.addEventListener('hashchange', this._hc); window.addEventListener('resize', this._rs); window.addEventListener('scroll', this._sc, { passive: true }); window.addEventListener('keydown', this._kd);
+    if (this.rootRef.current) this.rootRef.current.classList.add('gr-js');
+    this._pk = this.state.route.key; this._pq = this.state.quiz.step; this._pm = this.state.menu;
+    this.observe();
+    this._obsT = setInterval(() => this.observe(), 600);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this._hc); window.removeEventListener('resize', this._rs); window.removeEventListener('scroll', this._sc); window.removeEventListener('keydown', this._kd);
+    clearTimeout(this._t); clearInterval(this._obsT); if (this.io) this.io.disconnect();
+  }
+  componentDidUpdate() {
+    const r = this.state.route;
+    const ps = { route: { key: this._pk }, quiz: { step: this._pq }, menu: this._pm };
+    this._pk = r.key; this._pq = this.state.quiz.step; this._pm = this.state.menu;
+    if (ps.route.key !== undefined && ps.route.key !== r.key) {
+      window.scrollTo(0, 0);
+      this.anim(this.mainRef, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], 300);
+      if (r.name === 'result') this.anim(this.resRef, [{ transform: 'scale(.5) rotate(-10deg)', opacity: 0 }, { transform: 'scale(1.06) rotate(2deg)', opacity: 1, offset: 0.7 }, { transform: 'none', opacity: 1 }], 650);
+    }
+    if (ps.quiz.step !== undefined && ps.quiz.step !== this.state.quiz.step) this.anim(this.qRef, [{ opacity: 0, transform: 'translateX(24px)' }, { opacity: 1, transform: 'none' }], 300);
+    if (!ps.menu && this.state.menu && this.menuRef.current && !this.rm()) Array.from(this.menuRef.current.children).forEach((c, i) => c.animate && c.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: i * 45, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards' }));
+    this.observe();
+  }
+  anim(ref, kf, d) { const el = ref.current; if (!el || !el.animate || this.rm()) return; el.animate(kf, { duration: d, easing: 'cubic-bezier(.2,.7,.2,1)' }); }
+  observe() {
+    if (typeof document === 'undefined') return;
+    const els = document.querySelectorAll('[data-reveal]:not(.is-in)');
+    if (this.rm() || typeof IntersectionObserver === 'undefined') { els.forEach(el => el.classList.add('is-in')); return; }
+    const vh = window.innerHeight;
+    els.forEach(el => { const b = el.getBoundingClientRect(); if (b.top < vh && b.bottom > 0) requestAnimationFrame(() => el.classList.add('is-in')); });
+    if (!this.io) this.io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); this.io.unobserve(e.target); } }), { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => this.io.observe(el));
+  }
+  go(h) { window.location.hash = h; }
+  pick(j) {
+    if (this._lock) return;
+    const q = this.state.quiz; if (q.step >= 6) return;
+    const answers = q.answers.slice(0, q.step + 1); answers[q.step] = j;
+    this._lock = true;
+    this.setState({ quiz: { step: q.step, answers } });
+    this._t = setTimeout(() => { this._lock = false; this.setState(s => ({ quiz: { ...s.quiz, step: s.quiz.step + 1 } })); }, 320);
+  }
+  winner(answers) {
+    const c = [0, 0, 0, 0]; answers.forEach(a => { if (a != null) c[a]++; });
+    let w = 0; c.forEach((n, i) => { if (n > c[w]) w = i; });
+    return { key: this.order[w], counts: c };
+  }
+  ico(n, s = 24, sw = 1.9) {
+    const h = React.createElement;
+    return h('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', style: { flex: 'none' } }, ...this.P[n].map((d, i) => h('path', { key: i, d })));
+  }
+  ev(e, ages) {
+    const [v, c, left] = e, sold = left === 0;
+    return { when: '[DATE] · [TIME] [TIMEZONE]', where: '[VENUE ' + v + '], [CITY ' + c + ']', ck: 'city-' + c.toLowerCase(), ages, left, sold, open: !sold, pill: sold ? 'Sold out' : left + ' places left', pillBg: sold ? '#FF7A7A' : '#35D07F', rowBg: sold ? '#121829' : '#1B2340' };
+  }
+  mission(m, i = 0) {
+    const t = this.T[m.type];
+    const events = m.events.map(e => this.ev(e, m.ages));
+    return { ...m, color: t.color, typeName: t.name, typeSlug: t.slug, code: 'MISSION ' + m.no, agesText: 'AGES ' + m.ages, lenText: m.mins + ' MIN', groupText: 'UP TO ' + m.cap, price: '[PRICE] / ' + m.unit, perUnit: 'per ' + m.unit, href: '#/mission/' + m.slug, registerHref: '#/register/' + m.slug, delay: (i % 3) * 80 + 'ms', evs: events, ev: events.find(e => e.open) || events[0] || this.ev(['A', 'A', 0], m.ages), hasEvents: events.length > 0, noEvents: events.length === 0, resultHref: '#/result/' + t.slug,
+      nextText: events.length ? (events.find(e => e.open) || events[0]).when : 'No dates yet',
+      placesText: events.length ? (events.find(e => e.open) || events[0]).pill : 'Register interest', placesBg: events.length ? (events.find(e => e.open) || events[0]).pillBg : '#9FACC9' };
+  }
+  lab() {
+    const h = React.createElement, still = this.rm(), an = a => (still ? {} : { animation: a }), k = [];
+    [262, 210, 150, 90].forEach((r, i) => k.push(h('circle', { key: 'r' + i, cx: 290, cy: 290, r, fill: 'none', stroke: '#2C3757', strokeWidth: 1.5, opacity: 0.45 + i * 0.15 })));
+    k.push(h('g', { key: 'orb', className: 'gr-anim', style: { transformOrigin: '300px 290px', transformBox: 'view-box', ...an('grDrift 14s ease-in-out infinite') } }, h('g', { transform: 'rotate(-16 300 290)' }, h('ellipse', { cx: 300, cy: 290, rx: 250, ry: 74, fill: 'none', stroke: '#38BDF8', strokeWidth: 3 }), h('circle', { cx: 550, cy: 290, r: 10, fill: '#38BDF8' }), h('circle', { cx: 50, cy: 290, r: 6, fill: '#38BDF8' }))));
+    let s1 = '', s2 = ''; const rungs = [];
+    for (let y = 96; y <= 484; y += 6) { const dx = 26 * Math.sin((y - 96) / 36); s1 += (y === 96 ? 'M' : 'L') + (96 + dx).toFixed(1) + ' ' + y + ' '; s2 += (y === 96 ? 'M' : 'L') + (96 - dx).toFixed(1) + ' ' + y + ' '; }
+    for (let y = 108; y <= 474; y += 19) { const dx = 26 * Math.sin((y - 96) / 36); rungs.push(h('line', { key: 'g' + y, x1: 96 + dx, x2: 96 - dx, y1: y, y2: y, stroke: '#C6F534', strokeWidth: 2.5, opacity: 0.5, strokeLinecap: 'round' })); }
+    k.push(h('g', { key: 'dna', className: 'gr-anim', style: { transformOrigin: '96px 290px', transformBox: 'view-box', ...an('grBreathe 6s ease-in-out infinite alternate') } }, ...rungs, h('path', { d: s1, fill: 'none', stroke: '#C6F534', strokeWidth: 4, strokeLinecap: 'round' }), h('path', { d: s2, fill: 'none', stroke: '#C6F534', strokeWidth: 4, strokeLinecap: 'round', opacity: 0.75 })));
+    k.push(h('rect', { key: 'lg1', x: 196, y: 250, width: 10, height: 196, rx: 5, fill: '#1B2340', stroke: '#6B7CAB', strokeWidth: 2 }));
+    k.push(h('rect', { key: 'lg2', x: 454, y: 250, width: 10, height: 196, rx: 5, fill: '#1B2340', stroke: '#6B7CAB', strokeWidth: 2 }));
+    k.push(h('rect', { key: 'base', x: 176, y: 440, width: 308, height: 24, rx: 12, fill: '#1B2340', stroke: '#6B7CAB', strokeWidth: 2 }));
+    [[250, '#35D07F', 300], [330, '#FF5CA8', 258], [410, '#FFA03B', 318]].forEach(([x, c, L], i) => {
+      k.push(h('path', { key: 'lq' + i, d: `M${x - 22} ${L} V404 A22 22 0 0 0 ${x + 22} 404 V${L} Z`, fill: c }));
+      [0, 1, 2].forEach(j => k.push(h('circle', { key: `b${i}${j}`, className: 'gr-anim', cx: x - 9 + j * 9, cy: 404 - j * 16, r: [5, 3.5, 4.5][j], fill: '#F2F5FF', opacity: 0.6, style: an(`grRise ${2.6 + j * 0.7 + i * 0.3}s ease-in ${j * 0.9 + i * 0.4}s infinite`) })));
+      k.push(h('path', { key: 'tb' + i, d: `M${x - 27} 176 V404 A27 27 0 0 0 ${x + 27} 404 V176`, fill: 'rgba(242,245,255,0.04)', stroke: '#F2F5FF', strokeWidth: 3, strokeLinecap: 'round' }));
+      k.push(h('rect', { key: 'lip' + i, x: x - 33, y: 166, width: 66, height: 12, rx: 6, fill: '#F2F5FF' }));
+    });
+    k.push(h('rect', { key: 'bar', x: 186, y: 246, width: 288, height: 22, rx: 11, fill: '#1B2340', stroke: '#6B7CAB', strokeWidth: 2 }));
+    ['BIO', 'CHEM', 'ENG'].forEach((t, i) => k.push(h('text', { key: 't' + i, x: 250 + i * 80, y: 261.5, textAnchor: 'middle', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', fill: '#F2F5FF' }, t)));
+    [[488, 132, 6], [520, 196, 3.5], [176, 112, 4.5], [470, 500, 3]].forEach(([cx, cy, r], i) => k.push(h('circle', { key: 's' + i, cx, cy, r, fill: '#C6F534' })));
+    return h('svg', { viewBox: '0 0 560 560', role: 'img', 'aria-label': 'A rack of three bubbling test tubes, a DNA helix and an orbiting ring', style: { display: 'block', width: '100%', height: 'auto' } }, ...k);
+  }
+  particles() {
+    if (this.rm()) return null;
+    const h = React.createElement, cols = ['#C6F534', '#35D07F', '#FF5CA8', '#38BDF8', '#FFA03B'];
+    return h('div', { 'aria-hidden': 'true', style: { position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' } }, ...Array.from({ length: 14 }, (_, i) => h('span', { key: i, className: 'gr-anim', style: { position: 'absolute', left: ((i * 37) % 100) + '%', bottom: '-10px', width: 4 + (i % 3) * 2, height: 4 + (i % 3) * 2, borderRadius: 999, background: cols[i % 5], opacity: 0, animation: `grDrop ${9 + (i % 5) * 2}s linear ${i * 0.9}s infinite` } })));
+  }
+  ticker() {
+    const h = React.createElement;
+    const row = (p) => h('div', { style: { display: 'flex', flex: 'none' }, 'aria-hidden': p ? 'true' : undefined }, ...this.M.map(m => { const t = this.T[m.type]; return h('a', { key: m.id, href: '#/mission/' + m.slug, tabIndex: p ? -1 : undefined, style: { display: 'inline-flex', alignItems: 'center', gap: 14, paddingRight: 56, color: '#F2F5FF', textDecoration: 'none', whiteSpace: 'nowrap' } }, h('span', { style: { width: 14, height: 14, borderRadius: 4, background: t.color } }), h('span', null, m.title.toUpperCase()), h('span', { style: { color: '#9FACC9' } }, '/ ' + t.name.toUpperCase() + ' / AGES ' + m.ages)); }));
+    return h('div', { className: 'gr-anim gr-ticker', style: { display: 'flex', width: 'max-content', animation: this.rm() ? 'none' : 'grTicker 50s linear infinite' } }, row(false), row(true));
+  }
+  burst(color) {
+    if (this.rm()) return null;
+    const h = React.createElement, cols = [color, '#C6F534', '#F2F5FF'];
+    return h('div', { key: this.state.route.key, 'aria-hidden': 'true', style: { position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' } }, ...Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2, d = 120 + (i % 3) * 50; return h('span', { key: i, className: 'gr-anim', style: { position: 'absolute', left: -6, top: -6, width: i % 2 ? 14 : 9, height: i % 2 ? 14 : 9, borderRadius: 999, background: cols[i % 3], '--dx': Math.cos(a) * d + 'px', '--dy': Math.sin(a) * d + 'px', animation: `grBurst 1000ms cubic-bezier(.2,.7,.2,1) ${250 + i * 14}ms both` } }); }));
+  }
+  setF(k) { return e => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v }, errors: { ...s.errors, [k]: undefined } })); }; }
+  submit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const f = this.state.form, er = {};
+    if (!f.name.trim()) er.name = 'Tell us your name so we know who to reply to.';
+    if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) er.email = 'That email does not look quite right. Check for a missing @ or dot.';
+    if (!f.consent) er.consent = 'We need a yes here before we can email you about this mission.';
+    if (Object.keys(er).length) { this.setState({ errors: er }); setTimeout(() => { const el = document.querySelector('[aria-invalid="true"]'); if (el) el.focus(); }, 0); return; }
+    const m = this.M.find(x => x.slug === this.state.route.id);
+    this.setState({ sent: { mission: m ? m.title.toUpperCase() : 'NOT PICKED YET', typeName: m ? this.T[m.type].name.toUpperCase() : 'ANY', color: m ? this.T[m.type].color : '#6B7CAB', kids: f.kids || '-', hasType: !!m }, form: { ...this.state.form, name: '', email: '', phone: '', notes: '', consent: false } });
+    this.go('#/sent');
+  }
+  renderVals() {
+    const r = this.state.route, w = this.state.w, mob = w < 760, nar = w < 1024;
+    const ic = {}; Object.keys(this.P).forEach(n => { ic[n] = this.ico(n, n === 'arrow' || n === 'arrowL' ? 20 : 24); });
+    ic.flaskS = this.ico('flask', 18, 2.4);
+    const pg = {}; ['home', 'missions', 'mission', 'quiz', 'result', 'register', 'sent', 'notfound', 'lab', 'who'].forEach(n => { pg[n] = r.name === n; });
+    const actMap = { missions: ['missions', 'mission', 'register'], quiz: ['quiz', 'result'], lab: ['lab'], who: ['who'] };
+    const nav = [['missions', 'Missions', '#/missions'], ['quiz', 'Scientist quiz', '#/quiz'], ['lab', 'The Lab', '#/lab'], ['who', 'Who we are', '#/who']].map(([k, l, href]) => { const on = actMap[k].includes(r.name); return { label: l, href, current: on ? 'page' : undefined, color: on ? '#F2F5FF' : '#9FACC9', bar: on ? 'inset 0 -2px 0 #C6F534' : 'none' }; });
+    const lay = {
+      headerBg: this.state.scrolled || this.state.menu ? 'rgba(10,14,26,0.88)' : 'rgba(10,14,26,0)', headerBorder: this.state.scrolled || this.state.menu ? '#2C3757' : 'transparent',
+      navDisplay: nar ? 'none' : 'flex', burgerDisplay: nar ? 'inline-flex' : 'none', ctaDisplay: nar ? 'none' : 'inline-flex', floatDisplay: mob ? 'none' : 'inline-flex',
+      heroCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1.05fr) minmax(0,1fr)', bandCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,460px)',
+      missionCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) 380px', bookPos: nar ? 'static' : 'sticky', mediaCols: mob ? '1fr 1fr' : '2fr 1fr', mediaBig: mob ? 'span 2' : 'auto', mediaRows: mob ? '240px 120px' : '210px 210px', mediaBigRow: mob ? 'auto' : 'span 2',
+      resultCols: mob ? 'minmax(0,1fr)' : '220px minmax(0,1fr)', resultBlock: mob ? '140px' : '220px', resultInitial: mob ? '72px' : '120px',
+      recCols: mob ? 'minmax(0,1fr)' : 'minmax(0,380px) minmax(0,1fr)', regCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) 440px', formCols: mob ? 'minmax(0,1fr)' : '1fr 1fr', span2: mob ? 'auto' : 'span 2', quizCols: mob ? 'minmax(0,1fr)' : '1fr 1fr', tileH: mob ? '76px' : '112px'
+    };
+    const catKey = n => n.toLowerCase().replace(/ /g, '-');
+    const all = this.M.map((m, i) => this.mission(m, i));
+    const bySlug = s => all.find(m => m.slug === s);
+    const byId = id => all.find(m => m.id === id);
+    // missions page
+    const cq = r.q.cat || '', cityq = this.cities[r.q.city] ? r.q.city : '';
+    const catName = (this.cats.find(c => catKey(c[0]) === cq) || [''])[0];
+    const list = all.filter(m => (!catName || m.cat === catName) && (!cityq || m.evs.some(e => e.ck === cityq))).map((m, i) => ({ ...m, delay: (i % 3) * 80 + 'ms' }));
+    const cityPart = cityq ? '&city=' + cityq : '';
+    const ms = {
+      chips: [['All missions', ''], ...this.cats.map(c => [c[0], catKey(c[0])])].map(([name, k]) => { const on = k === (catName ? cq : ''); return { name, href: '#/missions' + (k || cityq ? '?' + (k ? 'cat=' + k : '') + (k && cityq ? '&' : '') + (cityq ? 'city=' + cityq : '') : ''), current: on ? 'page' : undefined, bg: on ? '#C6F534' : 'transparent', fg: on ? '#0A0E1A' : '#F2F5FF', border: on ? '#C6F534' : '#6B7CAB' }; }),
+      city: cityq, onCity: e => { const v = e.target.value; const parts = []; if (catName) parts.push('cat=' + cq); if (v) parts.push('city=' + v); this.go('#/missions' + (parts.length ? '?' + parts.join('&') : '')); },
+      list, hasList: list.length > 0, empty: list.length === 0,
+      summary: 'SHOWING ' + list.length + ' OF 6' + (catName ? ' / ' + catName.toUpperCase() : '') + (cityq ? ' / ' + this.cities[cityq] : ' / ALL CITIES'),
+      emptyLine: (catName ? 'No ' + catName + ' missions' : 'No missions') + (cityq ? ' are scheduled in ' + this.cities[cityq] + ' yet.' : ' are published yet.') + ' Try another city, or register interest and we will tell you the moment one lands.'
+    };
+    // mission page
+    const mm = bySlug(r.id) || all[0];
+    const mp = { m: mm, steps: mm.steps.map((s, i) => ({ n: '0' + (i + 1), title: s[0], text: s[1], delay: (i % 2) * 80 + 'ms' })), incl: mm.incl, worth: mm.worth, related: all.filter(x => x.id !== mm.id && x.type === mm.type).concat(all.filter(x => x.id !== mm.id && x.type !== mm.type)).slice(0, 3).map((x, i) => ({ ...x, delay: i * 80 + 'ms' })) };
+    // quiz
+    const q = this.state.quiz, done = q.step >= 6, idx = Math.min(q.step, 5), Qn = this.Q[idx], num = idx + 1, pct = done ? 100 : Math.round((q.step) / 6 * 100);
+    const win = this.winner(q.answers), WT = this.T[win.key];
+    const qz = {
+      playing: !done, done, num, pctText: pct + '% DONE', bar: Math.max(pct, 3) + '%', question: Qn.q,
+      answers: this.order.map((t, j) => { const sel = q.answers[idx] === j && !done; return { letter: 'ABCD'[j], text: Qn.a[j], color: this.T[t].color, pressed: sel ? 'true' : 'false', border: sel ? '#C6F534' : '#2C3757', bg: sel ? '#243058' : '#1B2340', shadow: sel ? '0 0 32px rgba(198,245,52,0.35)' : '0 8px 24px rgba(4,7,16,0.45)', onClick: () => this.pick(j) }; }),
+      dots: this.Q.map((_, i) => ({ bg: i < q.step || done ? '#C6F534' : (i === q.step ? '#F2F5FF' : '#2C3757') })),
+      backOpacity: q.step > 0 ? 1 : 0.4, backDisabled: q.step > 0 ? 'false' : 'true',
+      back: () => { if (this.state.quiz.step > 0 && !this._lock) this.setState(s => ({ quiz: { ...s.quiz, step: s.quiz.step - 1 } })); },
+      restart: () => { clearTimeout(this._t); this._lock = false; this.setState({ quiz: { step: 0, answers: [] } }); },
+      result: { name: WT.name, color: WT.color, initial: WT.initial, tag: WT.tag, sentence: 'You are ' + WT.an + ' ' + WT.name, href: '#/result/' + WT.slug },
+      tally: this.order.map((t, i) => ({ label: this.T[t].name.toUpperCase(), n: String(win.counts[i]), color: this.T[t].color, width: (win.counts[i] / 6 * 100) + '%' }))
+    };
+    // result
+    const rk = this.typeBySlug(r.id) || 'chem', RT = this.T[rk];
+    const rs = { t: { ...RT, sentence: 'You are ' + RT.an + ' ' + RT.name }, primary: byId(RT.recs[0]), second: byId(RT.recs[1]), also: 'ALSO GOOD FOR ' + RT.an.toUpperCase() + ' ' + RT.name.toUpperCase(), burst: this.burst(RT.color), fromQuiz: q.step >= 6 };
+    // register
+    const rmm = r.id ? bySlug(r.id) : null, f = this.state.form, er = this.state.errors;
+    const fe = k => ({ msg: er[k] || '', has: !!er[k], border: er[k] ? '#FF7A7A' : '#6B7CAB', inv: er[k] ? 'true' : 'false' });
+    const rg = { has: !!rmm, none: !rmm, m: rmm || all[0], f, set: { name: this.setF('name'), email: this.setF('email'), phone: this.setF('phone'), kids: this.setF('kids'), age: this.setF('age'), date: this.setF('date'), city: this.setF('city'), venue: this.setF('venue'), notes: this.setF('notes'), consent: this.setF('consent') }, e: { name: fe('name'), email: fe('email'), consent: fe('consent') }, submit: e => this.submit(e), eyebrow: rmm ? 'REGISTER INTEREST / ' + rmm.title.toUpperCase() : 'REGISTER INTEREST', ageDefault: rmm ? rmm.ages : '' };
+    const st = this.state.sent || { mission: 'NOT PICKED YET', typeName: 'ANY', color: '#6B7CAB', kids: '-', hasType: false };
+    return {
+      ic, pg, nav, lay, mob, menu: this.state.menu,
+      toggleMenu: () => this.setState(s => ({ menu: !s.menu })), menuLabel: this.state.menu ? 'Close menu' : 'Open menu', menuExpanded: this.state.menu ? 'true' : 'false', menuIcon: this.state.menu ? ic.close : ic.menu,
+      skip: e => { e.preventDefault(); if (this.mainRef.current) this.mainRef.current.focus(); },
+      rootRef: this.rootRef, mainRef: this.mainRef, qRef: this.qRef, artRef: this.artRef, menuRef: this.menuRef, resRef: this.resRef,
+      heroMove: e => { if (this.rm() || !this.artRef.current) return; const b = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - b.left) / b.width - 0.5, y = (e.clientY - b.top) / b.height - 0.5; this.artRef.current.style.transform = `translate3d(${x * -22}px,${y * -16}px,0) rotate(${x * -2.5}deg)`; },
+      heroLeave: () => { if (this.artRef.current) this.artRef.current.style.transform = 'none'; },
+      lab: this.lab(), particles: this.particles(), ticker: this.ticker(),
+      cats: this.cats.map(([name, line, icon], i) => { const n = all.filter(m => m.cat === name).length; return { name, line, icon: this.ico(icon, 26), href: '#/missions?cat=' + catKey(name), delay: i * 60 + 'ms', count: n ? n + (n > 1 ? ' MISSIONS' : ' MISSION') : 'ASK US' }; }),
+      types: this.order.map((t, i) => ({ ...this.T[t], tilt: ['-3deg', '3deg', '3deg', '-3deg'][i], aria: this.T[t].name + ': start the quiz' })),
+      featured: ['m01', 'm02', 'm04'].map((id, i) => ({ ...byId(id), delay: i * 80 + 'ms' })), next: byId('m02'),
+      team: [['SCIENCE AND EXPERIENCE', '[TEAM LEAD]', 'Plans every mission and runs most of them. Responsible for the ceiling.', 'science lead mid-demo', '#35D07F'], ['TECHNOLOGY', '[TECH LEAD]', 'Builds the coding missions and this website. Owns the pressure launcher.', 'tech lead with laptops', '#38BDF8'], ['CONTENT', '[CONTENT LEAD]', 'Films the reactions, writes the recipe cards, runs the Instagram challenges.', 'content lead filming', '#FF5CA8']].map(([role, name, line, photo, color], i) => ({ role, name, line, photo, color, delay: i * 80 + 'ms' })),
+      ms, mp, qz, rs, rg, st
+    };
+  }
+}
+</script>
+</body>
+</html>

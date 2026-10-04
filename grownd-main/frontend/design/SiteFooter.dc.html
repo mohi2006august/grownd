@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<footer style="margin-top:auto;border-top:1px solid #2C3757;background:#121829;padding:{{ pad }};display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:12px;max-width:440px">
+<a href="#a01" aria-label="GROWND home" style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:0.04em;color:#C6F534;text-decoration:none">GROWND</a>
+<p style="margin:0;font-family:'Figtree',sans-serif;font-size:14px;line-height:22px;color:#9FACC9">Run by [TEAM LEAD] on science and experience, [TECH LEAD] on technology and [CONTENT LEAD] on content. Real experiments for ages 5 to 12.</p>
+</div>
+<nav aria-label="Footer" style="display:flex;flex-wrap:wrap;gap:0 24px">
+<a href="#a02" style="min-height:44px;display:inline-flex;align-items:center;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none">Missions</a>
+<a href="#a03" style="min-height:44px;display:inline-flex;align-items:center;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none">Scientist quiz</a>
+<a href="#a15" style="min-height:44px;display:inline-flex;align-items:center;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none">The Lab</a>
+<a href="#a01" style="min-height:44px;display:inline-flex;align-items:center;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none">Who we are</a>
+<a href="#a06" style="min-height:44px;display:inline-flex;align-items:center;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:#F2F5FF;text-decoration:none">Register interest</a>
+</nav>
+</div>
+<p style="margin:0;padding-top:24px;border-top:1px solid #2C3757;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:#9FACC9">PROTOTYPE BUILD. NO PAYMENTS ARE TAKEN AND NO CHILD DATA IS STORED.</p>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { pad: this.props.mobile ? '48px 20px 32px' : '64px 48px 40px' }; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<sc-if value="{{ desktop }}" hint-placeholder-val="{{ true }}">
+<header style="position:sticky;top:0;z-index:5;height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 48px;background:rgba(10,14,26,0.94);border-bottom:1px solid #2C3757">
+<a href="#main" style="position:absolute;left:16px;top:-80px;padding:12px 16px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-family:'Figtree',sans-serif;font-weight:700;font-size:15px;text-decoration:none" style-focus="top:16px">Skip to content</a>
+<a href="#a01" aria-label="GROWND home" style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:0.04em;color:#C6F534;text-decoration:none;min-height:44px;display:inline-flex;align-items:center">GROWND</a>
+<nav aria-label="Main" style="display:flex;gap:4px">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+<a href="{{ n.href }}" aria-current="{{ n.current }}" style="min-height:44px;display:inline-flex;align-items:center;padding:0 14px;font-family:'Figtree',sans-serif;font-size:15px;font-weight:600;color:{{ n.color }};text-decoration:none;box-shadow:{{ n.bar }};transition:color 150ms ease" style-hover="color:#F2F5FF">{{ n.label }}</a>
+</sc-for>
+</nav>
+<a href="#a06" style="display:inline-flex;align-items:center;min-height:48px;padding:12px 20px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-family:'Figtree',sans-serif;font-size:15px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35)">Book a science experience</a>
+</header>
+</sc-if>
+<sc-if value="{{ mobile }}" hint-placeholder-val="{{ false }}">
+<header style="position:sticky;top:0;z-index:5;background:rgba(10,14,26,0.96);border-bottom:1px solid #2C3757">
+<a href="#main" style="position:absolute;left:12px;top:-80px;padding:12px 16px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-family:'Figtree',sans-serif;font-weight:700;font-size:15px;text-decoration:none" style-focus="top:10px">Skip to content</a>
+<div style="height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 20px">
+<a href="#a09" aria-label="GROWND home" style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.04em;color:#C6F534;text-decoration:none;min-height:44px;display:inline-flex;align-items:center">GROWND</a>
+<button type="button" aria-label="{{ menuLabel }}" aria-expanded="{{ expanded }}" style="width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;border:2px solid #6B7CAB;background:transparent;color:#F2F5FF;cursor:pointer">
+<sc-if value="{{ closed }}" hint-placeholder-val="{{ true }}">{{ burger }}</sc-if>
+<sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">{{ close }}</sc-if>
+</button>
+</div>
+<sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Main" style="display:flex;flex-direction:column;padding:8px 20px 24px;gap:0;background:#121829;border-top:1px solid #2C3757">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+<a href="{{ n.href }}" aria-current="{{ n.current }}" style="min-height:56px;display:flex;align-items:center;font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:600;color:{{ n.color }};text-decoration:none;border-bottom:1px solid #2C3757">{{ n.label }}</a>
+</sc-for>
+<a href="#a14" style="margin-top:24px;display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:14px;background:#C6F534;color:#0A0E1A;font-family:'Figtree',sans-serif;font-size:16px;font-weight:700;text-decoration:none">Book a science experience</a>
+<a href="#a11" style="margin-top:12px;display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:14px;border:2px solid #6B7CAB;color:#F2F5FF;font-family:'Figtree',sans-serif;font-size:16px;font-weight:700;text-decoration:none">Start the quiz</a>
+</nav>
+</sc-if>
+</header>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;missions&quot;,&quot;quiz&quot;,&quot;lab&quot;,&quot;who&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;open&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.active || '', m = !!this.props.mobile, o = !!this.props.open;
+    const h = React.createElement;
+    const svg = (ps) => h('svg', { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': 'true' }, ...ps.map((d, i) => h('path', { key: i, d })));
+    const items = [['missions', 'Missions', m ? '#a10' : '#a02'], ['quiz', 'Scientist quiz', m ? '#a11' : '#a03'], ['lab', 'The Lab', '#a15'], ['who', 'Who we are', m ? '#a09' : '#a01']];
+    return {
+      desktop: !m, mobile: m, open: o, closed: !o,
+      nav: items.map(([k, l, href]) => ({ label: l, href, current: k === a ? 'page' : undefined, color: k === a ? '#F2F5FF' : '#9FACC9', bar: k === a ? 'inset 0 -2px 0 #C6F534' : 'none' })),
+      burger: svg(['M4 7h16', 'M4 12h16', 'M4 17h16']), close: svg(['M6 6l12 12', 'M18 6L6 18']),
+      menuLabel: o ? 'Close menu' : 'Open menu', expanded: o ? 'true' : 'false'
+    };
+  }
+}
+</script>
+</body>
+</html>

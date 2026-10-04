@@ -1,0 +1,28 @@
+{
+  "name": "grownd-api",
+  "private": true,
+  "type": "module",
+  "description": "GROWND booking API and admin API (Fastify + Supabase Postgres)",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "check": "node --env-file-if-exists=.env scripts/check-setup.js",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.js",
+    "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.1",
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/static": "^10.1.5",
+    "@fastify/under-pressure": "^9.2.0",
+    "fastify": "^5.12.5",
+    "ioredis": "^6.0.0",
+    "jose": "^6.2.12",
+    "postgres": "^3.4.9",
+    "stripe": "^23.0.0"
+  }
+}
