@@ -46,9 +46,7 @@ If your password contains symbols such as `@ # / ? %`, write them as `%40 %23 %2
 Go to **Authentication → Sign In / Providers** (some versions call it *General configuration*). Turn off **Allow new users to sign up** and save. Only the admins you create in step 6 can then sign in.
 
 ### 5. Check, then create the tables
-```bash
-cd backend
-```
+Open a terminal in the app folder: the `grownd-main` folder that contains `vercel.json`. All the commands below run from there.
 ```bash
 npm install
 ```
@@ -128,19 +126,73 @@ To test a quote, open a registration in the dashboard, create a **payment link**
 
 ---
 
-## Part 3: Going live (when the site is deployed)
+## Part 3: Put it on Vercel
+
+Do Part 1 first: the tables and your admin login are created from your computer.
+
+### 1. Point Vercel at the app folder
+In Vercel, open your project, then **Settings → Build and Deployment**:
+- **Root Directory:** `grownd-main` (the folder that contains `vercel.json`). Save.
+- **Framework Preset:** **Other**. Leave Build Command, Output Directory and Install Command on their defaults, because `vercel.json` sets everything.
+
+If the Root Directory is `grownd-main/backend`, Vercel runs only the backend, for every page, and never deploys the website. That is what produces `FUNCTION_INVOCATION_FAILED`.
+
+With the app folder as the root, Vercel's CDN serves the website and dashboard, and one Vercel Function answers `/api/*`. A daily Vercel Cron job tidies up unpaid bookings.
+
+### 2. Add the environment variables
+Go to **Settings → Environment Variables**. Add these for *Production* and *Preview*, copying the values from your `backend/.env`:
+
+| Name | Value |
+| --- | --- |
+| `DATABASE_URL` | Transaction pooler string (port 6543, with `?sslmode=require`) |
+| `SUPABASE_URL` | Project URL |
+| `SUPABASE_ANON_KEY` | Publishable key |
+| `SUPABASE_JWT_SECRET` | Only if `npm run check` asked for it |
+| `STRIPE_SECRET_KEY` | `sk_test_...` while testing |
+| `STRIPE_WEBHOOK_SECRET` | From step 4 below |
+| `CRON_SECRET` | Any long random string. Vercel Cron sends it to the clean-up job, and nobody else can trigger the job. |
+| `REDIS_URL` | Recommended before launch. Add **Upstash Redis** from the Vercel Marketplace and paste its `rediss://...` URL, so rate limits count across all Vercel instances instead of per instance. |
+
+Not needed on Vercel:
+- `PORT`, `NODE_ENV`, `TRUST_PROXY` and `WEB_CONCURRENCY`: Vercel handles these.
+- `SITE_URL`: detected automatically. Set it only if customers should return to a different domain.
+- `MIGRATION_DATABASE_URL`: migrations run from your computer.
+- `SUPABASE_SERVICE_ROLE_KEY`: only `npm run create-admin` on your computer uses it, so keep this key off the server.
+
+### 3. Deploy
+Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed variables only take effect in a new deployment.
+
+### 4. Connect Stripe to the live address
+1. In Stripe, go to **Workbench → Webhooks → Create an event destination** and set it up:
+   - URL: `https://grownd-beige.vercel.app/api/payments/webhook` (or your own domain).
+   - Events: the five listed in Part 4, step 3.
+2. Copy its signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
+
+### 5. Check it
+- `https://grownd-beige.vercel.app` shows the website, and `/admin/` signs you in.
+- `/readyz` answers `{"status":"ready"}`, which means the database is reachable.
+- If a setting is missing, `/api/...` answers with a message naming it, and the website still loads.
+
+**Plan notes:**
+- On the Hobby plan, Vercel Cron runs at most once a day. That is fine, because Stripe's webhooks do the real-time work and the cron job is only a safety net. On Pro, change the schedule in `vercel.json` to `*/10 * * * *`.
+- Preview deployments (other branches) are protected by Vercel Authentication by default.
+
+---
+
+## Part 4: Going live
 
 1. **Stripe:** activate your account with business details and a bank account.
-2. **Live key:** in live mode, create a **restricted key** with *Checkout Sessions: Write* and *Refunds: Write*. Put it in `STRIPE_SECRET_KEY` on your server. Try the same permissions in a sandbox first (`rk_test_...`) and run a test booking with them.
+2. **Live key:** in live mode, create a **restricted key** with *Checkout Sessions: Write* and *Refunds: Write*. Put it in `STRIPE_SECRET_KEY` in Vercel. Try the same permissions in a sandbox first (`rk_test_...`) and run a test booking with them.
 3. **Webhook:** go to **Workbench → Webhooks → Create an event destination** and set it up as follows:
    - Choose **Your account** and the latest API version.
    - Select the events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `charge.refunded`.
-   - Choose **Webhook endpoint**, with the URL `https://YOUR-API-HOST/api/payments/webhook`.
-   - Reveal the signing secret and put it in `STRIPE_WEBHOOK_SECRET` on the server.
+   - Choose **Webhook endpoint**, with the URL `https://YOUR-SITE/api/payments/webhook`.
+   - Reveal the signing secret and put it in `STRIPE_WEBHOOK_SECRET` in Vercel.
 
    Production refuses to take payments without it.
-4. **Server settings:** set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. Run `npm run check` with the production values.
+4. **Rate limits:** set `REDIS_URL` (Upstash) in Vercel. For extra protection, add Vercel Firewall rate-limit rules for `/api/checkout` and `/api/registrations`.
 5. **Supabase:** consider the Pro plan before launch, for no pausing, daily backups and more connections.
+6. **Not using Vercel?** The API also runs as a normal server. Build the container from the app folder with `docker build -f backend/Dockerfile .`. On the server, set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. Then host `frontend/` on any CDN that forwards `/api/*` to it (see `frontend/README.md`).
 
 ## If something goes wrong
 Run `npm run check`; it names the problem and the fix. The usual ones are:
@@ -152,3 +204,5 @@ Run `npm run check`; it names the problem and the fix. The usual ones are:
 | *Could not reach SUPABASE_URL* | Typo in the URL, or the free project is paused; restore it in the dashboard. |
 | *Please sign in again* in the dashboard | `npm run check` tells you if `SUPABASE_JWT_SECRET` is needed. |
 | *Online booking is not switched on yet* | No Stripe key, or no currency set in the dashboard's Settings. |
+| Vercel shows `FUNCTION_INVOCATION_FAILED` on every page | The Root Directory is wrong; it must be `grownd-main` (Part 3, step 1). |
+| `/api/...` on Vercel says *This site is not set up yet* | A variable is missing in Vercel; the message names it (Part 3, step 2). |

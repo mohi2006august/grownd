@@ -21,18 +21,9 @@ Customers type their card details on Stripe's own page, never on this site. If p
 
 The site, the checkout page and the dashboard all call the API at the **same origin**, under `/api`. So whatever serves these files must also route `/api/*` to the backend.
 
-- **Locally:** the backend serves both folders for you. Run `npm run dev` in `backend/`, then open http://localhost:4000 and http://localhost:4000/admin/.
-- **In production:** put `frontend/` on a CDN or static host and proxy `/api/*` to the API. Files under `admin/` are served as they are; everything else comes from `site/`. Examples:
-
-  **Vercel** (`vercel.json`, with the project root set to `frontend/`; real files such as `/admin/...` are served before rewrites apply):
-  ```json
-  {
-    "rewrites": [
-      { "source": "/api/:path*", "destination": "https://YOUR-API-HOST/api/:path*" },
-      { "source": "/:path*", "destination": "/site/:path*" }
-    ]
-  }
-  ```
+- **Locally:** the backend serves both folders for you. Run `npm run dev` in the app folder, then open http://localhost:4000 and http://localhost:4000/admin/.
+- **On Vercel:** nothing to do here. The `vercel.json` in the app folder already serves this folder from Vercel's CDN and sends `/api/*` to the backend function (SETUP.md, Part 3).
+- **Other static hosts:** put `frontend/` on the CDN and proxy `/api/*` to the API. Files under `admin/` are served as they are; everything else comes from `site/`. For example:
 
   **Netlify** (`_redirects` in the publish folder `frontend/`):
   ```

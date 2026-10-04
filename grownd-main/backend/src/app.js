@@ -11,6 +11,7 @@ import { config } from './config.js';
 import { DB_UNAVAILABLE, sql } from './db.js';
 import { HttpError } from './lib/errors.js';
 import adminRoutes from './routes/admin.js';
+import cronRoutes from './routes/cron.js';
 import healthRoutes from './routes/health.js';
 import paymentRoutes from './routes/payments.js';
 import publicRoutes from './routes/public.js';
@@ -62,6 +63,8 @@ export async function buildApp() {
     const Redis = mod.Redis ?? mod.default;
     redis = new Redis(config.redisUrl, { connectTimeout: 1000, maxRetriesPerRequest: 1, enableOfflineQueue: false });
     redis.on('error', err => app.log.warn({ err: err.message }, 'redis error'));
+  } else if (config.onVercel) {
+    app.log.warn('No REDIS_URL: rate limits are counted per Vercel instance, not across all of them. Add Upstash Redis (Vercel Marketplace) and set REDIS_URL before launch.');
   }
   await app.register(rateLimit, {
     global: true,
@@ -111,6 +114,7 @@ export async function buildApp() {
   // ---- routes ----
 
   await app.register(healthRoutes);
+  await app.register(cronRoutes);
   await app.register(publicRoutes);
   await app.register(paymentRoutes);
   await app.register(adminRoutes);

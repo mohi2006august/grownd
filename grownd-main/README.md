@@ -9,17 +9,20 @@ frontend/          static files, served from a CDN
   design/          editable design sources the site is exported from
 backend/           API: Node + Fastify, stateless, talks to Supabase Postgres and Stripe
   src/
-    routes/        HTTP layer: public, payments, admin, health. Validation and status codes only
+    routes/        HTTP layer: public, payments, admin, cron, health. Validation and status codes only
     services/      business logic; all SQL lives here (orders.js holds the payment rules)
     payments/      the only code that knows about Stripe, behind a small provider-neutral interface
     lib/           cache, errors, money, validation helpers
     app.js         plugins, protection, error handling
-    server.js      start-up, payment reconciliation, graceful shutdown
+    server.js      start-up, payment reconciliation, graceful shutdown (long-running servers)
     index.js       entry point; optional multi-core worker supervisor
   scripts/         check (setup checker), db:migrate, create-admin
-  Dockerfile
+  Dockerfile       for container hosts (not needed on Vercel)
 database/
   migrations/      SQL schema for Supabase, applied in order
+api/index.js       Vercel Function: runs the backend for /api/* on Vercel
+vercel.json        Vercel routing: CDN for frontend/, the function for /api/*, daily cron
+package.json       npm workspace root: `npm install` here installs the backend too
 ```
 
 Each folder has its own README with the details. **New here? Start with [SETUP.md](SETUP.md).**
@@ -107,10 +110,9 @@ On that basis, one million visitors loading the site is mostly CDN traffic, and 
 
 You need Node 22+ and a Supabase project (the free tier is fine). Stripe is optional at first: without its key the site simply takes registrations of interest.
 
-**[SETUP.md](SETUP.md)** walks through creating the Supabase project and Stripe account and filling in `backend/.env`. In short:
+**[SETUP.md](SETUP.md)** walks through creating the Supabase project and Stripe account and filling in `backend/.env`. In short, from this folder:
 
 ```bash
-cd backend
 npm install
 npm run check                            # checks backend/.env and every service, says what to fix
 npm run db:migrate                       # creates the tables
@@ -122,14 +124,17 @@ Then open http://localhost:4000 for the site and http://localhost:4000/admin/ fo
 
 ## Deploy
 
-1. **Database:** run `npm run db:migrate` against your Supabase project.
-2. **API:** build `backend/Dockerfile` on any container host (Render, Railway, Fly.io, Google Cloud Run, AWS ECS).
-   - Set the variables from `backend/.env.example`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
-   - Use `/readyz` as the health check.
-   - Autoscale on CPU.
-   - Add `REDIS_URL` once you run more than one instance.
-3. **Stripe:** live key and webhook endpoint at `https://YOUR-API-HOST/api/payments/webhook` (see [SETUP.md](SETUP.md), Part 3). Run `npm run check` with the production values.
-4. **Frontend:** upload `frontend/` to a static host or CDN and proxy `/api/*` to the API. See `frontend/README.md`.
+**On Vercel** (the setup used for grownd-beige.vercel.app): set the project's Root Directory to this folder, add the environment variables and deploy. [SETUP.md](SETUP.md), Part 3, lists every setting.
+
+`vercel.json` makes Vercel's CDN serve `frontend/`, and one Vercel Function (`api/index.js`) run the backend for `/api/*` with Fluid compute. A daily Vercel Cron job calls `/api/cron/reconcile`, because serverless has no long-running timer. The API's caching headers let the CDN answer `/api/content` too. Set `REDIS_URL` (Upstash) so rate limits are shared across instances.
+
+**On a container host** (Render, Railway, Fly.io, Cloud Run, ECS):
+1. Build from this folder: `docker build -f backend/Dockerfile .`
+2. Set the variables from `backend/.env.example`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
+3. Use `/readyz` as the health check, autoscale on CPU, and add `REDIS_URL` once you run more than one instance.
+4. Host `frontend/` on a CDN that forwards `/api/*` to the API (see `frontend/README.md`).
+
+Either way, run `npm run db:migrate` against Supabase from your computer, and point the Stripe webhook at `https://YOUR-SITE/api/payments/webhook` (SETUP.md, Part 4).
 
 ## Before launch
 
