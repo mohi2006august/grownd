@@ -2,19 +2,28 @@
 //   npm run create-admin -- you@example.com            create, or reset the password of, an admin
 //   npm run create-admin -- you@example.com --keep     grant admin to an existing user, keep their password
 //   npm run create-admin -- you@example.com --revoke   remove admin access
-// Needs SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and DATABASE_URL in backend/.env.
+// Needs DATABASE_URL in backend/.env. Creating a user or setting a password also needs SUPABASE_URL and
+// SUPABASE_SERVICE_ROLE_KEY. Without the secret key, add the user in the Supabase dashboard
+// (Authentication -> Users -> Add user) and run this with --keep.
 import postgres from 'postgres';
 
 const [email = '', flag = ''] = process.argv.slice(2).map(s => s.trim());
 const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL } = process.env;
 const MIN_PASSWORD = 10;
+const filled = v => Boolean(v) && !/YOUR-|\[YOUR/.test(v);
+const hasKey = filled(SUPABASE_URL) && filled(SUPABASE_SERVICE_ROLE_KEY);
+const NO_KEY_HELP = 'Creating a login or setting a password needs SUPABASE_SERVICE_ROLE_KEY in backend/.env. Without it: add the user in Supabase (Authentication -> Users -> Add user, tick "Auto Confirm User"), then run this again with --keep.';
 
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !['', '--keep', '--revoke'].includes(flag)) {
   console.error('Usage: npm run create-admin -- you@example.com [--keep | --revoke]');
   process.exit(1);
 }
-if ([SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL].some(v => !v || /YOUR-|\[YOUR/.test(v))) {
-  console.error('Fill in SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and DATABASE_URL in backend/.env first, then run "npm run check".');
+if (!filled(DATABASE_URL)) {
+  console.error('Fill in DATABASE_URL in backend/.env first, then run "npm run check".');
+  process.exit(1);
+}
+if (flag === '' && !hasKey) {
+  console.error(NO_KEY_HELP);
   process.exit(1);
 }
 
@@ -69,14 +78,26 @@ async function authAdmin(method, path, body) {
 }
 
 const sql = postgres(DATABASE_URL, { max: 1, prepare: false });
+
+/** Sets or clears the admin role. Through the Auth admin API when the secret key is set, else directly in auth.users. */
+async function setRole(id, admin) {
+  if (hasKey) return authAdmin('PUT', `/users/${id}`, { app_metadata: { role: admin ? 'admin' : null } });
+  if (admin) await sql`update auth.users set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb where id = ${id}`;
+  else await sql`update auth.users set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) - 'role' where id = ${id}`;
+}
+
 try {
   const [existing] = await sql`select id from auth.users where lower(email) = lower(${email}) limit 1`;
 
   if (flag === '--revoke') {
     if (!existing) throw new Error(`No user with the email ${email}.`);
-    await authAdmin('PUT', `/users/${existing.id}`, { app_metadata: { role: null } });
+    await setRole(existing.id, false);
     console.log(`Removed admin access from ${email}. Their current session lasts until its token expires (about an hour).`);
+  } else if (flag === '--keep' && existing && !hasKey) {
+    await setRole(existing.id, true);
+    console.log(`${email} is an admin. They sign in with the password set in Supabase.`);
   } else {
+    if (!existing && !hasKey) throw new Error(`No user with the email ${email} yet. ${NO_KEY_HELP}`);
     let password;
     if (flag !== '--keep' || !existing) {
       password = await askHidden(`Password for ${email} (at least ${MIN_PASSWORD} characters): `);

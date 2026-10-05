@@ -1,7 +1,7 @@
 // Booking and payment pages for the GROWND site. Plain DOM, no build step.
-//   /checkout.html?event=ID                  book places on a date and pay
-//   /checkout.html?order=ID                  pay a payment link, or see an order
-//   /checkout.html?order=ID&result=success   back from the payment page (or result=cancelled)
+//   /checkout?event=ID                       book places on a date and pay
+//   /checkout?order=ID                       pay a payment link, or see an order
+//   /checkout?order=ID&result=success        back from the payment page (or result=cancelled)
 // Card details are entered on Stripe's own page and never reach this site or the GROWND API.
 
 const main = document.getElementById('main');
@@ -151,14 +151,14 @@ async function bookingPage(eventId) {
     if (e) { slug = s; mission = m; event = e; break; }
   }
   if (!event) {
-    return show(statusView({ title: 'This date is no longer available', lede: 'It may have passed or been changed. Have a look at what is coming up.', actions: [link('See all missions', '/#/missions')] }));
+    return show(statusView({ title: 'This date is no longer available', lede: 'It may have passed or been changed. Have a look at what is coming up.', actions: [link('See all missions', '/missions')] }));
   }
   const currency = data.settings.currency;
   if (!data.payments.enabled || mission.price == null || !event.date || !currency) {
-    return show(statusView({ title: 'Online booking is not open for this date yet', lede: 'Register your interest and the team will be in touch with dates and a price.', actions: [link('Register interest', `/#/register/${slug}`)] }));
+    return show(statusView({ title: 'Online booking is not open for this date yet', lede: 'Register your interest and the team will be in touch with dates and a price.', actions: [link('Register interest', `/register/${slug}`)] }));
   }
   if (event.placesLeft === 0) {
-    return show(statusView({ tone: 'bad', title: 'This date is sold out', lede: 'Join the waiting list and we will tell you if a place opens up, or pick another date.', actions: [link('Join the waiting list', `/#/register/${slug}`), link('Other dates', `/#/mission/${slug}`, true)] }));
+    return show(statusView({ tone: 'bad', title: 'This date is sold out', lede: 'Join the waiting list and we will tell you if a place opens up, or pick another date.', actions: [link('Join the waiting list', `/register/${slug}`), link('Other dates', `/missions/${slug}`, true)] }));
   }
 
   const unitMinor = toMinor(mission.price, currency);
@@ -285,7 +285,7 @@ async function bookingPage(eventId) {
 function orderView(order, result) {
   const first = order.firstName;
   const booking = order.kind === 'booking';
-  const again = booking && order.event ? [link('Try again', `/checkout.html?event=${order.event.id}`)] : [];
+  const again = booking && order.event ? [link('Try again', `/checkout?event=${order.event.id}`)] : [];
   const home = link('Back to GROWND', '/', again.length > 0);
 
   switch (order.status) {
@@ -402,5 +402,5 @@ if (orderId && /^[0-9a-f-]{36}$/i.test(orderId)) {
 } else if (eventId > 0) {
   bookingPage(eventId);
 } else {
-  show(statusView({ title: 'Nothing to show here', lede: 'Pick a date on a mission page to book it.', actions: [link('See all missions', '/#/missions')] }));
+  show(statusView({ title: 'Nothing to show here', lede: 'Pick a date on a mission page to book it.', actions: [link('See all missions', '/missions')] }));
 }

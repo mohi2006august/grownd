@@ -51,8 +51,8 @@ function describeWhen(date, time, timezone) {
   return [day, [time, timezone].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
 }
 
-const payUrl = id => `${config.siteUrl}/checkout.html?order=${id}`;
-const returnUrl = (id, result) => `${config.siteUrl}/checkout.html?order=${id}&result=${result}`;
+const payUrl = id => `${config.siteUrl}/checkout?order=${id}`;
+const returnUrl = (id, result) => `${config.siteUrl}/checkout?order=${id}&result=${result}`;
 
 function maskEmail(email) {
   const [user, domain] = email.split('@');
