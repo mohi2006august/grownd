@@ -1167,13 +1167,13 @@ function SettingsView() {
 
   function siteForm(s) {
     const inputs = {
-      currency: h('input', { class: 'input', type: 'text', maxlength: '3', value: s.currency, placeholder: 'GBP', autocapitalize: 'characters', spellcheck: 'false' }),
+      currency: h('input', { class: 'input', type: 'text', maxlength: '3', value: s.currency, placeholder: 'INR', autocapitalize: 'characters', spellcheck: 'false' }),
       timezone: h('input', { class: 'input', type: 'text', maxlength: '40', value: s.timezone, placeholder: 'UK time' }),
       responseTime: h('input', { class: 'input', type: 'text', maxlength: '60', value: s.responseTime, placeholder: 'one working day' }),
       insuranceNote: h('textarea', { class: 'textarea', maxlength: '400', value: s.insuranceNote, placeholder: 'e.g. Fully insured. Every GROWND scientist holds an enhanced DBS check.' })
     };
     const fields = {
-      currency: field('Currency code', inputs.currency, { hint: 'Three letters, like GBP or EUR. Every price on the site uses it.' }),
+      currency: field('Currency code', inputs.currency, { hint: 'Three letters, like INR for rupees. Every price on the site uses it.' }),
       timezone: field('Timezone label', inputs.timezone, { hint: 'Shown after event times. A single date can override it.' }),
       responseTime: field('Reply time', inputs.responseTime, { hint: 'Completes “We reply within …” on the register page.', span: true }),
       insuranceNote: field('Safety and checks', inputs.insuranceNote, { hint: 'Shown on the home page and on every mission page.', span: true })

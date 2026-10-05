@@ -47,6 +47,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 @keyframes grPour{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
 @keyframes grSheen{0%{transform:translateX(-70%)}55%,100%{transform:translateX(70%)}}
 @keyframes grBurst{0%{transform:translate(0,0) scale(.4);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+.gr-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.gr-js [data-reveal]{opacity:1;transform:none;transition:none}.gr-anim{animation:none!important}*{transition:none!important}}
 </style>
 </helmet>
@@ -78,7 +79,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 
 <header style="position:sticky;top:0;z-index:50;padding:12px clamp(12px,2vw,24px) 0">
 <div style="max-width:1392px;margin:0 auto;height:64px;padding:0 8px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:999px;background:{{ lay.headerBg }};border:1px solid {{ lay.headerBorder }};box-shadow:{{ lay.headerShadow }};backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background 300ms ease,border-color 300ms ease,box-shadow 300ms ease">
-<a href="#/" aria-label="GROWND home" style="display:inline-flex;align-items:center;gap:10px;min-height:44px;text-decoration:none">
+<a href="/" aria-label="GROWND home" style="display:inline-flex;align-items:center;gap:10px;min-height:44px;text-decoration:none">
 <span aria-hidden="true" style="width:34px;height:34px;border-radius:10px;background:var(--brand,#C6F534);display:inline-flex;align-items:center;justify-content:center;color:var(--on-brand,#0A0E1A);transition:transform 300ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:rotate(-14deg) scale(1.08)">{{ ic.flaskS }}</span>
 <span style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.06em;color:var(--brand-ink,#C6F534)">GROWND</span>
 </a>
@@ -89,7 +90,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </nav>
 <div style="display:flex;align-items:center;gap:8px">
 <button type="button" onClick="{{ toggleTheme }}" aria-label="{{ themeLabel }}" aria-pressed="{{ themePressed }}" data-cursor="{{ themeCursor }}" style="width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--hair-strong,#6B7CAB);background:var(--raised,#1B2340);color:var(--ink,#F2F5FF);cursor:pointer;transition:transform 400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:rotate(30deg)">{{ themeIcon }}</button>
-<a data-magnet href="#/register" style="display:{{ lay.ctaDisplay }};align-items:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:15px;font-weight:700;text-decoration:none;white-space:nowrap;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-1px);color:var(--on-accent,#0A0E1A)">Book a science experience {{ ic.arrow }}</a>
+<a data-magnet href="/register" style="display:{{ lay.ctaDisplay }};align-items:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:15px;font-weight:700;text-decoration:none;white-space:nowrap;transition:box-shadow 150ms ease,transform 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-1px);color:var(--on-accent,#0A0E1A)">Book a science experience {{ ic.arrow }}</a>
 <button type="button" onClick="{{ toggleMenu }}" aria-label="{{ menuLabel }}" aria-expanded="{{ menuExpanded }}" aria-controls="gr-menu" style="display:{{ lay.burgerDisplay }};width:48px;height:48px;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--hair-strong,#6B7CAB);background:var(--raised,#1B2340);color:var(--ink,#F2F5FF);cursor:pointer">{{ menuIcon }}</button>
 </div>
 </div>
@@ -101,8 +102,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
 <a href="{{ n.href }}" aria-current="{{ n.current }}" style="min-height:72px;display:flex;align-items:center;gap:16px;font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;letter-spacing:-0.02em;color:{{ n.color }};text-decoration:none;border-bottom:1px solid var(--hair,#2C3757)"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">{{ n.num }}</span>{{ n.label }}<span style="margin-left:auto;color:var(--brand-ink,#C6F534)">{{ ic.arrow }}</span></a>
 </sc-for>
-<a href="#/register" style="margin-top:28px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:17px;font-weight:700;text-decoration:none">Book a science experience</a>
-<a href="#/quiz" style="margin-top:12px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:17px;font-weight:700;text-decoration:none">Start the quiz</a>
+<a href="/register" style="margin-top:28px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:17px;font-weight:700;text-decoration:none">Book a science experience</a>
+<a href="/quiz" style="margin-top:12px;display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:17px;font-weight:700;text-decoration:none">Start the quiz</a>
 <p style="margin:28px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:var(--muted,#9FACC9)">AGES 5-12 / 90-120 MIN / WE BRING EVERYTHING</p>
 </nav>
 </div>
@@ -114,7 +115,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <button type="button" onClick="{{ goBack }}" data-magnet="1" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 18px 8px 12px;border-radius:999px;background:rgba(var(--raised-rgb,27,35,64),0.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(var(--ink-rgb,242,245,255),0.14);color:var(--ink,#F2F5FF);font-size:15px;font-weight:700;cursor:pointer;transition:background 150ms ease,transform 150ms ease" style-hover="background:rgba(198,245,52,0.16)">{{ ic.arrowL }} {{ crumbs.backLabel }}</button>
 <nav aria-label="Breadcrumb"><ol style="list-style:none;margin:0;padding:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;font-weight:500">
 <sc-for list="{{ crumbs.items }}" as="c" hint-placeholder-count="3">
-<li style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="color:var(--hair-strong,#6B7CAB);display:{{ c.sep }}">/</span><sc-if value="{{ c.link }}" hint-placeholder-val="{{ true }}"><a href="{{ c.href }}" style="display:inline-flex;align-items:center;min-height:32px;padding:0 6px;color:var(--muted,#9FACC9);text-decoration:none;border-radius:8px" style-hover="color:var(--ink,#F2F5FF)">{{ c.label }}</a></sc-if><sc-if value="{{ c.here }}" hint-placeholder-val="{{ false }}"><span aria-current="page" style="padding:0 6px;color:var(--brand-ink,#C6F534)">{{ c.label }}</span></sc-if></li>
+<li style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="color:var(--hair-strong,#6B7CAB);display:{{ c.sep }}">/</span><sc-if value="{{ c.link }}" hint-placeholder-val="{{ true }}"><a href="{{ c.href }}" style="display:inline-flex;align-items:center;min-height:44px;padding:0 6px;color:var(--muted,#9FACC9);text-decoration:none;border-radius:8px" style-hover="color:var(--ink,#F2F5FF)">{{ c.label }}</a></sc-if><sc-if value="{{ c.here }}" hint-placeholder-val="{{ false }}"><span aria-current="page" style="padding:0 6px;color:var(--brand-ink,#C6F534)">{{ c.label }}</span></sc-if></li>
 </sc-for>
 </ol></nav>
 </div>
@@ -136,8 +137,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <h1 aria-label="Every child is a scientist. Some just need a lab." style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(52px,7vw,104px);line-height:0.92;font-weight:700;letter-spacing:-0.035em"><span aria-hidden="true"><span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 0ms both">Every</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 60ms both">child</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 120ms both">is</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 170ms both">a</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 220ms both">scientist.</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em;color:var(--muted,#9FACC9)"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 340ms both">Some</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em;color:var(--muted,#9FACC9)"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 400ms both">just</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em;color:var(--muted,#9FACC9)"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 460ms both">need</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.1em;margin-bottom:-0.1em;color:var(--muted,#9FACC9)"><span class="gr-anim" style="display:inline-block;animation:grWordIn 850ms cubic-bezier(.2,.8,.2,1) 520ms both">a</span></span> <span style="display:inline-block;transform:rotate(-2deg)"><span class="gr-anim" style="display:inline-block;padding:0 0.14em 0.04em;border-radius:18px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);animation:grPop 700ms cubic-bezier(.2,.8,.2,1) 680ms both">lab.</span></span></span></h1>
 <p style="margin:0;font-size:clamp(17px,1.4vw,19px);line-height:1.55;color:var(--muted,#9FACC9);max-width:540px;text-wrap:pretty">Hands-on STEM missions for ages 5 to 12: birthdays, workshops, school events and coding sessions. We bring the kit, the scientists and the clean-up. You bring the children.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap">
-<a data-magnet href="#/register" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease,gap 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);gap:14px;color:var(--on-accent,#0A0E1A)" style-active="transform:scale(0.97)">Book a science experience {{ ic.arrow }}</a>
-<a data-magnet href="#/missions" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none;transition:border-color 150ms ease,background 150ms ease,gap 150ms ease" style-hover="border-color:var(--ink,#F2F5FF);background:var(--surface,#121829);gap:14px;color:var(--ink,#F2F5FF)" style-active="transform:scale(0.97)">Enter the Lab {{ ic.arrow }}</a>
+<a data-magnet href="/register" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease,gap 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);gap:14px;color:var(--on-accent,#0A0E1A)" style-active="transform:scale(0.97)">Book a science experience {{ ic.arrow }}</a>
+<a data-magnet href="/missions" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none;transition:border-color 150ms ease,background 150ms ease,gap 150ms ease" style-hover="border-color:var(--ink,#F2F5FF);background:var(--surface,#121829);gap:14px;color:var(--ink,#F2F5FF)" style-active="transform:scale(0.97)">Enter the Lab {{ ic.arrow }}</a>
 </div>
 <dl aria-label="At a glance" style="margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;background:var(--hair,#2C3757);border:1px solid var(--hair,#2C3757);border-radius:14px;overflow:hidden">
 <div style="padding:14px 16px;background:rgba(var(--surface-rgb,14,19,34),0.6)"><dt style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">AGES</dt><dd style="margin:6px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">5-12</dd></div>
@@ -165,7 +166,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </div>
 <sc-if value="{{ rig.done }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<a href="#/quiz" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 20px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Take the real quiz {{ ic.arrow }}</a>
+<a href="/quiz" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 20px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Take the real quiz {{ ic.arrow }}</a>
 <button type="button" onClick="{{ rig.reset }}" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 18px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);background:transparent;color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;cursor:pointer" style-hover="border-color:var(--ink,#F2F5FF)">{{ ic.refresh }} Reset the rig</button>
 </div>
 </sc-if>
@@ -182,7 +183,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,5.4vw,76px);line-height:0.95;font-weight:700;letter-spacing:-0.03em">Choose your mission</h2>
 <p style="margin:0;font-size:17px;line-height:1.55;color:var(--muted,#9FACC9);max-width:520px">Six elements. Every one is hands-on and every one comes with its own scientists. Hover to react.</p>
 </div>
-<a href="#/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--brand-ink,#C6F534);font-size:16px;font-weight:700;text-decoration:none" style-hover="color:var(--ink,#F2F5FF)">See all six missions {{ ic.arrow }}</a>
+<a href="/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--brand-ink,#C6F534);font-size:16px;font-weight:700;text-decoration:none" style-hover="color:var(--ink,#F2F5FF)">See all six missions {{ ic.arrow }}</a>
 </div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px">
 <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
@@ -205,12 +206,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)" data-scramble="1">STEP 02 / 6 QUESTIONS / 2 MINUTES</span>
 <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,5.4vw,72px);line-height:0.95;font-weight:700;letter-spacing:-0.03em">What kind of scientist are you?</h2>
 <p style="margin:0;font-size:18px;line-height:28px;color:var(--muted,#9FACC9);max-width:500px">Six questions, no wrong answers, four possible scientist types. Each one points at the missions that suit it. Nothing is stored, so let them take it twice.</p>
-<a data-magnet href="#/quiz" style="align-self:flex-start;display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease,gap 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);gap:14px;color:var(--on-accent,#0A0E1A)">Start the quiz {{ ic.arrow }}</a>
+<a data-magnet href="/quiz" style="align-self:flex-start;display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none;transition:box-shadow 150ms ease,transform 150ms ease,gap 150ms ease" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);transform:translateY(-2px);gap:14px;color:var(--on-accent,#0A0E1A)">Start the quiz {{ ic.arrow }}</a>
 <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:var(--muted,#9FACC9)">HOVER OR TAB TO A CARD TO READ ITS FILE</span>
 </div>
 <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:14px">
 <sc-for list="{{ types }}" as="t" hint-placeholder-count="4">
-<a href="#/quiz" data-cursor="QUIZ" aria-label="{{ t.aria }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" class="gr-anim" style="display:block;aspect-ratio:1/0.9;perspective:1000px;text-decoration:none;color:var(--on-accent,#0A0E1A);animation:grFloat 6s ease-in-out infinite;animation-delay:{{ t.fdelay }}">
+<a href="/quiz" data-cursor="QUIZ" aria-label="{{ t.aria }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" class="gr-anim" style="display:block;aspect-ratio:1/0.9;perspective:1000px;text-decoration:none;color:var(--on-accent,#0A0E1A);animation:grFloat 6s ease-in-out infinite;animation-delay:{{ t.fdelay }}">
 <span style="position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:{{ t.rot }};transition:transform 700ms cubic-bezier(.2,.7,.2,1)">
 <span style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;background:{{ t.color }};padding:clamp(14px,2vw,22px);display:flex;flex-direction:column;justify-content:space-between">
 <span style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;font-weight:500"><span>TYPE {{ t.num }}</span><span>FILE</span></span>
@@ -229,15 +230,15 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </section>
 
 <section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:flex;flex-direction:column;gap:20px">
-<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)" data-scramble="1">NEXT MISSION / YOUR TICKET</span>
+<h2 data-reveal style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)" data-scramble="1">NEXT MISSION / YOUR TICKET</h2>
 <div data-reveal style="position:relative;display:grid;grid-template-columns:{{ lay.ticketCols }};border-radius:24px;background:rgba(var(--raised-rgb,27,35,64),0.52);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(var(--ink-rgb,242,245,255),0.11);box-shadow:0 16px 40px rgba(var(--shadow-rgb,4,7,16),0.55)">
-<div style="position:relative;overflow:hidden;min-height:240px;border-radius:24px 0 0 24px;background:{{ next.color }};color:var(--on-accent,#0A0E1A);padding:26px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="position:relative;overflow:hidden;min-height:240px;border-radius:{{ lay.ticketRadius }};background:{{ next.color }};color:var(--on-accent,#0A0E1A);padding:26px;display:flex;flex-direction:column;justify-content:space-between">
 <span aria-hidden="true" class="gr-anim" style="position:absolute;inset:-20px;background-image:radial-gradient(rgba(var(--deep-rgb,10,14,26),0.16) 2px,transparent 2.6px);background-size:18px 18px;animation:grDots 18s linear infinite"></span>
 <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">{{ next.code }}</span>
 <span style="position:relative;font-family:'Space Grotesk',sans-serif;font-size:clamp(52px,6vw,84px);line-height:0.9;font-weight:700;letter-spacing:-0.03em">{{ next.glyph }}</span>
 <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;text-transform:uppercase">{{ next.typeName }} / {{ next.cat }}</span>
 </div>
-<div style="position:relative;min-width:0;padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;gap:18px;border-left:2px dashed var(--hair,#2C3757)">
+<div style="position:relative;min-width:0;padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;gap:18px;border-left:{{ lay.ticketLeft }};border-top:{{ lay.ticketTop }}">
 <span aria-hidden="true" style="position:absolute;left:-16px;top:-16px;width:30px;height:30px;border-radius:999px;background:var(--deep,#0A0E1A);border:1px solid var(--hair,#2C3757);display:{{ lay.notchDisplay }}"></span>
 <span aria-hidden="true" style="position:absolute;left:-16px;bottom:-16px;width:30px;height:30px;border-radius:999px;background:var(--deep,#0A0E1A);border:1px solid var(--hair,#2C3757);display:{{ lay.notchDisplay }}"></span>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">ADMIT ONE SCIENTIST / AGES {{ next.ages }}</span><span style="display:inline-flex;padding:4px 12px;border-radius:999px;background:{{ next.ev.pillBg }};color:var(--on-accent,#0A0E1A);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">{{ next.ev.pill }}</span></div>
@@ -262,7 +263,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:flex;flex-direction:column;gap:32px">
 <div data-reveal style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
 <div style="display:flex;flex-direction:column;gap:14px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)" data-scramble="1">FEATURED MISSIONS / 3 OF 6</span><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,4.8vw,64px);line-height:0.98;font-weight:700;letter-spacing:-0.03em;max-width:860px">A party where the cake is the second best bit.</h2></div>
-<a href="#/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--brand-ink,#C6F534);font-size:16px;font-weight:700;text-decoration:none" style-hover="color:var(--ink,#F2F5FF)">Browse all missions {{ ic.arrow }}</a>
+<a href="/missions" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--brand-ink,#C6F534);font-size:16px;font-weight:700;text-decoration:none" style-hover="color:var(--ink,#F2F5FF)">Browse all missions {{ ic.arrow }}</a>
 </div>
 <span style="display:{{ lay.swipeDisplay }};margin-top:-16px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:var(--muted,#9FACC9)">SWIPE FOR MORE</span>
 <div style="display:grid;grid-template-columns:{{ lay.featCols }};grid-auto-flow:{{ lay.featFlow }};grid-auto-columns:{{ lay.featAuto }};overflow-x:{{ lay.featOverflow }};scroll-snap-type:x mandatory;scrollbar-width:none;gap:clamp(16px,2.4vw,32px);padding-bottom:8px">
@@ -271,7 +272,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </section>
 
 <section style="width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(80px,9vw,128px)">
-<a data-reveal data-cursor="ENTER" href="#/missions" style="position:relative;display:flex;flex-direction:column;gap:24px;overflow:hidden;border-radius:24px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);padding:clamp(28px,5vw,72px);text-decoration:none;transition-property:opacity,transform,box-shadow" style-hover="color:var(--on-accent,#0A0E1A);box-shadow:0 0 60px rgba(198,245,52,0.35)">
+<a data-reveal data-cursor="ENTER" href="/missions" style="position:relative;display:flex;flex-direction:column;gap:24px;overflow:hidden;border-radius:24px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);padding:clamp(28px,5vw,72px);text-decoration:none;transition-property:opacity,transform,box-shadow" style-hover="color:var(--on-accent,#0A0E1A);box-shadow:0 0 60px rgba(198,245,52,0.35)">
 <span aria-hidden="true" class="gr-anim" style="position:absolute;inset:-20px;background-image:radial-gradient(rgba(var(--deep-rgb,10,14,26),0.10) 2px,transparent 2.6px);background-size:22px 22px;animation:grDots 30s linear infinite"></span>
 <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500" data-scramble="1">STEP 03 / YOUR MOVE</span>
 <span style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(56px,10vw,168px);line-height:0.85;font-weight:700;letter-spacing:-0.045em">Enter the Lab</span><span style="width:clamp(72px,8vw,120px);height:clamp(72px,8vw,120px);border-radius:999px;background:var(--deep,#0A0E1A);color:var(--brand-ink,#C6F534);display:inline-flex;align-items:center;justify-content:center;flex:none">{{ ic.arrowXL }}</span></span>
@@ -285,7 +286,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div style="display:flex;flex-direction:column;gap:16px;max-width:900px">
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)">MISSIONS / 6 AVAILABLE</span>
 <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,4.6vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em;text-wrap:balance">Six missions. Pick the one that sounds like your kid.</h1>
-<p style="margin:0;font-size:18px;line-height:28px;color:var(--muted,#9FACC9)">Not sure? <a href="#/quiz" style="color:var(--brand-ink,#C6F534);font-weight:700">Take the two-minute scientist quiz</a> and we will point you at the right one.</p>
+<p style="margin:0;font-size:18px;line-height:28px;color:var(--muted,#9FACC9)">Not sure? <a href="/quiz" style="color:var(--brand-ink,#C6F534);font-weight:700">Take the two-minute scientist quiz</a> and we will point you at the right one.</p>
 </div>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:16px 24px;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--hair,#2C3757);border-bottom:1px solid var(--hair,#2C3757)">
 <nav aria-label="Filter by category" style="display:flex;flex-wrap:wrap;gap:8px">
@@ -299,6 +300,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </div>
 <p aria-live="polite" style="margin:-12px 0 0;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">{{ ms.summary }}</p>
 <sc-if value="{{ ms.hasList }}" hint-placeholder-val="{{ true }}">
+<h2 class="gr-sr">The missions</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
 <sc-for list="{{ ms.list }}" as="item" hint-placeholder-count="6"><div data-reveal style="transition-delay:{{ item.delay }}"><dc-import name="MissionCard" m="{{ item }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div></sc-for>
 </div>
@@ -308,12 +310,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <span style="width:72px;height:72px;border-radius:24px;border:1px solid var(--hair-strong,#6B7CAB);display:inline-flex;align-items:center;justify-content:center">{{ ic.flask }}</span>
 <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">Nothing in that category yet</h2>
 <p style="margin:0;max-width:520px;font-size:16px;line-height:26px;color:var(--muted,#9FACC9)">{{ ms.emptyLine }}</p>
-<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Show all missions</a><a href="#/register" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Register interest</a></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a href="/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Show all missions</a><a href="/register" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Register interest</a></div>
 </div>
 </sc-if>
 <div data-reveal style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;padding:clamp(28px,4vw,48px) clamp(24px,4vw,56px);border-radius:24px;background:rgba(var(--surface-rgb,18,24,41),0.5);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(var(--ink-rgb,242,245,255),0.09);margin-top:16px">
 <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em">Still scrolling? Let the quiz decide.</h2><p style="margin:0;font-size:16px;line-height:26px;color:var(--muted,#9FACC9)">Six questions, two minutes, one mission that fits.</p></div>
-<a href="#/quiz" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Start the quiz {{ ic.arrow }}</a>
+<a href="/quiz" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Start the quiz {{ ic.arrow }}</a>
 </div>
 </section>
 </sc-if>
@@ -323,7 +325,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--brand-ink,#C6F534)">THE LAB / OPENING IN PHASE TWO</span>
 <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(44px,6vw,76px);line-height:0.98;font-weight:700;letter-spacing:-0.025em;max-width:860px">The Lab is still bubbling.</h1>
 <p style="margin:0;max-width:640px;font-size:18px;line-height:28px;color:var(--muted,#9FACC9)">Experiments of the week, home challenges and achievement badges land here after the first missions run. For now, the best experiment on the site is the quiz.</p>
-<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Start the quiz</a><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Start the quiz</a><a href="/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
 </section>
 </sc-if>
 
@@ -337,7 +339,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
 <sc-for list="{{ team }}" as="p" hint-placeholder-count="3">
 <article data-reveal style="transition-delay:{{ p.delay }};border-radius:24px;background:rgba(var(--raised-rgb,27,35,64),0.52);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(var(--ink-rgb,242,245,255),0.11);overflow:hidden">
-<div role="img" aria-label="Photo placeholder" style="height:220px;background:{{ p.color }};color:var(--on-accent,#0A0E1A);padding:20px;display:flex;align-items:flex-end;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700">[PHOTO: {{ p.photo }}]</div>
+<div role="img" aria-label="Photo to come: {{ p.photo }}" style="height:220px;background:{{ p.color }};color:var(--on-accent,#0A0E1A);padding:20px;display:flex;align-items:flex-end;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700">[PHOTO: {{ p.photo }}]</div>
 <div style="padding:24px;display:flex;flex-direction:column;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">{{ p.role }}</span><h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">{{ p.name }}</h2><p style="margin:0;font-size:15px;line-height:24px;color:var(--muted,#9FACC9)">{{ p.line }}</p></div>
 </article>
 </sc-for>
@@ -350,19 +352,19 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div style="width:100%;max-width:1440px;margin:0 auto;padding:24px clamp(20px,4vw,48px) clamp(64px,8vw,112px);display:grid;grid-template-columns:{{ lay.missionCols }};gap:clamp(32px,4vw,56px);align-items:start">
 <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<a href="{{ mp.m.resultHref }}" style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;background:{{ mp.m.color }};color:var(--on-accent,#0A0E1A);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none">{{ mp.m.typeName }}</a>
+<a href="{{ mp.m.resultHref }}" style="display:inline-flex;align-items:center;min-height:40px;padding:6px 16px;border-radius:999px;background:{{ mp.m.color }};color:var(--on-accent,#0A0E1A);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none">{{ mp.m.typeName }}</a>
 <span style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;border:1px solid var(--hair-strong,#6B7CAB);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">{{ mp.m.cat }}</span>
 <span style="display:inline-flex;align-items:center;min-height:32px;padding:6px 14px;border-radius:999px;border:1px solid var(--hair-strong,#6B7CAB);color:var(--muted,#9FACC9);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em">{{ mp.m.code }}</span>
 </div>
 <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(46px,6.4vw,84px);line-height:0.95;font-weight:700;letter-spacing:-0.025em;text-wrap:balance">{{ mp.m.title }}</h1>
 <p style="margin:0;max-width:760px;font-size:clamp(17px,1.4vw,19px);line-height:1.55;color:var(--muted,#9FACC9)">{{ mp.m.para }}</p>
 <div style="display:grid;grid-template-columns:{{ lay.mediaCols }};grid-template-rows:{{ lay.mediaRows }};gap:16px;margin-top:8px">
-<div role="img" aria-label="Photo placeholder" style="grid-column:{{ lay.mediaBig }};grid-row:{{ lay.mediaBigRow }};position:relative;overflow:hidden;border-radius:24px;background:{{ mp.m.color }};color:var(--on-accent,#0A0E1A);padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;justify-content:space-between">
+<div role="img" aria-label="Photo to come: children mid-experiment in {{ mp.m.title }}" style="grid-column:{{ lay.mediaBig }};grid-row:{{ lay.mediaBigRow }};position:relative;overflow:hidden;border-radius:24px;background:{{ mp.m.color }};color:var(--on-accent,#0A0E1A);padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;justify-content:space-between">
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500">{{ mp.m.code }} / {{ mp.m.glyph }}</span>
 <span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,3vw,36px);line-height:1.1;font-weight:700;letter-spacing:-0.01em;max-width:440px">[PHOTO: children mid-experiment]</span>
 </div>
-<div role="img" aria-label="Photo placeholder" style="border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--muted,#9FACC9)">[PHOTO 2]</div>
-<div role="img" aria-label="Video placeholder" style="border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:8px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--muted,#9FACC9)"><span style="width:52px;height:52px;border-radius:999px;border:2px solid var(--ink,#F2F5FF);display:inline-flex;align-items:center;justify-content:center;color:var(--ink,#F2F5FF)">{{ ic.play }}</span>[VIDEO: 20s reel]</div>
+<div role="img" aria-label="Second photo of {{ mp.m.title }} to come" style="border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--muted,#9FACC9)">[PHOTO 2]</div>
+<div role="img" aria-label="Video to come: a 20-second reel of {{ mp.m.title }}" style="border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:8px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--muted,#9FACC9)"><span style="width:52px;height:52px;border-radius:999px;border:2px solid var(--ink,#F2F5FF);display:inline-flex;align-items:center;justify-content:center;color:var(--ink,#F2F5FF)">{{ ic.play }}</span>[VIDEO: 20s reel]</div>
 </div>
 
 <section style="display:flex;flex-direction:column;gap:24px;margin-top:40px">
@@ -394,7 +396,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </section>
 
 <section style="display:flex;flex-direction:column;gap:14px;margin-top:32px">
-<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">UPCOMING DATES / SHOWN IN EACH EVENT'S OWN TIMEZONE</span>
+<h2 data-reveal style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">UPCOMING DATES / SHOWN IN EACH EVENT'S OWN TIMEZONE</h2>
 <sc-if value="{{ mp.m.hasEvents }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ mp.m.evs }}" as="e" hint-placeholder-count="3">
 <div data-reveal style="display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;padding:20px 24px;border-radius:14px;background:{{ e.rowBg }};backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(var(--ink-rgb,242,245,255),0.10)">
@@ -451,6 +453,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 
 <sc-if value="{{ pg.quiz }}" hint-placeholder-val="{{ false }}">
 <section style="width:100%;max-width:1120px;margin:0 auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,48px) clamp(40px,5vw,64px);min-height:calc(100vh - 72px);display:flex;flex-direction:column">
+<h1 class="gr-sr">Scientist quiz: what kind of scientist is your child?</h1>
 <div style="display:flex;flex-direction:column;gap:12px">
 <div style="display:flex;justify-content:space-between;gap:12px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:16px;font-weight:500;letter-spacing:0.08em"><span aria-live="polite">QUESTION {{ qz.num }} OF 6</span><span style="color:var(--muted,#9FACC9)">{{ qz.pctText }}</span></div>
 <div role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="{{ qz.num }}" style="height:8px;border-radius:8px;background:var(--hair,#2C3757);overflow:hidden"><div style="height:100%;width:{{ qz.bar }};background:var(--brand,#C6F534);border-radius:8px;transition:width 400ms cubic-bezier(.2,.7,.2,1)"></div></div>
@@ -459,7 +462,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div ref="{{ qRef }}" style="display:flex;flex-direction:column">
 <sc-if value="{{ qz.playing }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(16px,3vw,40px);margin:clamp(28px,5vw,56px) 0 clamp(24px,4vw,40px)">
-<h1 style="margin:0;flex:1;min-width:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,4.2vw,52px);line-height:1.05;font-weight:700;letter-spacing:-0.02em;max-width:900px;text-wrap:balance">{{ qz.question }}</h1>
+<h2 style="margin:0;flex:1;min-width:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,4.2vw,52px);line-height:1.05;font-weight:700;letter-spacing:-0.02em;max-width:900px;text-wrap:balance">{{ qz.question }}</h2>
 <div style="flex:none;width:{{ lay.flaskW }};display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:100%">{{ qz.flask }}</div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;font-weight:500;color:var(--muted,#9FACC9);white-space:nowrap">YOUR MIX {{ qz.answered }}/6</span></div>
 </div>
 <div role="group" aria-label="Answers" style="display:grid;grid-template-columns:{{ lay.quizCols }};gap:16px">
@@ -477,7 +480,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div style="width:{{ lay.resultBlock }};height:{{ lay.resultBlock }};border-radius:24px;background:{{ qz.result.color }};color:var(--on-accent,#0A0E1A);display:flex;flex-direction:column;justify-content:space-between;padding:20px"><span style="font-family:'Space Grotesk',sans-serif;font-size:{{ lay.resultInitial }};line-height:0.9;font-weight:700">{{ qz.result.initial }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;text-transform:uppercase">{{ qz.result.name }}</span></div>
 <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">ALL 6 ANSWERED / RESULT READY</span>
-<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.4vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">{{ qz.result.sentence }}.</h1>
+<h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,4.4vw,56px);line-height:1.02;font-weight:700;letter-spacing:-0.02em">{{ qz.result.sentence }}.</h2>
 <p style="margin:0;font-size:18px;line-height:28px;color:var(--muted,#9FACC9)">{{ qz.result.tag }}</p>
 <div style="display:flex;flex-direction:column;gap:8px;padding:16px 0;border-top:1px solid var(--hair,#2C3757);border-bottom:1px solid var(--hair,#2C3757)">
 <sc-for list="{{ qz.tally }}" as="t" hint-placeholder-count="4">
@@ -562,10 +565,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </a>
 </section>
 <section style="display:flex;flex-direction:column;gap:20px">
-<span data-reveal style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">{{ rs.also }}</span>
+<h2 data-reveal style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">{{ rs.also }}</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(20px,2.4vw,32px)">
 <div data-reveal><dc-import name="MissionCard" m="{{ rs.second }}" mobile="{{ mob }}" hint-size="100%,440px"></dc-import></div>
-<a data-reveal href="#/missions" style="transition-delay:80ms;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:32px;border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);text-decoration:none;min-height:280px" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">
+<a data-reveal href="/missions" style="transition-delay:80ms;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:32px;border-radius:24px;border:2px dashed var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);text-decoration:none;min-height:280px" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">
 <span style="font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">Browse all six missions</span>
 <span style="font-size:16px;line-height:26px;color:var(--muted,#9FACC9)">Ignore us, pick your own.</span>
 <span style="color:var(--brand-ink,#C6F534)">{{ ic.arrow }}</span>
@@ -573,7 +576,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 </div>
 </section>
 <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-top:32px;border-top:1px solid var(--hair,#2C3757)">
-<a href="#/quiz" onClick="{{ qz.restart }}" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">{{ ic.refresh }} Take the quiz again</a>
+<a href="/quiz" onClick="{{ qz.restart }}" style="display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">{{ ic.refresh }} Take the quiz again</a>
 <p style="margin:0;font-size:14px;line-height:22px;color:var(--muted,#9FACC9)">Nothing about this result is stored. Refresh and it is gone.</p>
 </div>
 </div>
@@ -619,7 +622,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">CURRENCY</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ site.currency }}</dd>
 <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">TIMEZONE</dt><dd style="margin:0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ site.timezone }}</dd>
 </dl>
-<div style="padding-top:20px;border-top:1px solid var(--hair,#2C3757);display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Not this one?</span><div style="display:flex;gap:20px;flex-wrap:wrap"><a href="#/missions" style="min-height:44px;display:inline-flex;align-items:center;color:var(--brand-ink,#C6F534);font-weight:700;font-size:15px">Change mission</a><a href="#/quiz" style="min-height:44px;display:inline-flex;align-items:center;color:var(--brand-ink,#C6F534);font-weight:700;font-size:15px">Retake the quiz</a></div></div>
+<div style="padding-top:20px;border-top:1px solid var(--hair,#2C3757);display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Not this one?</span><div style="display:flex;gap:20px;flex-wrap:wrap"><a href="/missions" style="min-height:44px;display:inline-flex;align-items:center;color:var(--brand-ink,#C6F534);font-weight:700;font-size:15px">Change mission</a><a href="/quiz" style="min-height:44px;display:inline-flex;align-items:center;color:var(--brand-ink,#C6F534);font-weight:700;font-size:15px">Retake the quiz</a></div></div>
 </div>
 </sc-if>
 <sc-if value="{{ rg.none }}" hint-placeholder-val="{{ true }}">
@@ -627,7 +630,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--muted,#9FACC9)">YOUR MISSION / NOT PICKED</span>
 <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:30px;font-weight:600">No mission picked yet</h2>
 <p style="margin:0;font-size:15px;line-height:24px;color:var(--muted,#9FACC9)">That is fine. Tell us roughly what you want in the form and we will suggest one. Or let the quiz choose.</p>
-<div style="display:flex;gap:10px;flex-wrap:wrap"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:15px;font-weight:700;text-decoration:none">Browse missions</a><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:15px;font-weight:700;text-decoration:none">Take the quiz</a></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><a href="/missions" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:15px;font-weight:700;text-decoration:none">Browse missions</a><a href="/quiz" style="display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:15px;font-weight:700;text-decoration:none">Take the quiz</a></div>
 </div>
 </sc-if>
 <div style="display:flex;gap:14px;padding:20px;border-radius:14px;background:rgba(var(--surface-rgb,18,24,41),0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--hair-strong,#6B7CAB)"><span>{{ ic.info }}</span><p style="margin:0;font-size:14px;line-height:22px">Nothing is charged here. We confirm availability and the price with you by email.</p></div>
@@ -647,7 +650,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div><dt style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9);font-weight:500">CHILDREN</dt><dd style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500">{{ st.kids }}</dd></div>
 </dl>
 <div style="display:flex;gap:14px;padding:16px 20px;border-radius:14px;background:rgba(var(--surface-rgb,18,24,41),0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--hair-strong,#6B7CAB)"><span>{{ ic.info }}</span><p style="margin:0;font-size:14px;line-height:22px">Your details are saved and with the GROWND team now. Nothing is charged at this stage.</p></div>
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Browse more missions</a><a href="#/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">Take the scientist quiz</a></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none" style-hover="box-shadow:0 0 32px rgba(198,245,52,0.35);color:var(--on-accent,#0A0E1A)">Browse more missions</a><a href="/quiz" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none" style-hover="border-color:var(--ink,#F2F5FF);color:var(--ink,#F2F5FF)">Take the scientist quiz</a></div>
 </section>
 </div>
 </sc-if>
@@ -658,7 +661,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <span style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;font-weight:500;color:var(--brand-ink,#C6F534)">ERROR 404 / EXPERIMENT FAILED</span>
 <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(46px,6.4vw,84px);line-height:0.95;font-weight:700;letter-spacing:-0.025em">This one did not react.</h1>
 <p style="margin:0;max-width:600px;font-size:18px;line-height:28px;color:var(--muted,#9FACC9)">The page you wanted is not here. Good scientists write down what went wrong, so if a GROWND link sent you here, tell us and we will fix it.</p>
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="#/" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Back to the lab</a><a href="#/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><a href="/" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;background:var(--brand,#C6F534);color:var(--on-brand,#0A0E1A);font-size:16px;font-weight:700;text-decoration:none">Back to the lab</a><a href="/missions" style="display:inline-flex;align-items:center;min-height:52px;padding:12px 24px;border-radius:14px;border:2px solid var(--hair-strong,#6B7CAB);color:var(--ink,#F2F5FF);font-size:16px;font-weight:700;text-decoration:none">Browse all missions</a></div>
 </div>
 <div aria-label="Lab notebook" style="padding:32px;border-radius:24px;background:rgba(var(--surface-rgb,18,24,41),0.5);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(var(--ink-rgb,242,245,255),0.09);display:flex;flex-direction:column;gap:14px;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:22px;font-weight:500">
 <span style="font-size:13px;letter-spacing:0.08em;color:var(--muted,#9FACC9)">LAB NOTEBOOK / ENTRY 404</span>
@@ -678,15 +681,15 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <div style="width:100%;max-width:1440px;margin:0 auto;padding:clamp(48px,6vw,72px) clamp(20px,4vw,48px) 40px;display:flex;flex-direction:column;gap:32px">
 <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px;align-items:flex-start">
 <div style="display:flex;flex-direction:column;gap:12px;max-width:440px">
-<a href="#/" style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.04em;color:var(--brand-ink,#C6F534);text-decoration:none">GROWND</a>
+<a href="/" style="align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.04em;color:var(--brand-ink,#C6F534);text-decoration:none">GROWND</a>
 <p style="margin:0;font-size:14px;line-height:22px;color:var(--muted,#9FACC9)">Run by [TEAM LEAD] on science and experience, [TECH LEAD] on technology and [CONTENT LEAD] on content. Real experiments for ages 5 to 12.</p>
 </div>
 <nav aria-label="Footer" style="display:flex;flex-wrap:wrap;gap:0 24px">
-<a href="#/missions" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Missions</a>
-<a href="#/quiz" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Scientist quiz</a>
-<a href="#/lab" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">The Lab</a>
-<a href="#/who" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Who we are</a>
-<a href="#/register" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Register interest</a>
+<a href="/missions" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Missions</a>
+<a href="/quiz" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Scientist quiz</a>
+<a href="/lab" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">The Lab</a>
+<a href="/about" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Who we are</a>
+<a href="/register" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Register interest</a>
 </nav>
 </div>
 <p style="margin:0;padding-top:24px;border-top:1px solid var(--hair,#2C3757);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:var(--muted,#9FACC9)">CARD PAYMENTS ARE HANDLED BY STRIPE. GROWND NEVER SEES YOUR CARD DETAILS.</p>
@@ -772,24 +775,70 @@ class Component extends DCLogic {
   };
   rootRef = React.createRef(); mainRef = React.createRef(); qRef = React.createRef(); artRef = React.createRef(); menuRef = React.createRef(); resRef = React.createRef(); wipeRef = React.createRef(); curRef = React.createRef(); curRing = React.createRef(); curTxt = React.createRef(); tubeRef = React.createRef(); tubeTxt = React.createRef(); curDot = React.createRef(); curLabel = React.createRef(); tickRef = React.createRef(); blobRef = React.createRef();
   state = {
-    route: this.parse() || { name: 'home', q: {}, key: '#/' },
+    route: this.parse() || { name: 'home', q: {}, key: '/' },
     w: typeof window !== 'undefined' ? window.innerWidth : 1440, scrolled: false, menu: false,
     quiz: { step: 0, answers: [] },
     form: { name: '', email: '', phone: '', kids: '12', age: '', date: '', city: '', venue: 'Not decided yet', notes: '', consent: false },
     errors: {}, sending: false, live: null, sent: null, rig: { drops: [], round: 0 }, fine: false, flip: -1, deep: false, theme: 'dark', idName: '', idStatus: ''
   };
-  parse() { if (typeof window === 'undefined') return null; return this.parseHash(window.location.hash || ''); }
-  parseHash(h) {
-    if (h && !h.startsWith('#/')) return null;
-    const [path, qs] = h.slice(2).split('?');
-    const parts = (path || '').split('/').filter(Boolean), q = {};
-    (qs || '').split('&').forEach(p => { if (!p) return; const i = p.indexOf('='); q[i < 0 ? p : p.slice(0, i)] = decodeURIComponent(i < 0 ? '' : p.slice(i + 1)); });
-    let name = parts[0] || 'home'; const id = parts[1];
-    if (name === 'mission') { if (!this.M.find(m => m.slug === id)) name = 'notfound'; }
-    else if (name === 'result') { if (!this.typeBySlug(id)) name = 'notfound'; }
-    else if (name === 'register') { if (id && !this.M.find(m => m.slug === id)) name = 'notfound'; }
-    else if (!['home', 'missions', 'quiz', 'sent', 'lab', 'who'].includes(name)) name = 'notfound';
-    return { name, id, q, key: h || '#/' };
+  // Pages have real addresses on the live site (/missions/slime-chemistry), so search engines can index
+  // each one. Opened as a file in the design tool (address ends in .html), routes live after a # instead.
+  // Old #/ links keep working everywhere.
+  preview() { return typeof window !== 'undefined' && /\.html?$/i.test(window.location.pathname); }
+  parse() {
+    if (typeof window === 'undefined') return null;
+    const h = window.location.hash || '';
+    if (h.startsWith('#/')) return this.parsePath(h.slice(1), true);
+    return this.parsePath(this.preview() ? '/' : window.location.pathname + window.location.search);
+  }
+  path(name, id) { return { home: '/', missions: '/missions', mission: '/missions/' + id, quiz: '/quiz', result: '/quiz/' + id, register: id ? '/register/' + id : '/register', sent: '/thank-you', lab: '/lab', who: '/about' }[name]; }
+  parsePath(p, legacy) {
+    if (!p || p.charAt(0) !== '/') return null;
+    const [path, qs] = p.split('#')[0].split('?');
+    const parts = path.split('/').filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch (_) { return s; } }), q = {};
+    (qs || '').split('&').forEach(x => { if (!x) return; const i = x.indexOf('='); try { q[i < 0 ? x : x.slice(0, i)] = decodeURIComponent(i < 0 ? '' : x.slice(i + 1)); } catch (_) {} });
+    const names = { '': 'home', missions: 'missions', quiz: 'quiz', register: 'register', 'thank-you': 'sent', lab: 'lab', about: 'who' };
+    if (legacy) Object.assign(names, { mission: 'mission', result: 'result', sent: 'sent', who: 'who' });
+    let name = names[parts[0] || ''] || 'notfound'; const id = parts[1];
+    if (id && name === 'missions') name = 'mission';
+    else if (id && name === 'quiz') name = 'result';
+    if (parts.length > 2 || (id && !['mission', 'result', 'register'].includes(name))) name = 'notfound';
+    else if (name === 'mission' && !this.M.find(m => m.slug === id)) name = 'notfound';
+    else if (name === 'result' && !this.typeBySlug(id)) name = 'notfound';
+    else if (name === 'register' && id && !this.M.find(m => m.slug === id)) name = 'notfound';
+    return { name, id, q, key: name === 'notfound' ? path : this.path(name, id) + (qs ? '?' + qs : '') };
+  }
+  here() { return this.preview() ? (window.location.hash || '#/').slice(1) : window.location.pathname + window.location.search; }
+  isRoute(href) { const seg = (href.split(/[?#]/)[0].split('/')[1] || ''); return href.charAt(0) === '/' && href.charAt(1) !== '/' && ['', 'missions', 'quiz', 'register', 'thank-you', 'lab', 'about'].includes(seg); }
+  // Keeps the tab title, description and share tags in step with the page (the build writes them per page).
+  seo() {
+    const meta = typeof window !== 'undefined' && window.__GROWND_SEO; if (!meta || this.preview()) return;
+    const r = this.state.route, p = r.name === 'notfound' ? null : this.path(r.name, r.id), m = (p && meta.pages[p]) || meta.notFound;
+    document.title = m.title;
+    const set = (sel, val) => { const el = document.head.querySelector(sel); if (el) el.setAttribute(el.tagName === 'LINK' ? 'href' : 'content', val); };
+    set('meta[name="description"]', m.description); set('meta[name="robots"]', m.robots);
+    set('link[rel="canonical"]', meta.origin + (p || '/')); set('meta[property="og:url"]', meta.origin + (p || '/'));
+    set('meta[property="og:title"]', m.title); set('meta[name="twitter:title"]', m.title);
+    set('meta[property="og:description"]', m.description); set('meta[name="twitter:description"]', m.description);
+    set('meta[property="og:image"]', meta.origin + m.image); set('meta[name="twitter:image"]', meta.origin + m.image); set('meta[property="og:image:alt"]', m.imageAlt); set('meta[name="twitter:image:alt"]', m.imageAlt);
+  }
+  // Dated events of the open mission as schema.org Events, so search engines can show them with their dates.
+  ldEvents() {
+    if (typeof document === 'undefined') return;
+    const r = this.state.route, live = this.state.live, sig = r.key + (live ? '+' : '');
+    if (sig === this._ldSig) return; this._ldSig = sig;
+    const old = document.getElementById('gr-ld-events'), m = r.name === 'mission' && live ? this.M.find(x => x.slug === r.id) : null, lv = m && live.missions[m.slug];
+    const evs = lv ? lv.events.filter(e => e.date) : [];
+    if (!evs.length) { if (old) old.remove(); return; }
+    const meta = window.__GROWND_SEO || {}, origin = meta.origin || window.location.origin, page = '/missions/' + m.slug, cur = live.settings && live.settings.currency;
+    const img = meta.pages && meta.pages[page] ? origin + meta.pages[page].image : undefined;
+    const data = evs.map(e => ({ '@context': 'https://schema.org', '@type': 'Event', name: m.title + ' by GROWND', description: m.line, startDate: e.date, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', typicalAgeRange: m.ages, image: img, url: origin + page,
+      location: { '@type': 'Place', name: e.venue || 'Venue to be confirmed', address: { '@type': 'PostalAddress', addressLocality: e.city || undefined, addressCountry: 'IN' } },
+      organizer: { '@type': 'Organization', name: 'GROWND', url: origin + '/' },
+      offers: lv.price != null && cur ? { '@type': 'Offer', price: lv.price, priceCurrency: cur, availability: e.placesLeft === 0 ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock', url: origin + page } : undefined }));
+    const s = old || Object.assign(document.createElement('script'), { type: 'application/ld+json', id: 'gr-ld-events' });
+    s.textContent = JSON.stringify(data.length === 1 ? data[0] : data);
+    if (!old) document.head.appendChild(s);
   }
   typeBySlug(s) { return this.order.find(k => this.T[k].slug === s); }
   rm() { return !!this.props.reduceMotion || (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
@@ -797,7 +846,7 @@ class Component extends DCLogic {
     this._hc = () => { const r = this.parse(); if (r) this.setState({ route: r, menu: false }); };
     this._rs = () => this.setState({ w: window.innerWidth });
     this._sc = () => { const s = window.scrollY > 12; if (s !== this.state.scrolled) this.setState({ scrolled: s }); const dp = window.scrollY > 700; if (dp !== this.state.deep) this.setState({ deep: dp }); const d = document.documentElement; const p = Math.max(0, Math.min(1, window.scrollY / Math.max(1, d.scrollHeight - window.innerHeight))); if (this.tubeRef.current) this.tubeRef.current.style.height = (p * 100).toFixed(1) + '%'; if (this.tubeTxt.current) this.tubeTxt.current.textContent = String(Math.round(p * 100)).padStart(2, '0') + '%'; const y = window.scrollY, v = y - (this._ly || 0); this._ly = y; if (!this.rm()) { const tk = this.tickRef.current; if (tk) { const sk = Math.max(-10, Math.min(10, v * 0.35)); tk.style.transform = 'skewX(' + (-sk).toFixed(2) + 'deg)'; clearTimeout(this._skT); this._skT = setTimeout(() => { if (this.tickRef.current) this.tickRef.current.style.transform = 'skewX(0deg)'; }, 120); } const hb = this.blobRef.current; if (hb) hb.style.transform = 'translateY(' + (y * 0.35).toFixed(1) + 'px)'; } };
-    this._ps = () => { if (this._stack && this._stack.length) this._stack.pop(); const r = this.parse(); this.setState({ route: r || { name: 'home', q: {}, key: '#/' }, menu: false }); };
+    this._ps = () => { if (this._stack && this._stack.length) this._stack.pop(); const r = this.parse(); this.setState({ route: r || { name: 'home', q: {}, key: '/' }, menu: false }); };
     this._mm = e => {
       const x = e.clientX, y = e.clientY; this._tx = x; this._ty = y;
       if (this._cx == null) { this._cx = x; this._cy = y; }
@@ -828,6 +877,11 @@ class Component extends DCLogic {
     if (this.rootRef.current) this.rootRef.current.classList.add('gr-js');
     try { const th = localStorage.getItem('grownd-theme'); if (th === 'light') { document.documentElement.classList.add('gr-light'); this.setState({ theme: 'light' }); } } catch (_) {}
     this._pk = this.state.route.key; this._pq = this.state.quiz.step; this._pm = this.state.menu;
+    // The build adds a plain-HTML copy of each page for crawlers without JavaScript; the live page replaces it.
+    const plain = document.querySelector('.gr-static'); if (plain) plain.remove();
+    // An old #/ link on the live site: show the clean address instead.
+    if (!this.preview() && (window.location.hash || '').startsWith('#/')) { try { window.history.replaceState(null, '', this.state.route.name === 'notfound' ? '/' : this.state.route.key); } catch (_) {} }
+    this.seo();
     this.observe();
     this.loadLive();
     this._obsT = setInterval(() => this.observe(), 600);
@@ -840,7 +894,9 @@ class Component extends DCLogic {
     const r = this.state.route;
     const ps = { route: { key: this._pk }, quiz: { step: this._pq }, menu: this._pm };
     this._pk = r.key; this._pq = this.state.quiz.step; this._pm = this.state.menu;
+    this.ldEvents();
     if (ps.route.key !== undefined && ps.route.key !== r.key) {
+      this.seo();
       window.scrollTo(0, 0);
       if (this.wipeRef.current && this.wipeRef.current.animate && !this.rm()) this.wipeRef.current.animate([{ transform: 'translateY(0%)' }, { transform: 'translateY(0%)', offset: 0.25 }, { transform: 'translateY(-100%)' }], { duration: 560, easing: 'cubic-bezier(.7,0,.2,1)' });
       this.anim(this.mainRef, [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 0, transform: 'translateY(24px)', offset: 0.35 }, { opacity: 1, transform: 'none' }], 700);
@@ -918,10 +974,10 @@ class Component extends DCLogic {
   }
   goBack() {
     const r = this.state.route, st = this._stack || [];
-    const parent = { mission: '#/missions', result: '#/quiz', register: r.id ? '#/mission/' + r.id : '#/missions', sent: '#/', missions: '#/', quiz: '#/', lab: '#/', who: '#/', notfound: '#/' }[r.name] || '#/';
+    const parent = { mission: '/missions', result: '/quiz', register: r.id ? '/missions/' + r.id : '/missions', sent: '/', missions: '/', quiz: '/', lab: '/', who: '/', notfound: '/' }[r.name] || '/';
     const prev = st.length ? st.pop() : parent;
-    const nr = this.parseHash(prev) || { name: 'home', q: {}, key: '#/' };
-    try { window.history.replaceState(null, '', prev); } catch (_) {}
+    const nr = this.parsePath(prev) || { name: 'home', q: {}, key: '/' };
+    try { window.history.replaceState(null, '', this.preview() ? '#' + nr.key : nr.key); } catch (_) {}
     this.setState({ route: nr, menu: false });
   }
   crumbs() {
@@ -929,19 +985,19 @@ class Component extends DCLogic {
     const m = this.M.find(x => x.slug === r.id), tk = this.typeBySlug(r.id);
     const map = {
       missions: [L('MISSIONS')], quiz: [L('SCIENTIST QUIZ')], lab: [L('THE LAB')], who: [L('WHO WE ARE')], notfound: [L('ERROR 404')],
-      mission: [L('MISSIONS', '#/missions'), L(m ? m.title.toUpperCase() : 'MISSION')],
-      result: [L('SCIENTIST QUIZ', '#/quiz'), L('RESULT / ' + (tk ? this.T[tk].name.toUpperCase() : ''))],
-      register: m ? [L('MISSIONS', '#/missions'), L(m.title.toUpperCase(), '#/mission/' + m.slug), L('REGISTER INTEREST')] : [L('MISSIONS', '#/missions'), L('REGISTER INTEREST')],
-      sent: [L('REGISTER INTEREST', '#/register'), L('DETAILS RECEIVED')]
+      mission: [L('MISSIONS', '/missions'), L(m ? m.title.toUpperCase() : 'MISSION')],
+      result: [L('SCIENTIST QUIZ', '/quiz'), L('RESULT / ' + (tk ? this.T[tk].name.toUpperCase() : ''))],
+      register: m ? [L('MISSIONS', '/missions'), L(m.title.toUpperCase(), '/missions/' + m.slug), L('REGISTER INTEREST')] : [L('MISSIONS', '/missions'), L('REGISTER INTEREST')],
+      sent: [L('REGISTER INTEREST', '/register'), L('DETAILS RECEIVED')]
     };
-    const list = [L('LAB', '#/')].concat(map[r.name] || []);
+    const list = [L('LAB', '/')].concat(map[r.name] || []);
     const hasPrev = (this._stack || []).length > 0;
     return { show: r.name !== 'home', backLabel: hasPrev ? 'Back' : 'Up a level', items: list.map((c, i) => ({ label: c.label, href: c.href, link: !!c.href && i < list.length - 1, here: i === list.length - 1, sep: i ? 'inline' : 'none' })) };
   }
   nav(href) {
-    const r = this.parseHash(href); if (!r) return;
-    this._stack = this._stack || []; if (this.state.route.key !== href) this._stack.push(this.state.route.key);
-    try { if (window.location.hash !== href) window.history.pushState(null, '', href); } catch (_) { try { window.location.hash = href; } catch (__) {} }
+    const r = this.parsePath(href); if (!r) return;
+    this._stack = this._stack || []; if (this.state.route.key !== r.key) this._stack.push(this.state.route.key);
+    try { if (this.here() !== r.key) window.history.pushState(null, '', this.preview() ? '#' + r.key : r.key); } catch (_) { try { window.location.hash = r.key; } catch (__) {} }
     this.setState({ route: r, menu: false });
   }
   addSample(k) { const d = this.state.rig.drops; if (d.length >= 3) return; const drops = d.concat(k); this.setState({ rig: { drops, round: this.state.rig.round + (drops.length === 3 ? 1 : 0) } }); }
@@ -1033,8 +1089,8 @@ class Component extends DCLogic {
   }
   mission(m, i = 0) {
     const t = this.T[m.type];
-    const lv = this.state.live && this.state.live.missions[m.slug], cost = lv ? (lv.price == null ? '' : this.money(lv.price)) : '[PRICE]', pay = !!(lv && cost && this.state.live.payments && this.state.live.payments.enabled), events = (lv ? lv.events : m.events).map(e => this.ev(e, m.ages)).map(e => ({ ...e, bookHref: pay && e.id && e.dated && e.open ? '/checkout.html?event=' + e.id : '#/register/' + m.slug })), next = events.find(e => e.bookHref.charAt(0) === '/');
-    return { ...m, color: t.color, typeName: t.name, typeSlug: t.slug, code: 'MISSION ' + m.no, agesText: 'AGES ' + m.ages, lenText: m.mins + ' MIN', groupText: 'UP TO ' + m.cap, price: cost ? cost + ' / ' + m.unit : 'Price on request', priceText: cost || 'On request', perUnit: cost ? 'per ' + m.unit : '', bookHref: next ? next.bookHref : '#/register/' + m.slug, payNote: next ? 'Book a date and pay securely by card. Want us to come to you instead? Register interest.' : 'No payment at this stage. Register interest sends your details to the GROWND team.', worth: m.worth.map(w => (w === '[INSURANCE AND DBS DETAILS]' ? this.site().insurance : w)), href: '#/mission/' + m.slug, registerHref: '#/register/' + m.slug, delay: (i % 3) * 80 + 'ms', evs: events, ev: events.find(e => e.open) || events[0] || this.ev(['A', 'A', 0], m.ages), hasEvents: events.length > 0, noEvents: events.length === 0, resultHref: '#/result/' + t.slug,
+    const lv = this.state.live && this.state.live.missions[m.slug], cost = lv ? (lv.price == null ? '' : this.money(lv.price)) : '[PRICE]', pay = !!(lv && cost && this.state.live.payments && this.state.live.payments.enabled), events = (lv ? lv.events : m.events).map(e => this.ev(e, m.ages)).map(e => ({ ...e, bookHref: pay && e.id && e.dated && e.open ? '/checkout?event=' + e.id : '/register/' + m.slug })), next = events.find(e => e.bookHref.indexOf('/checkout') === 0);
+    return { ...m, color: t.color, typeName: t.name, typeSlug: t.slug, code: 'MISSION ' + m.no, agesText: 'AGES ' + m.ages, lenText: m.mins + ' MIN', groupText: 'UP TO ' + m.cap, price: cost ? cost + ' / ' + m.unit : 'Price on request', priceText: cost || 'On request', perUnit: cost ? 'per ' + m.unit : '', bookHref: next ? next.bookHref : '/register/' + m.slug, payNote: next ? 'Book a date and pay securely by card. Want us to come to you instead? Register interest.' : 'No payment at this stage. Register interest sends your details to the GROWND team.', worth: m.worth.map(w => (w === '[INSURANCE AND DBS DETAILS]' ? this.site().insurance : w)), href: '/missions/' + m.slug, registerHref: '/register/' + m.slug, delay: (i % 3) * 80 + 'ms', evs: events, ev: events.find(e => e.open) || events[0] || this.ev(['A', 'A', 0], m.ages), hasEvents: events.length > 0, noEvents: events.length === 0, resultHref: '/quiz/' + t.slug,
       nextText: events.length ? (events.find(e => e.open) || events[0]).when : 'No dates yet',
       placesText: events.length ? (events.find(e => e.open) || events[0]).pill : 'Register interest', placesBg: events.length ? (events.find(e => e.open) || events[0]).pillBg : 'var(--muted,#9FACC9)' };
   }
@@ -1067,7 +1123,7 @@ class Component extends DCLogic {
   }
   ticker() {
     const h = React.createElement;
-    const row = (p) => h('div', { style: { display: 'flex', flex: 'none' }, 'aria-hidden': p ? 'true' : undefined }, ...this.M.map(m => { const t = this.T[m.type]; return h('a', { key: m.id, href: '#/mission/' + m.slug, tabIndex: p ? -1 : undefined, style: { display: 'inline-flex', alignItems: 'center', gap: 14, paddingRight: 56, color: 'var(--ink,#F2F5FF)', textDecoration: 'none', whiteSpace: 'nowrap' } }, h('span', { style: { width: 14, height: 14, borderRadius: 4, background: t.color } }), h('span', null, m.title.toUpperCase()), h('span', { style: { color: 'var(--muted,#9FACC9)' } }, '/ ' + t.name.toUpperCase() + ' / AGES ' + m.ages)); }));
+    const row = (p) => h('div', { style: { display: 'flex', flex: 'none' }, 'aria-hidden': p ? 'true' : undefined }, ...this.M.map(m => { const t = this.T[m.type]; return h('a', { key: m.id, href: '/missions/' + m.slug, tabIndex: p ? -1 : undefined, style: { display: 'inline-flex', alignItems: 'center', gap: 14, paddingRight: 56, color: 'var(--ink,#F2F5FF)', textDecoration: 'none', whiteSpace: 'nowrap' } }, h('span', { style: { width: 14, height: 14, borderRadius: 4, background: t.color } }), h('span', null, m.title.toUpperCase()), h('span', { style: { color: 'var(--muted,#9FACC9)' } }, '/ ' + t.name.toUpperCase() + ' / AGES ' + m.ages)); }));
     return h('div', { className: 'gr-anim gr-ticker', style: { display: 'flex', width: 'max-content', animation: this.rm() ? 'none' : 'grTicker 50s linear infinite' } }, row(false), row(true));
   }
   burst(color, key) {
@@ -1085,7 +1141,7 @@ class Component extends DCLogic {
     if (Object.keys(er).length) { this.setState({ errors: er }); setTimeout(() => { const el = document.querySelector('[aria-invalid="true"]'); if (el) el.focus(); }, 0); return; }
     if (this.state.sending) return;
     const m = this.M.find(x => x.slug === this.state.route.id);
-    const done = () => { this.setState({ sending: false, sent: { mission: m ? m.title.toUpperCase() : 'NOT PICKED YET', typeName: m ? this.T[m.type].name.toUpperCase() : 'ANY', color: m ? this.T[m.type].color : 'var(--hair-strong,#6B7CAB)', kids: f.kids || '-', hasType: !!m }, form: { ...this.state.form, name: '', email: '', phone: '', notes: '', consent: false } }); this.go('#/sent'); };
+    const done = () => { this.setState({ sending: false, sent: { mission: m ? m.title.toUpperCase() : 'NOT PICKED YET', typeName: m ? this.T[m.type].name.toUpperCase() : 'ANY', color: m ? this.T[m.type].color : 'var(--hair-strong,#6B7CAB)', kids: f.kids || '-', hasType: !!m }, form: { ...this.state.form, name: '', email: '', phone: '', notes: '', consent: false } }); this.go('/thank-you'); };
     const fail = msg => this.setState({ sending: false, errors: { server: msg } });
     this.setState({ sending: true, errors: {} });
     fetch('/api/registrations', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ mission: m ? m.slug : null, name: f.name, email: f.email, phone: f.phone, kids: f.kids, age: f.age, date: f.date, city: f.city, venue: f.venue, notes: f.notes, consent: f.consent }) })
@@ -1104,9 +1160,9 @@ class Component extends DCLogic {
     ic.flaskS = this.ico('flask', 18, 2.4); ic.arrowUp = this.ico('arrow', 22, 2.2); ic.arrowUp = React.createElement('span', { style: { display: 'inline-flex', transform: 'rotate(-90deg)' } }, ic.arrowUp); ic.arrowXL = this.ico('arrow', 44, 2.2);
     const pg = {}; ['home', 'missions', 'mission', 'quiz', 'result', 'register', 'sent', 'notfound', 'lab', 'who'].forEach(n => { pg[n] = r.name === n; });
     const actMap = { missions: ['missions', 'mission', 'register'], quiz: ['quiz', 'result'], lab: ['lab'], who: ['who'] };
-    const nav = [['missions', 'Missions', '#/missions'], ['quiz', 'Scientist quiz', '#/quiz'], ['lab', 'The Lab', '#/lab'], ['who', 'Who we are', '#/who']].map(([k, l, href]) => { const on = actMap[k].includes(r.name); return { label: l, href, num: '0' + (['missions', 'quiz', 'lab', 'who'].indexOf(k) + 1), current: on ? 'page' : undefined, color: on ? 'var(--ink,#F2F5FF)' : 'var(--muted,#9FACC9)', bg: on ? 'var(--raised,#1B2340)' : 'transparent', dot: on ? 'var(--brand,#C6F534)' : 'transparent', bar: 'none' }; });
+    const nav = [['missions', 'Missions', '/missions'], ['quiz', 'Scientist quiz', '/quiz'], ['lab', 'The Lab', '/lab'], ['who', 'Who we are', '/about']].map(([k, l, href]) => { const on = actMap[k].includes(r.name); return { label: l, href, num: '0' + (['missions', 'quiz', 'lab', 'who'].indexOf(k) + 1), current: on ? 'page' : undefined, color: on ? 'var(--ink,#F2F5FF)' : 'var(--muted,#9FACC9)', bg: on ? 'var(--raised,#1B2340)' : 'transparent', dot: on ? 'var(--brand,#C6F534)' : 'transparent', bar: 'none' }; });
     const lay = {
-      headerBg: this.state.scrolled || this.state.menu ? 'rgba(var(--surface-rgb,18,24,41),0.86)' : 'rgba(var(--surface-rgb,18,24,41),0.45)', headerBorder: this.state.scrolled || this.state.menu ? 'var(--hair,#2C3757)' : 'rgba(44,55,87,0.6)', theme: (() => { if (r.name === 'mission') { const m = this.M.find(x => x.slug === r.id); return m ? this.T[m.type].color : 'var(--brand,#C6F534)'; } if (r.name === 'result') { const k = this.typeBySlug(r.id); return k ? this.T[k].color : 'var(--brand,#C6F534)'; } if (r.name === 'register' && r.id) { const m = this.M.find(x => x.slug === r.id); return m ? this.T[m.type].color : 'var(--brand,#C6F534)'; } if (r.name === 'sent') return 'var(--success,#35D07F)'; return 'var(--brand,#C6F534)'; })(), flaskW: mob ? '84px' : '156px', idCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,580px)', featCols: mob ? 'none' : 'repeat(auto-fit,minmax(min(100%,340px),1fr))', featFlow: mob ? 'column' : 'row', featAuto: mob ? '84%' : 'auto', featOverflow: mob ? 'auto' : 'visible', swipeDisplay: mob ? 'block' : 'none', bookBar: nar && r.name === 'mission', topRight: nar ? '16px' : '56px', topBottom: nar && r.name === 'mission' ? '104px' : '24px', headerShadow: this.state.scrolled ? '0 12px 32px rgba(var(--shadow-rgb,4,7,16),0.5)' : 'none', cursorDisplay: this.state.fine && !this.rm() ? 'block' : 'none', tubeDisplay: nar ? 'none' : 'flex', ticketCols: mob ? 'minmax(0,1fr)' : '300px minmax(0,1fr)', notchDisplay: mob ? 'none' : 'block',
+      headerBg: this.state.scrolled || this.state.menu ? 'rgba(var(--surface-rgb,18,24,41),0.86)' : 'rgba(var(--surface-rgb,18,24,41),0.45)', headerBorder: this.state.scrolled || this.state.menu ? 'var(--hair,#2C3757)' : 'rgba(44,55,87,0.6)', theme: (() => { if (r.name === 'mission') { const m = this.M.find(x => x.slug === r.id); return m ? this.T[m.type].color : 'var(--brand,#C6F534)'; } if (r.name === 'result') { const k = this.typeBySlug(r.id); return k ? this.T[k].color : 'var(--brand,#C6F534)'; } if (r.name === 'register' && r.id) { const m = this.M.find(x => x.slug === r.id); return m ? this.T[m.type].color : 'var(--brand,#C6F534)'; } if (r.name === 'sent') return 'var(--success,#35D07F)'; return 'var(--brand,#C6F534)'; })(), flaskW: mob ? '84px' : '156px', idCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,580px)', featCols: mob ? 'none' : 'repeat(auto-fit,minmax(min(100%,340px),1fr))', featFlow: mob ? 'column' : 'row', featAuto: mob ? '84%' : 'auto', featOverflow: mob ? 'auto' : 'visible', swipeDisplay: mob ? 'block' : 'none', bookBar: nar && r.name === 'mission', topRight: nar ? '16px' : '56px', topBottom: nar && r.name === 'mission' ? '104px' : '24px', headerShadow: this.state.scrolled ? '0 12px 32px rgba(var(--shadow-rgb,4,7,16),0.5)' : 'none', cursorDisplay: this.state.fine && !this.rm() ? 'block' : 'none', tubeDisplay: nar ? 'none' : 'flex', ticketCols: mob ? 'minmax(0,1fr)' : '300px minmax(0,1fr)', notchDisplay: mob ? 'none' : 'block', ticketRadius: mob ? '24px 24px 0 0' : '24px 0 0 24px', ticketLeft: mob ? '0' : '2px dashed var(--hair,#2C3757)', ticketTop: mob ? '2px dashed var(--hair,#2C3757)' : '0',
       navDisplay: nar ? 'none' : 'flex', burgerDisplay: nar ? 'inline-flex' : 'none', ctaDisplay: nar ? 'none' : 'inline-flex', floatDisplay: mob ? 'none' : 'inline-flex',
       heroCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1.05fr) minmax(0,1fr)', bandCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,460px)',
       missionCols: nar ? 'minmax(0,1fr)' : 'minmax(0,1fr) 380px', bookPos: nar ? 'static' : 'sticky', mediaCols: mob ? '1fr 1fr' : '2fr 1fr', mediaBig: mob ? 'span 2' : 'auto', mediaRows: mob ? '240px 120px' : '210px 210px', mediaBigRow: mob ? 'auto' : 'span 2',
@@ -1123,8 +1179,8 @@ class Component extends DCLogic {
     const list = all.filter(m => (!catName || m.cat === catName) && (!cityq || m.evs.some(e => e.ck === cityq))).map((m, i) => ({ ...m, delay: (i % 3) * 80 + 'ms' }));
     const cityPart = cityq ? '&city=' + cityq : '';
     const ms = {
-      chips: [['All missions', ''], ...this.cats.map(c => [c[0], catKey(c[0])])].map(([name, k]) => { const on = k === (catName ? cq : ''); return { name, href: '#/missions' + (k || cityq ? '?' + (k ? 'cat=' + k : '') + (k && cityq ? '&' : '') + (cityq ? 'city=' + cityq : '') : ''), current: on ? 'page' : undefined, bg: on ? 'var(--brand,#C6F534)' : 'transparent', fg: on ? 'var(--on-brand,#0A0E1A)' : 'var(--ink,#F2F5FF)', border: on ? 'var(--brand,#C6F534)' : 'var(--hair-strong,#6B7CAB)' }; }),
-      city: cityq, cityOptions: Object.keys(cmap).map(k => React.createElement('option', { key: k, value: k }, cmap[k])), onCity: e => { const v = e.target.value; const parts = []; if (catName) parts.push('cat=' + cq); if (v) parts.push('city=' + v); this.go('#/missions' + (parts.length ? '?' + parts.join('&') : '')); },
+      chips: [['All missions', ''], ...this.cats.map(c => [c[0], catKey(c[0])])].map(([name, k]) => { const on = k === (catName ? cq : ''); return { name, href: '/missions' + (k || cityq ? '?' + (k ? 'cat=' + k : '') + (k && cityq ? '&' : '') + (cityq ? 'city=' + cityq : '') : ''), current: on ? 'page' : undefined, bg: on ? 'var(--brand,#C6F534)' : 'transparent', fg: on ? 'var(--on-brand,#0A0E1A)' : 'var(--ink,#F2F5FF)', border: on ? 'var(--brand,#C6F534)' : 'var(--hair-strong,#6B7CAB)' }; }),
+      city: cityq, cityOptions: Object.keys(cmap).map(k => React.createElement('option', { key: k, value: k }, cmap[k])), onCity: e => { const v = e.target.value; const parts = []; if (catName) parts.push('cat=' + cq); if (v) parts.push('city=' + v); this.go('/missions' + (parts.length ? '?' + parts.join('&') : '')); },
       list, hasList: list.length > 0, empty: list.length === 0,
       summary: 'SHOWING ' + list.length + ' OF 6' + (catName ? ' / ' + catName.toUpperCase() : '') + (cityq ? ' / ' + cmap[cityq].toUpperCase() : ' / ALL CITIES'),
       emptyLine: (catName ? 'No ' + catName + ' missions' : 'No missions') + (cityq ? ' are scheduled in ' + cmap[cityq] + ' yet.' : ' are published yet.') + ' Try another city, or register interest and we will tell you the moment one lands.'
@@ -1142,7 +1198,7 @@ class Component extends DCLogic {
       flask: this.quizFlask(), answered: String(Math.min(q.answers.filter(v => v != null).length, 6)), backOpacity: q.step > 0 ? 1 : 0.4, backDisabled: q.step > 0 ? 'false' : 'true',
       back: () => { if (this.state.quiz.step > 0 && !this._lock) this.setState(s => ({ quiz: { ...s.quiz, step: s.quiz.step - 1 } })); },
       restart: () => { clearTimeout(this._t); this._lock = false; this.setState({ quiz: { step: 0, answers: [] } }); },
-      result: { name: WT.name, color: WT.color, initial: WT.initial, tag: WT.tag, sentence: 'You are ' + WT.an + ' ' + WT.name, href: '#/result/' + WT.slug },
+      result: { name: WT.name, color: WT.color, initial: WT.initial, tag: WT.tag, sentence: 'You are ' + WT.an + ' ' + WT.name, href: '/quiz/' + WT.slug },
       tally: this.order.map((t, i) => ({ label: this.T[t].name.toUpperCase(), n: String(win.counts[i]), color: this.T[t].color, width: (win.counts[i] / 6 * 100) + '%' }))
     };
     // result
@@ -1162,12 +1218,12 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState(s => ({ menu: !s.menu })), menuLabel: this.state.menu ? 'Close menu' : 'Open menu', menuExpanded: this.state.menu ? 'true' : 'false', menuIcon: this.state.menu ? ic.close : ic.menu,
       skip: e => { e.preventDefault(); if (this.mainRef.current) this.mainRef.current.focus(); },
       rootRef: this.rootRef, wipeRef: this.wipeRef, curRef: this.curRef, curRing: this.curRing, curTxt: this.curTxt, tubeRef: this.tubeRef, tubeTxt: this.tubeTxt, curDot: this.curDot, curLabel: this.curLabel, tickRef: this.tickRef, blobRef: this.blobRef,
-      onRootClick: e => { if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return; const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return; const href = a.getAttribute('href'); if (href && href.indexOf('#/') === 0) { e.preventDefault(); this.nav(href); } },
+      onRootClick: e => { if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a || a.target || a.hasAttribute('download')) return; let href = a.getAttribute('href') || ''; if (href.indexOf('#/') === 0) href = href.slice(1); if (this.isRoute(href)) { e.preventDefault(); this.nav(href); } },
       mainRef: this.mainRef, qRef: this.qRef, artRef: this.artRef, menuRef: this.menuRef, resRef: this.resRef,
       heroMove: e => { if (this.rm() || !this.artRef.current) return; const b = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - b.left) / b.width - 0.5, y = (e.clientY - b.top) / b.height - 0.5; this.artRef.current.style.transform = 'translate3d(' + (x * -14) + 'px,' + (y * -10) + 'px,0) rotate(' + (x * -2) + 'deg)'; },
       heroLeave: () => { if (this.artRef.current) this.artRef.current.style.transform = 'none'; },
       lab: this.lab(), particles: this.particles(), ticker: this.bigTicker(), rig: this.rigVals(),
-      cats: this.cats.map(([name, line, icon], i) => { const n = all.filter(m => m.cat === name).length; return { name, line, sym: ['Bd', 'Pc', 'Ws', 'Se', 'Cd', 'Sv'][i], fdelay: (i * 0.45) + 's', num: '0' + (i + 1), icon: this.ico(icon, 26), href: '#/missions?cat=' + catKey(name), delay: i * 60 + 'ms', count: n ? n + (n > 1 ? ' MISSIONS' : ' MISSION') : 'ASK US' }; }),
+      cats: this.cats.map(([name, line, icon], i) => { const n = all.filter(m => m.cat === name).length; return { name, line, sym: ['Bd', 'Pc', 'Ws', 'Se', 'Cd', 'Sv'][i], fdelay: (i * 0.45) + 's', num: '0' + (i + 1), icon: this.ico(icon, 26), href: '/missions?cat=' + catKey(name), delay: i * 60 + 'ms', count: n ? n + (n > 1 ? ' MISSIONS' : ' MISSION') : 'ASK US' }; }),
       types: this.order.map((t, i) => ({ ...this.T[t], num: '0' + (i + 1), fdelay: (i * 0.7) + 's', rot: this.state.flip === i ? 'rotateY(180deg)' : 'rotateY(0deg)', enter: () => this.setState({ flip: i }), leave: () => this.setState(s => (s.flip === i ? { flip: -1 } : null)), tilt: ['-3deg', '3deg', '3deg', '-3deg'][i], aria: this.T[t].name + ': start the quiz' })),
       featured: ['m01', 'm02', 'm04'].map((id, i) => ({ ...byId(id), delay: i * 80 + 'ms' })), next: byId('m02'),
       team: [['SCIENCE AND EXPERIENCE', '[TEAM LEAD]', 'Plans every mission and runs most of them. Responsible for the ceiling.', 'science lead mid-demo', 'var(--success,#35D07F)'], ['TECHNOLOGY', '[TECH LEAD]', 'Builds the coding missions and this website. Owns the pressure launcher.', 'tech lead with laptops', 'var(--phys,#38BDF8)'], ['CONTENT', '[CONTENT LEAD]', 'Films the reactions, writes the recipe cards, runs the Instagram challenges.', 'content lead filming', 'var(--chem,#FF5CA8)']].map(([role, name, line, photo, color], i) => ({ role, name, line, photo, color, delay: i * 80 + 'ms' })),

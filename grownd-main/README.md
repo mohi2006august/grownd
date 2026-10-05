@@ -3,10 +3,12 @@
 The GROWND science-experience website, its booking and payments API, and the admin dashboard the team uses to manage registrations, payments, prices and dates.
 
 ```
-frontend/          static files, served from a CDN
-  site/            public website (index.html) and the booking/payment page (checkout.html)
+frontend/          the website; `npm run build` turns it into dist/, served from a CDN
+  design/          the site's source: every page, its logic and the mission data
+  seo.mjs          titles, descriptions, share images and structured data for each page
+  build.mjs        builds dist/: one HTML file per page, hashed assets, sitemap, robots.txt
+  site/            the booking/payment page (checkout.html)
   admin/           admin dashboard (plain HTML/CSS/JS, Supabase Auth sign-in)
-  design/          editable design sources the site is exported from
 backend/           API: Node + Fastify, stateless, talks to Supabase Postgres and Stripe
   src/
     routes/        HTTP layer: public, payments, admin, cron, health. Validation and status codes only
@@ -21,11 +23,11 @@ backend/           API: Node + Fastify, stateless, talks to Supabase Postgres an
 database/
   migrations/      SQL schema for Supabase, applied in order
 api/index.js       Vercel Function: runs the backend for /api/* on Vercel
-vercel.json        Vercel routing: CDN for frontend/, the function for /api/*, daily cron
+vercel.json        Vercel: builds the site, serves dist/ from the CDN, the function for /api/*, daily cron
 package.json       npm workspace root: `npm install` here installs the backend too
 ```
 
-Each folder has its own README with the details. **New here? Start with [SETUP.md](SETUP.md).**
+Each folder has its own README with the details. **New here? Start with [SETUP.md](SETUP.md).** Search engine setup, Search Console and the backlink plan are in [SEO.md](SEO.md).
 
 ## How it fits together
 
@@ -45,7 +47,7 @@ flowchart LR
   API1 & API2 & APIn -. shared rate limits, optional .-> R[(Redis)]
 ```
 
-- **Visitors** load static pages from a CDN. The site calls `GET /api/content` (prices, dates, site details), `POST /api/registrations` (register interest) and the checkout endpoints.
+- **Visitors** load static pages from a CDN: one HTML file per page (`/missions/slime-chemistry`, `/quiz`, ...) with its own title, description and share image, so search engines and link previews see every page. The site calls `GET /api/content` (prices, dates, site details), `POST /api/registrations` (register interest) and the checkout endpoints.
 - **Payments** happen on Stripe's hosted Checkout page, so card details never touch GROWND's servers (the lightest PCI compliance level, SAQ A). Stripe tells the API what happened through signed webhooks.
 - **Admins** sign in with Supabase Auth in the dashboard. The API verifies the token on every request and requires `app_metadata.role = "admin"`.
 - **The database** is only reachable through the API. Row Level Security blocks Supabase's auto-generated REST API for these tables.
@@ -116,23 +118,23 @@ You need Node 22+ and a Supabase project (the free tier is fine). Stripe is opti
 npm install
 npm run check                            # checks backend/.env and every service, says what to fix
 npm run db:migrate                       # creates the tables
-npm run create-admin -- you@example.com  # your dashboard login
-npm run dev
+npm run create-admin -- you@example.com --keep  # makes a Supabase user an admin (SETUP.md, step 6)
+npm run dev                              # builds the site, then starts the API
 ```
 
-Then open http://localhost:4000 for the site and http://localhost:4000/admin/ for the dashboard.
+Then open http://localhost:4000 for the site and http://localhost:4000/admin/ for the dashboard. After editing anything in `frontend/`, run `npm run build` and refresh; `npm run check:site` checks the build for SEO problems.
 
 ## Deploy
 
 **On Vercel** (the setup used for grownd-beige.vercel.app): set the project's Root Directory to this folder, add the environment variables and deploy. [SETUP.md](SETUP.md), Part 3, lists every setting.
 
-`vercel.json` makes Vercel's CDN serve `frontend/`, and one Vercel Function (`api/index.js`) run the backend for `/api/*` with Fluid compute. A daily Vercel Cron job calls `/api/cron/reconcile`, because serverless has no long-running timer. The API's caching headers let the CDN answer `/api/content` too. Set `REDIS_URL` (Upstash) so rate limits are shared across instances.
+`vercel.json` makes Vercel run `npm run build` and serve `dist/` from its CDN with clean addresses, and one Vercel Function (`api/index.js`) run the backend for `/api/*` with Fluid compute. A daily Vercel Cron job calls `/api/cron/reconcile`, because serverless has no long-running timer. The API's caching headers let the CDN answer `/api/content` too. Set `REDIS_URL` (Upstash) so rate limits are shared across instances.
 
 **On a container host** (Render, Railway, Fly.io, Cloud Run, ECS):
 1. Build from this folder: `docker build -f backend/Dockerfile .`
 2. Set the variables from `backend/.env.example`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
 3. Use `/readyz` as the health check, autoscale on CPU, and add `REDIS_URL` once you run more than one instance.
-4. Host `frontend/` on a CDN that forwards `/api/*` to the API (see `frontend/README.md`).
+4. Run `npm run build` (with `SITE_URL` set to your address) and host `dist/` on a CDN that forwards `/api/*` to the API (see `frontend/README.md`).
 
 Either way, run `npm run db:migrate` against Supabase from your computer, and point the Stripe webhook at `https://YOUR-SITE/api/payments/webhook` (SETUP.md, Part 4).
 

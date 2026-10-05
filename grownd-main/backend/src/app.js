@@ -4,8 +4,8 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import underPressure from '@fastify/under-pressure';
+import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import v8 from 'node:v8';
 import { config } from './config.js';
 import { DB_UNAVAILABLE, sql } from './db.js';
@@ -16,7 +16,25 @@ import healthRoutes from './routes/health.js';
 import paymentRoutes from './routes/payments.js';
 import publicRoutes from './routes/public.js';
 
-const FRONTEND = fileURLToPath(new URL('../../frontend/', import.meta.url));
+// The built site (`npm run build` writes dist/ in the app folder), served locally only. Found from the
+// working directory rather than this file's location, so Vercel's bundler leaves it out of the API function.
+const SITE_BUILD = config.serveFrontend ? findSiteBuild() : null;
+function findSiteBuild() {
+  for (let dir = process.cwd(), i = 0; i < 3; i++, dir = path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, 'dist', '404.html'))) return path.join(dir, 'dist') + path.sep;
+  }
+  return null;
+}
+
+function pageUrl(url) {
+  const [pathname, query] = url.split(/\?(.*)/s);
+  if (pathname.length < 2 || pathname.endsWith('/') || pathname.startsWith('/api/') || path.extname(pathname)) return url;
+  let name;
+  try { name = decodeURIComponent(pathname); } catch { return url; }
+  const file = path.join(SITE_BUILD, `${name}.html`);
+  if (!file.startsWith(SITE_BUILD) || !fs.existsSync(file)) return url;
+  return `${pathname}.html${query !== undefined ? `?${query}` : ''}`;
+}
 
 export async function buildApp() {
   const app = Fastify({
@@ -27,7 +45,9 @@ export async function buildApp() {
     bodyLimit: 16 * 1024,
     requestTimeout: 15_000,
     keepAliveTimeout: 72_000, // longer than common load balancer idle timeouts (60s), avoiding stray 502s
-    return503OnClosing: true
+    return503OnClosing: true,
+    // Locally, /missions is the page missions.html even though a missions/ folder exists (as on Vercel).
+    ...(SITE_BUILD && { rewriteUrl: req => pageUrl(req.url) })
   });
 
   // ---- protection ----
@@ -104,7 +124,12 @@ export async function buildApp() {
     return reply.code(status).send({ error: message });
   });
 
-  app.setNotFoundHandler((request, reply) => reply.code(404).send({ error: 'Not found.' }));
+  app.setNotFoundHandler((request, reply) => {
+    if (SITE_BUILD && request.method === 'GET' && !request.url.startsWith('/api/')) {
+      return reply.code(404).type('text/html; charset=utf-8').send(fs.createReadStream(path.join(SITE_BUILD, '404.html')));
+    }
+    return reply.code(404).send({ error: 'Not found.' });
+  });
 
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
@@ -119,10 +144,11 @@ export async function buildApp() {
   await app.register(paymentRoutes);
   await app.register(adminRoutes);
 
-  // Local convenience: serve the site and dashboard from the same origin as the API.
+  // Local convenience: serve the built site (dist/, from `npm run build`) and the dashboard from the
+  // same origin as the API, with the same clean addresses as Vercel (/missions/x -> missions/x.html).
   if (config.serveFrontend) {
-    await app.register(fastifyStatic, { root: path.join(FRONTEND, 'site'), prefix: '/' });
-    await app.register(fastifyStatic, { root: path.join(FRONTEND, 'admin'), prefix: '/admin/', decorateReply: false, redirect: true });
+    if (SITE_BUILD) await app.register(fastifyStatic, { root: SITE_BUILD, prefix: '/', extensions: ['html'], redirect: true });
+    else app.log.warn('No site build found in dist/. Run "npm run build" (npm run dev does it for you).');
   }
 
   return app;

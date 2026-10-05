@@ -102,7 +102,7 @@ if (supabaseUp) {
 }
 
 if (!set('SUPABASE_SERVICE_ROLE_KEY')) {
-  note('SUPABASE_SERVICE_ROLE_KEY is empty. Only "npm run create-admin" needs it.', 'Supabase -> Project Settings -> API Keys -> the secret key (sb_secret_...), or the legacy "service_role" key.');
+  note('SUPABASE_SERVICE_ROLE_KEY is empty. That is fine: add admins in Supabase (Authentication -> Users -> Add user), then run "npm run create-admin -- their@email --keep".', 'Only needed to create logins from this computer: Supabase -> Project Settings -> API Keys -> the secret key (sb_secret_...).');
 } else if (!(serviceKey.startsWith('sb_secret_') || jwtRole(serviceKey) === 'service_role')) {
   fix('SUPABASE_SERVICE_ROLE_KEY does not look like a secret / service_role key.', 'Supabase -> Project Settings -> API Keys -> the secret key (sb_secret_...).');
 } else if (supabaseUp) {
@@ -184,7 +184,7 @@ if (!set('DATABASE_URL')) {
         if (!missing.length) {
           const settings = Object.fromEntries((await sql`select key, value from settings`).map(r => [r.key, r.value]));
           if (settings.currency) ok(`Currency is ${settings.currency}`);
-          else note('No currency set yet, so booking buttons stay hidden even with Stripe set up.', 'Dashboard -> Settings -> Currency code (for example GBP).');
+          else note('No currency set yet, so booking buttons stay hidden even with Stripe set up.', 'Dashboard -> Settings -> Currency code (for example INR).');
           const [{ priced }] = await sql`select count(*)::int as priced from missions where price is not null`;
           const [{ dated }] = await sql`select count(*)::int as dated from events where date >= current_date`;
           if (!priced || !dated) note(`${priced} mission(s) have a price and ${dated} upcoming date(s) exist.`, 'Dashboard -> Missions & dates. A date needs a price before it can be booked online.');

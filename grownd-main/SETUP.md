@@ -26,7 +26,7 @@ Open **Project Settings → API Keys**.
 | --- | --- |
 | `SUPABASE_URL` | The **Project URL**, `https://<project-ref>.supabase.co`. It's shown on the project home page, or under **Project Settings → Data API**. |
 | `SUPABASE_ANON_KEY` | The **Publishable key** (`sb_publishable_...`). Safe to share; the dashboard uses it to sign admins in. |
-| `SUPABASE_SERVICE_ROLE_KEY` | A **Secret key** (`sb_secret_...`): reveal it, then copy. Full access to everything, so keep it on the server only. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional. A **Secret key** (`sb_secret_...`) lets `npm run create-admin` create logins from your computer. It has full access to everything, so keep it out of chats and off the server. Step 6 works without it. |
 
 The older long keys starting with `eyJ` (`anon`, `service_role`) also work, but Supabase is retiring them, so prefer the new ones. If you paste the secret key into `SUPABASE_ANON_KEY` by mistake, the API refuses to start, because that key is sent to browsers.
 
@@ -60,17 +60,22 @@ npm run db:migrate
 If `npm run check` asks for `SUPABASE_JWT_SECRET`, your project still signs logins with the old shared secret. Copy it from **Project Settings → JWT Keys** (legacy JWT secret).
 
 ### 6. Create your admin login
-```bash
-npm run create-admin -- you@yourdomain.com
-```
-Type a password of at least 10 characters, twice. Nothing appears while you type, which is normal. Run it again with another email to add more admins. Add `--revoke` to remove one.
+1. In Supabase, go to **Authentication → Users → Add user → Create new user**. Enter your email and a password of at least 10 characters, tick **Auto Confirm User**, and create it.
+2. Give that user admin access:
+   ```bash
+   npm run create-admin -- you@yourdomain.com --keep
+   ```
+
+Repeat both steps for every admin. To take access away, run the same command with `--revoke` instead of `--keep`.
+
+With `SUPABASE_SERVICE_ROLE_KEY` set, `npm run create-admin -- you@yourdomain.com` (without `--keep`) does both steps in one go. It asks for the password twice, and nothing appears while you type.
 
 ### 7. Start it and sign in
 ```bash
 npm run dev
 ```
 Open <http://localhost:4000/admin/> and sign in. Then:
-- **Settings:** set the currency (`GBP`), timezone label, reply time and safety note.
+- **Settings:** set the currency (`INR` for rupees), timezone label, reply time and safety note.
 - **Missions & dates:** set prices and add dates.
 
 The public site is at <http://localhost:4000>.
@@ -137,7 +142,7 @@ In Vercel, open your project, then **Settings → Build and Deployment**:
 
 If the Root Directory is `grownd-main/backend`, Vercel runs only the backend, for every page, and never deploys the website. That is what produces `FUNCTION_INVOCATION_FAILED`.
 
-With the app folder as the root, Vercel's CDN serves the website and dashboard, and one Vercel Function answers `/api/*`. A daily Vercel Cron job tidies up unpaid bookings.
+With the app folder as the root, Vercel runs `npm run build`, its CDN serves the website and dashboard from `dist/`, and one Vercel Function answers `/api/*`. A daily Vercel Cron job tidies up unpaid bookings.
 
 ### 2. Add the environment variables
 Go to **Settings → Environment Variables**. Add these for *Production* and *Preview*, copying the values from your `backend/.env`:
@@ -152,10 +157,11 @@ Go to **Settings → Environment Variables**. Add these for *Production* and *Pr
 | `STRIPE_WEBHOOK_SECRET` | From step 4 below |
 | `CRON_SECRET` | Any long random string. Vercel Cron sends it to the clean-up job, and nobody else can trigger the job. |
 | `REDIS_URL` | Recommended before launch. Add **Upstash Redis** from the Vercel Marketplace and paste its `rediss://...` URL, so rate limits count across all Vercel instances instead of per instance. |
+| `GOOGLE_SITE_VERIFICATION` | Optional: the code from Google Search Console's HTML-tag method ([SEO.md](SEO.md)). |
+| `SITE_URL` | Optional: the site's address, e.g. `https://grownd.in`. Without it, Vercel's production domain is used for search links, share images and payment return links. |
 
 Not needed on Vercel:
 - `PORT`, `NODE_ENV`, `TRUST_PROXY` and `WEB_CONCURRENCY`: Vercel handles these.
-- `SITE_URL`: detected automatically. Set it only if customers should return to a different domain.
 - `MIGRATION_DATABASE_URL`: migrations run from your computer.
 - `SUPABASE_SERVICE_ROLE_KEY`: only `npm run create-admin` on your computer uses it, so keep this key off the server.
 
