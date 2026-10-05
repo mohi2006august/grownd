@@ -1,5 +1,5 @@
 import { sql } from '../db.js';
-import { paymentsEnabled, testMode, webhooksEnabled } from '../payments/stripe.js';
+import { paymentsEnabled, testMode, webhooksEnabled } from '../payments/provider.js';
 import { STATUSES } from './registrations.js';
 import { getSettings, SETTING_KEYS } from './settings.js';
 

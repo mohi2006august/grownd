@@ -1,11 +1,10 @@
-// Checks backend/.env and that Supabase, the database and Stripe all answer.
+// Checks backend/.env and that Supabase, the database and Razorpay all answer.
 // Usage: npm run check
 // Never prints your keys or passwords. Exits with code 1 if something must be fixed.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
-import { makeStripeClient } from '../src/payments/stripe-client.js';
 
 const env = process.env;
 const BACKEND = fileURLToPath(new URL('..', import.meta.url));
@@ -184,7 +183,7 @@ if (!set('DATABASE_URL')) {
         if (!missing.length) {
           const settings = Object.fromEntries((await sql`select key, value from settings`).map(r => [r.key, r.value]));
           if (settings.currency) ok(`Currency is ${settings.currency}`);
-          else note('No currency set yet, so booking buttons stay hidden even with Stripe set up.', 'Dashboard -> Settings -> Currency code (for example INR).');
+          else note('No currency set yet, so booking buttons stay hidden even with Razorpay set up.', 'Dashboard -> Settings -> Currency code (for example INR).');
           const [{ priced }] = await sql`select count(*)::int as priced from missions where price is not null`;
           const [{ dated }] = await sql`select count(*)::int as dated from events where date >= current_date`;
           if (!priced || !dated) note(`${priced} mission(s) have a price and ${dated} upcoming date(s) exist.`, 'Dashboard -> Missions & dates. A date needs a price before it can be booked online.');
@@ -207,40 +206,45 @@ if (set('MIGRATION_DATABASE_URL')) {
 }
 
 // ---------------------------------------------------------------------------
-heading('Stripe (online payments)');
-const stripeKey = env.STRIPE_SECRET_KEY || '';
-const webhookSecret = env.STRIPE_WEBHOOK_SECRET || '';
+heading('Razorpay (online payments)');
+const keyId = (env.RAZORPAY_KEY_ID || '').trim();
+const keySecret = (env.RAZORPAY_KEY_SECRET || '').trim();
+const webhookSecret = (env.RAZORPAY_WEBHOOK_SECRET || '').trim();
 
-if (!stripeKey) {
-  note('No STRIPE_SECRET_KEY, so online payments are off and the site only takes registrations of interest.', 'Stripe dashboard (in a sandbox) -> API keys -> Secret key (sk_test_...). See SETUP.md, Part 2.');
-} else if (stripeKey.startsWith('pk_')) {
-  fix('STRIPE_SECRET_KEY holds the publishable key (pk_...).', 'Use the secret key (sk_test_...) from the Stripe dashboard -> API keys.');
-} else if (!/^(sk|rk)_(test|live)_/.test(stripeKey)) {
-  fix('STRIPE_SECRET_KEY does not look like a Stripe secret key (sk_test_..., sk_live_..., rk_...).');
+if (!keyId && !keySecret) {
+  note('No Razorpay keys, so online payments are off and the site only takes registrations of interest.', 'Razorpay dashboard (Test Mode) -> Account & Settings -> API Keys -> Generate Test Key. See SETUP.md, Part 2.');
+} else if (!/^rzp_(test|live)_\w+$/.test(keyId)) {
+  fix('RAZORPAY_KEY_ID should look like rzp_test_... or rzp_live_...', 'Copy the Key Id from Razorpay -> Account & Settings -> API Keys.');
+} else if (!keySecret) {
+  fix('RAZORPAY_KEY_SECRET is empty.', 'Razorpay shows it once, when the key is generated. Lost it? Regenerate the key under Account & Settings -> API Keys.');
 } else {
-  const live = /_live_/.test(stripeKey);
+  const live = keyId.startsWith('rzp_live_');
   try {
-    await makeStripeClient(stripeKey, env.STRIPE_API_BASE).checkout.sessions.list({ limit: 1 });
-    ok(`Stripe accepts the key (${live ? 'LIVE mode: real cards will be charged' : 'test mode: no real money moves'})`);
-    if (live && !production) note('This is a live Stripe key outside production.', 'Use the test key (sk_test_...) for local work.');
-  } catch (err) {
-    const why = {
-      StripeAuthenticationError: 'Stripe says the key is not valid.',
-      StripePermissionError: 'the key works but may not use Checkout Sessions (a restricted key without that permission?).',
-      StripeConnectionError: 'could not reach Stripe.'
-    }[err?.type] || `Stripe answered with an error (${err?.type || 'unknown'}).`;
-    fix(`Stripe check failed: ${why}`, 'Copy the secret key again from the Stripe dashboard -> API keys.');
+    const base = (env.RAZORPAY_API_BASE || 'https://api.razorpay.com').replace(/\/+$/, '');
+    const res = await fetch(`${base}/v1/payment_links?count=1`, {
+      headers: { Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}` },
+      signal: AbortSignal.timeout(10_000)
+    });
+    if (res.ok) {
+      ok(`Razorpay accepts the keys (${live ? 'LIVE mode: real money will be charged' : 'test mode: no real money moves'})`);
+      if (live && !production) note('These are live Razorpay keys outside production.', 'Use test keys (rzp_test_...) for local work.');
+    } else if (res.status === 401) {
+      fix('Razorpay says the key id or secret is wrong.', 'Copy both again from Razorpay -> Account & Settings -> API Keys (regenerate the key if the secret is lost).');
+    } else {
+      fix(`Razorpay answered with status ${res.status}.`, 'Check that Payment Links are enabled on your Razorpay account.');
+    }
+  } catch {
+    fix('Could not reach Razorpay.', 'Check your internet connection.');
   }
 }
 
 if (webhookSecret) {
-  if (/^whsec_/.test(webhookSecret)) ok('STRIPE_WEBHOOK_SECRET is set');
-  else fix('STRIPE_WEBHOOK_SECRET should start with whsec_.');
-} else if (stripeKey) {
+  ok('RAZORPAY_WEBHOOK_SECRET is set');
+} else if (keyId) {
   if (production) {
-    fix('Production needs STRIPE_WEBHOOK_SECRET; payments stay off without it.', 'Stripe -> Workbench -> Webhooks -> Create an event destination for https://YOUR-API-HOST/api/payments/webhook, then copy its signing secret (SETUP.md, Part 3).');
+    fix('Production needs RAZORPAY_WEBHOOK_SECRET; payments stay off without it.', 'Razorpay -> Account & Settings -> Webhooks -> Add New Webhook for https://YOUR-SITE/api/payments/webhook (SETUP.md, Part 3).');
   } else {
-    note('No STRIPE_WEBHOOK_SECRET. Fine for trying payments locally, but refunds made in Stripe and slow bank payments will not sync.', 'Run "stripe listen --forward-to localhost:4000/api/payments/webhook" and paste the whsec_ secret it prints.');
+    note('No RAZORPAY_WEBHOOK_SECRET. Fine for trying payments locally, but refunds made in Razorpay will not sync.', 'Webhooks need a public address, so add them on the deployed site (SETUP.md, Part 3).');
   }
 }
 

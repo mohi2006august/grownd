@@ -1,6 +1,6 @@
-# Setting up Supabase and Stripe
+# Setting up Supabase and Razorpay
 
-About 20 minutes. You create the accounts and paste the keys into **`backend/.env`**, then run **`npm run check`**. It checks every value, talks to Supabase, the database and Stripe, and tells you exactly what is missing and where to find it. It never prints your keys.
+About 20 minutes. You create the accounts and paste the keys into **`backend/.env`**, then run **`npm run check`**. It checks every value, talks to Supabase, the database and Razorpay, and tells you exactly what is missing and where to find it. It never prints your keys.
 
 Keep keys out of chat, email and git. `backend/.env` is already git-ignored.
 
@@ -82,52 +82,32 @@ The public site is at <http://localhost:4000>.
 
 ---
 
-## Part 2: Stripe (payments)
+## Part 2: Razorpay (payments)
+
+Customers pay on Razorpay's own page by UPI, card, netbanking or wallet, then come back to the site. GROWND never sees their card or UPI details.
 
 ### 1. Create the account
-Sign up at <https://dashboard.stripe.com/register>. You can test straight away; business verification is only needed for real payments.
+Sign up at <https://dashboard.razorpay.com/signup>. **Test Mode** works straight away. Business verification (KYC) is only needed before taking real money (Part 4).
 
-### 2. Get a test key
-1. Make sure you are in a **sandbox** (test mode). New accounts start in one, or create one from the account menu.
-2. Open **API keys** (in Workbench / Developers, or <https://dashboard.stripe.com/test/apikeys>).
-3. Copy the **Secret key** (`sk_test_...`) into `STRIPE_SECRET_KEY` in `backend/.env`.
-4. Restart `npm run dev` and run `npm run check`. Stripe should show as **test mode**.
+### 2. Get test keys
+1. In the Razorpay dashboard, switch the toggle at the top to **Test Mode**.
+2. Go to **Account & Settings → API Keys → Generate Test Key**.
+3. Razorpay shows the **Key Id** (`rzp_test_...`) and the **Key Secret** once. Paste them into `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in `backend/.env`. If you lose the secret, generate a new key.
+4. Restart `npm run dev` and run `npm run check`. Razorpay should show as **test mode**.
 
-That is enough to try payments locally. Even without step 3, a payment is recorded the moment the customer comes back to the site.
+That's enough to try payments locally: a payment is recorded the moment the customer comes back to the site. Webhooks need a public address, so you set them up on the deployed site (Part 3, step 4).
 
-### 3. Recommended: webhooks on your machine
-These keep refunds made in Stripe and slow bank payments in sync, just as production will.
-
-1. Install the Stripe CLI, with either of these:
-   ```bash
-   winget install --id Stripe.StripeCli
-   ```
-   ```bash
-   npm install -g @stripe/cli
-   ```
-2. Log it in to your account (it opens your browser):
-   ```bash
-   stripe login
-   ```
-3. Forward webhooks to the API, and leave this window open while you test:
-   ```bash
-   stripe listen --forward-to localhost:4000/api/payments/webhook
-   ```
-4. It prints `Ready! Your webhook signing secret is 'whsec_...'`. Copy that secret into `STRIPE_WEBHOOK_SECRET`, then restart `npm run dev`.
-
-### 4. Try a booking
-1. In the dashboard, make sure a mission has a **price** and an upcoming **date**.
-2. On the site, open that mission, click **Book this date** and pay with:
-   - card `4242 4242 4242 4242`
-   - any future expiry date
-   - any CVC and postcode
+### 3. Try a booking
+1. In the dashboard, set the currency to `INR` in **Settings**, and make sure a mission has a **price** and an upcoming **date**.
+2. On the site, open that mission, click **Book this date** and pay on Razorpay's test page with either of these:
+   - **UPI:** `success@razorpay`
+   - **Card:** `4111 1111 1111 1111`, any future expiry date and any CVV. On the test bank page, choose **Success**.
 3. You land on **You're booked!** The booking shows in the dashboard under **Payments**, where you can also try a refund.
 
-To test a quote, open a registration in the dashboard, create a **payment link** and open it.
+To test a quote, open a registration in the dashboard, create a **payment link**, and open it.
 
-### 5. Make the payment page look like GROWND
-- **Settings → Branding:** logo, icon and brand colours for the payment page.
-- **Settings → Public details:** business name and support email, shown on receipts.
+### 4. Make the payment page look like GROWND
+In Razorpay, go to **Account & Settings → Branding** and add the logo and brand colour (`#C6F534`). Customers see them on the payment page and in receipts.
 
 ---
 
@@ -153,8 +133,9 @@ Go to **Settings → Environment Variables**. Add these for *Production* and *Pr
 | `SUPABASE_URL` | Project URL |
 | `SUPABASE_ANON_KEY` | Publishable key |
 | `SUPABASE_JWT_SECRET` | Only if `npm run check` asked for it |
-| `STRIPE_SECRET_KEY` | `sk_test_...` while testing |
-| `STRIPE_WEBHOOK_SECRET` | From step 4 below |
+| `RAZORPAY_KEY_ID` | `rzp_test_...` while testing |
+| `RAZORPAY_KEY_SECRET` | The secret shown with that key |
+| `RAZORPAY_WEBHOOK_SECRET` | The secret you choose in step 4 below |
 | `CRON_SECRET` | Any long random string. Vercel Cron sends it to the clean-up job, and nobody else can trigger the job. |
 | `REDIS_URL` | Recommended before launch. Add **Upstash Redis** from the Vercel Marketplace and paste its `rediss://...` URL, so rate limits count across all Vercel instances instead of per instance. |
 | `GOOGLE_SITE_VERIFICATION` | Optional: the code from Google Search Console's HTML-tag method ([SEO.md](SEO.md)). |
@@ -168,11 +149,12 @@ Not needed on Vercel:
 ### 3. Deploy
 Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed variables only take effect in a new deployment.
 
-### 4. Connect Stripe to the live address
-1. In Stripe, go to **Workbench → Webhooks → Create an event destination** and set it up:
-   - URL: `https://grownd-beige.vercel.app/api/payments/webhook` (or your own domain).
-   - Events: the five listed in Part 4, step 3.
-2. Copy its signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
+### 4. Connect Razorpay to the live address
+1. In Razorpay, go to **Account & Settings → Webhooks → Add New Webhook**, in the same mode (test or live) as your keys:
+   - **Webhook URL:** `https://grownd-beige.vercel.app/api/payments/webhook` (or your own domain).
+   - **Secret:** make up a long random string, and put the same string in `RAZORPAY_WEBHOOK_SECRET` in Vercel.
+   - **Active events:** `payment_link.paid`, `payment_link.expired`, `payment_link.cancelled` and `refund.processed`.
+2. Redeploy so the new variable takes effect.
 
 ### 5. Check it
 - `https://grownd-beige.vercel.app` shows the website, and `/admin/` signs you in.
@@ -180,25 +162,19 @@ Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed v
 - If a setting is missing, `/api/...` answers with a message naming it, and the website still loads.
 
 **Plan notes:**
-- On the Hobby plan, Vercel Cron runs at most once a day. That is fine, because Stripe's webhooks do the real-time work and the cron job is only a safety net. On Pro, change the schedule in `vercel.json` to `*/10 * * * *`.
+- On the Hobby plan, Vercel Cron runs at most once a day. That is fine, because Razorpay's webhooks do the real-time work and the cron job is only a safety net. On Pro, change the schedule in `vercel.json` to `*/10 * * * *`.
 - Preview deployments (other branches) are protected by Vercel Authentication by default.
 
 ---
 
 ## Part 4: Going live
 
-1. **Stripe:** activate your account with business details and a bank account.
-2. **Live key:** in live mode, create a **restricted key** with *Checkout Sessions: Write* and *Refunds: Write*. Put it in `STRIPE_SECRET_KEY` in Vercel. Try the same permissions in a sandbox first (`rk_test_...`) and run a test booking with them.
-3. **Webhook:** go to **Workbench → Webhooks → Create an event destination** and set it up as follows:
-   - Choose **Your account** and the latest API version.
-   - Select the events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `charge.refunded`.
-   - Choose **Webhook endpoint**, with the URL `https://YOUR-SITE/api/payments/webhook`.
-   - Reveal the signing secret and put it in `STRIPE_WEBHOOK_SECRET` in Vercel.
-
-   Production refuses to take payments without it.
+1. **Razorpay:** complete **Account Activation** (KYC): business details, PAN, bank account and the website address. Razorpay checks that the site shows prices, contact details, and terms, privacy and refund policies, so publish those first.
+2. **Live keys:** switch the dashboard to **Live Mode**, go to **Account & Settings → API Keys → Generate Live Key**, and put the Key Id (`rzp_live_...`) and Key Secret in Vercel.
+3. **Webhook:** add the webhook from Part 3, step 4 again in **Live Mode**, with its own secret in `RAZORPAY_WEBHOOK_SECRET`. Production refuses to take payments without it.
 4. **Rate limits:** set `REDIS_URL` (Upstash) in Vercel. For extra protection, add Vercel Firewall rate-limit rules for `/api/checkout` and `/api/registrations`.
 5. **Supabase:** consider the Pro plan before launch, for no pausing, daily backups and more connections.
-6. **Not using Vercel?** The API also runs as a normal server. Build the container from the app folder with `docker build -f backend/Dockerfile .`. On the server, set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. Then host `frontend/` on any CDN that forwards `/api/*` to it (see `frontend/README.md`).
+6. **Not using Vercel?** The API also runs as a normal server. Build the container from the app folder with `docker build -f backend/Dockerfile .`. On the server, set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. Then run `npm run build` and host `dist/` on any CDN that forwards `/api/*` to it (see `frontend/README.md`).
 
 ## If something goes wrong
 Run `npm run check`; it names the problem and the fix. The usual ones are:
@@ -209,6 +185,6 @@ Run `npm run check`; it names the problem and the fix. The usual ones are:
 | *pooler did not recognise the user name* | The user must be `postgres.<project-ref>`; copy the string again from **Connect**. |
 | *Could not reach SUPABASE_URL* | Typo in the URL, or the free project is paused; restore it in the dashboard. |
 | *Please sign in again* in the dashboard | `npm run check` tells you if `SUPABASE_JWT_SECRET` is needed. |
-| *Online booking is not switched on yet* | No Stripe key, or no currency set in the dashboard's Settings. |
+| *Online booking is not switched on yet* | No Razorpay keys, or no currency set in the dashboard's Settings. |
 | Vercel shows `FUNCTION_INVOCATION_FAILED` on every page | The Root Directory is wrong; it must be `grownd-main` (Part 3, step 1). |
 | `/api/...` on Vercel says *This site is not set up yet* | A variable is missing in Vercel; the message names it (Part 3, step 2). |

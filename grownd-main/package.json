@@ -12,6 +12,7 @@
   "scripts": {
     "build": "node frontend/build.mjs",
     "check:site": "node frontend/tools/check-site.mjs",
+    "test": "npm test -w backend",
     "dev": "npm run build && npm run dev -w backend",
     "check": "npm run check -w backend",
     "db:migrate": "npm run db:migrate -w backend",

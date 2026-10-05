@@ -2,7 +2,7 @@
 //   /checkout?event=ID                       book places on a date and pay
 //   /checkout?order=ID                       pay a payment link, or see an order
 //   /checkout?order=ID&result=success        back from the payment page (or result=cancelled)
-// Card details are entered on Stripe's own page and never reach this site or the GROWND API.
+// Card and UPI details are entered on Razorpay's own page and never reach this site or the GROWND API.
 
 const main = document.getElementById('main');
 const params = new URLSearchParams(location.search);
@@ -82,7 +82,7 @@ function digits(currency) {
   return (digitsCache[currency] ??= new Intl.NumberFormat('en', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits);
 }
 const toMinor = (amount, currency) => Math.round(amount * 10 ** digits(currency));
-const money = (minor, currency) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency.toUpperCase() }).format(minor / 10 ** digits(currency.toUpperCase()));
+const money = (minor, currency) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency.toUpperCase() }).format(minor / 10 ** digits(currency.toUpperCase()));
 
 function when(e) {
   const day = e.date
@@ -221,7 +221,7 @@ async function bookingPage(eventId) {
     h('div', null,
       payButton,
       h('p', { class: 'pay-note', style: { 'margin-top': '14px' } }, icon('lock', 16),
-        `You pay on Stripe's secure page. We hold your ${perChild ? 'places' : 'booking'} for ${data.payments.holdMinutes} minutes while you do.`)));
+        `You pay on Razorpay's secure page, by UPI, card, netbanking or wallet. We hold your ${perChild ? 'places' : 'booking'} for ${data.payments.holdMinutes} minutes while you do.`)));
 
   const summary = h('aside', { class: 'card summary', style: { '--type': TYPE_COLOR[mission.type] || 'var(--brand)' }, 'aria-label': 'Your booking' },
     h('p', { class: 'mono muted' }, 'Your booking'),
@@ -362,7 +362,7 @@ function payRequestView(order) {
     orderCard(order),
     h('div', { class: 'card', style: { 'margin-top': '16px', display: 'grid', gap: '14px' } },
       alertBox, button,
-      h('p', { class: 'pay-note' }, icon('lock', 16), "You pay on Stripe's secure page. GROWND never sees your card details.")));
+      h('p', { class: 'pay-note' }, icon('lock', 16), "You pay on Razorpay's secure page, by UPI, card, netbanking or wallet. GROWND never sees your card or UPI details.")));
 }
 
 async function loadOrder(id, result) {

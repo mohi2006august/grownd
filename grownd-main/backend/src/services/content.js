@@ -1,7 +1,7 @@
 import { config } from '../config.js';
 import { sql } from '../db.js';
 import { cached } from '../lib/cache.js';
-import { paymentsEnabled } from '../payments/stripe.js';
+import { paymentsEnabled } from '../payments/provider.js';
 import { getSettings } from './settings.js';
 
 // What the public site needs to fill its placeholders and take bookings: prices, upcoming dates,
