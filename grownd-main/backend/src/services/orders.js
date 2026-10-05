@@ -13,7 +13,7 @@ import { config } from '../config.js';
 import { sql } from '../db.js';
 import { busy, HttpError, notFound } from '../lib/errors.js';
 import { toMinor } from '../lib/money.js';
-import * as provider from '../payments/stripe.js';
+import * as provider from '../payments/provider.js';
 import { getSettingsCached } from './settings.js';
 
 export const PAGE_SIZE = 50;
@@ -232,7 +232,7 @@ export async function createBooking({ eventId, kids, name, email, phone, age, no
 
   try {
     const checkout = await provider.createCheckout({
-      orderId: order.id, attempt: 1, email, currency, unitAmount, quantity,
+      orderId: order.id, attempt: 1, customer: { name, email, phone }, currency, unitAmount, quantity,
       name: ev.title,
       description: [when, where, `${kids} ${kids === 1 ? 'child' : 'children'}`].filter(Boolean).join(' · '),
       successUrl: returnUrl(order.id, 'success'), cancelUrl: returnUrl(order.id, 'cancelled'), expiresAt
@@ -302,7 +302,7 @@ export async function startRequestPayment(id) {
     const linkEnds = new Date(row.expires_at).getTime();
     const expiresAt = new Date(Math.max(Date.now() + 31 * 60_000, Math.min(linkEnds, Date.now() + 23 * 3600_000)));
     const checkout = await provider.createCheckout({
-      orderId: id, attempt: crypto.randomUUID(), email: row.email, currency: row.currency,
+      orderId: id, attempt: crypto.randomUUID(), customer: { name: row.name, email: row.email, phone: row.phone }, currency: row.currency,
       unitAmount: row.unit_amount, quantity: row.quantity, name: row.description, description: null,
       successUrl: returnUrl(id, 'success'), cancelUrl: returnUrl(id, 'cancelled'), expiresAt
     });
@@ -434,7 +434,7 @@ export async function getOrder(id) {
 /** A payment link for a registration (a quote for a party, a school visit). */
 export async function createPaymentRequest(registrationId, { amount, description, days }) {
   const settings = await getSettingsCached();
-  if (!provider.paymentsEnabled) throw new HttpError(409, 'Online payments are off. Add the Stripe keys to the backend first.');
+  if (!provider.paymentsEnabled) throw new HttpError(409, 'Online payments are off. Add the Razorpay keys to the backend first.');
   if (!settings.currency) throw new HttpError(409, 'Set the currency in Settings first.');
   const currency = settings.currency.toLowerCase();
   const unitAmount = toMinor(amount, currency);
@@ -459,7 +459,7 @@ export async function refundOrder(id) {
   try {
     await provider.refundPayment(row.payment_intent_id, id);
   } catch (err) {
-    throw Object.assign(new HttpError(502, 'Stripe did not accept the refund. Check the payment in the Stripe dashboard.'), { cause: err });
+    throw Object.assign(new HttpError(502, 'Razorpay did not accept the refund. Check the payment in the Razorpay dashboard.'), { cause: err });
   }
   await sql.begin(tx => applyRefund(tx, { paymentIntentId: row.payment_intent_id, amountRefunded: row.amount, fullyRefunded: true }));
   return getOrder(id);

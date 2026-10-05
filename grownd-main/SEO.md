@@ -52,7 +52,6 @@ Search results show what is on the page, so replace the placeholders first:
 - In the dashboard: prices, currency (`INR`), dates, reply time and the safety note. These fill `[PRICE]`, `[DATE]`, `[CITY …]`, `[RESPONSE TIME]` and `[INSURANCE AND DBS DETAILS]`.
 - In the design source: `MISSION CONTROL / [CITY]`, the team names (`[TEAM LEAD]`, `[TECH LEAD]`, `[CONTENT LEAD]`) and the photos (`[PHOTO …]`, `[VIDEO …]`).
 - The mission notes mention **DBS checks**, which are a UK thing. For India, say what you actually do, for example police verification and child-safety training.
-- The footer says card payments are handled by Stripe. That changes once Razorpay is in.
 - In `frontend/seo.mjs`, fill `site.email` and `site.sameAs` (your Instagram, YouTube and Facebook pages) once they exist.
 
 ## Google Search Console

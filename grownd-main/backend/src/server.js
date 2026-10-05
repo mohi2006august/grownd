@@ -1,6 +1,6 @@
 import { buildApp } from './app.js';
 import { config } from './config.js';
-import { paymentsEnabled, testMode, webhooksEnabled } from './payments/stripe.js';
+import { paymentsEnabled, testMode, webhooksEnabled } from './payments/provider.js';
 import { reconcileOverdue } from './services/orders.js';
 
 export async function start() {
@@ -16,12 +16,12 @@ export async function start() {
     reconcileTimer.unref();
     app.log.info({ testMode, webhooks: webhooksEnabled }, 'online payments are on');
     if (!webhooksEnabled) {
-      app.log.warn('Stripe webhooks are off (no STRIPE_WEBHOOK_SECRET). Fine for local testing: payments are confirmed when customers return to the site. Production requires webhooks.');
+      app.log.warn('Razorpay webhooks are off (no RAZORPAY_WEBHOOK_SECRET). Fine for local testing: payments are confirmed when customers return to the site. Production requires webhooks.');
     }
-  } else if (config.production && config.stripeSecretKey) {
-    app.log.error('online payments are OFF: production needs STRIPE_WEBHOOK_SECRET as well as STRIPE_SECRET_KEY');
+  } else if (config.production && config.razorpayKeyId) {
+    app.log.error('online payments are OFF: production needs RAZORPAY_WEBHOOK_SECRET as well as the Razorpay keys');
   } else {
-    app.log.warn('online payments are off: set STRIPE_SECRET_KEY to turn them on');
+    app.log.warn('online payments are off: set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to turn them on');
   }
 
   // Graceful shutdown: stop taking new connections, let in-flight requests finish,

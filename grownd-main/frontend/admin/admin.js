@@ -147,7 +147,7 @@ function ago(iso) {
 function money(n, currency) {
   if (n == null) return 'Not set';
   try {
-    if (currency) return new Intl.NumberFormat('en-GB', { style: 'currency', currency, minimumFractionDigits: n % 1 ? 2 : 0 }).format(n);
+    if (currency) return new Intl.NumberFormat('en-IN', { style: 'currency', currency, minimumFractionDigits: n % 1 ? 2 : 0 }).format(n);
   } catch {}
   return n.toFixed(n % 1 ? 2 : 0);
 }
@@ -161,7 +161,7 @@ const statusPill = s => h('span', { class: 'pill s-' + s }, STATUS_LABEL[s]);
 
 /** Formats an amount held in the currency's smallest unit (pence, cents). */
 function moneyMinor(minor, currency) {
-  const format = new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency.toUpperCase() });
+  const format = new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency.toUpperCase() });
   return format.format(minor / 10 ** format.resolvedOptions().maximumFractionDigits);
 }
 const sumsText = (list, key) => (list.length ? list.map(x => moneyMinor(x[key], x.currency)).join(' + ') : '–');
@@ -329,7 +329,7 @@ function renderShell() {
   const nav = h('nav', { class: 'nav', 'aria-label': 'Admin sections' },
     NAV.map(([key, label, ic]) => (links[key] = h('a', { href: '#/' + key }, icon(ic, 20), label, key === 'registrations' ? badge : null))));
   const main = h('main', { class: 'main', id: 'main', tabindex: '-1' });
-  const testPill = h('span', { class: 'test-pill', hidden: true, title: 'Payments use Stripe test keys: no real money moves.' }, 'Stripe test mode');
+  const testPill = h('span', { class: 'test-pill', hidden: true, title: 'Payments use Razorpay test keys: no real money moves.' }, 'Razorpay test mode');
   app.replaceChildren(h('div', { class: 'shell' },
     h('aside', { class: 'side' },
       h('a', { class: 'brand', href: '#/overview', 'aria-label': 'GROWND admin overview' }, brand()),
@@ -405,7 +405,7 @@ function OverviewView() {
     for (const k of setup.settings) items.push(['Set the ' + SETTING_LABEL[k] + '. The site still shows a placeholder for it.', '#/settings', 'Open settings']);
     if (setup.unpriced.length) items.push([`No price yet for ${setup.unpriced.join(', ')}.`, '#/missions', 'Add prices']);
     if (setup.undated.length) items.push([`No upcoming dates for ${setup.undated.join(', ')}. These show “Register interest” on the site.`, '#/missions', 'Add dates']);
-    if (setup.payments) items.push(['Online payments are off. Add the Stripe keys to the backend (see SETUP.md) to take bookings and send payment links.', '#/payments', 'Payments']);
+    if (setup.payments) items.push(['Online payments are off. Add the Razorpay keys to the backend (see SETUP.md) to take bookings and send payment links.', '#/payments', 'Payments']);
     if (!items.length) return null;
     return h('section', { class: 'panel setup', 'aria-labelledby': 'setup-h' },
       h('div', { class: 'panel-head' }, h('h2', { id: 'setup-h' }, 'Before launch'), h('span', { class: 'muted' }, plural(items.length, 'thing') + ' to fill in')),
@@ -446,7 +446,7 @@ function OverviewView() {
           h('div', { class: 'tiles' },
             tile('NEEDS A REPLY', s.byStatus.new, s.byStatus.new ? 'New registrations waiting' : 'All caught up', '#/registrations?status=new', s.byStatus.new > 0),
             tile('PAID · 30 DAYS', sumsText(s.revenue30d, 'amount'),
-              !s.payments.enabled ? 'Online payments are off' : s.payments.testMode ? 'Stripe test mode' : 'After refunds', '#/payments?status=paid', false),
+              !s.payments.enabled ? 'Online payments are off' : s.payments.testMode ? 'Razorpay test mode' : 'After refunds', '#/payments?status=paid', false),
             tile('PLACES BOOKED', s.bookedPlaces, 'Paid places on upcoming dates', '#/payments?status=paid', false),
             tile('UPCOMING DATES', s.upcoming.total, s.upcoming.soldOut ? s.upcoming.soldOut + ' sold out' : 'None sold out', '#/missions', false)),
           setupPanel(s.setup),
@@ -749,7 +749,7 @@ function RegistrationPayments(r) {
   (async () => {
     try {
       const [orders, s] = await Promise.all([api('/orders?registration=' + r.id), getSettings()]);
-      if (!orders.payments.enabled) return body.replaceChildren(h('p', { class: 'muted' }, 'Online payments are off. Add the Stripe keys to the backend to send payment links.'));
+      if (!orders.payments.enabled) return body.replaceChildren(h('p', { class: 'muted' }, 'Online payments are off. Add the Razorpay keys to the backend to send payment links.'));
       if (!s.currency) return body.replaceChildren(h('p', { class: 'muted' }, 'Set the currency in Settings to send payment links.'));
       items = orders.items;
       settings = s;
@@ -790,7 +790,7 @@ function PaymentsView() {
   const tabs = h('nav', { class: 'tabs', 'aria-label': 'Filter by status' });
   const table = h('div', { class: 'panel table-panel' }, h('p', { class: 'empty' }, 'Loading…'));
   const el = h('div', null,
-    pageHead('PAYMENTS', 'Payments', 'Dates booked and paid on the site, and payment links sent from registrations. Card details stay with Stripe.'),
+    pageHead('PAYMENTS', 'Payments', 'Dates booked and paid on the site, and payment links sent from registrations. Card and UPI details stay with Razorpay.'),
     notice, tiles,
     h('div', { class: 'toolbar spaced' }, h('div', { class: 'search' }, icon('search'), search), kindSelect),
     eventBar, tabs, table);
@@ -817,9 +817,9 @@ function PaymentsView() {
   function renderTop() {
     const s = data.summary;
     fill(notice,
-      !data.payments.enabled && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Online payments are off. Add the Stripe keys to the backend (see SETUP.md). Until then the site only takes registrations of interest.')),
-      data.payments.enabled && !data.payments.webhooks && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Stripe webhooks are off. Payments are confirmed when customers return to the site, but refunds made in Stripe and slow bank payments will not show here. Set STRIPE_WEBHOOK_SECRET (production needs it).')),
-      data.payments.enabled && data.payments.testMode && h('div', { class: 'notice' }, icon('warn'), h('span', null, 'Stripe test mode: pay with test cards such as 4242 4242 4242 4242. No real money moves.')));
+      !data.payments.enabled && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Online payments are off. Add the Razorpay keys to the backend (see SETUP.md). Until then the site only takes registrations of interest.')),
+      data.payments.enabled && !data.payments.webhooks && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Razorpay webhooks are off. Payments are confirmed when customers return to the site, but refunds made in the Razorpay dashboard will not show here. Set RAZORPAY_WEBHOOK_SECRET (production needs it).')),
+      data.payments.enabled && data.payments.testMode && h('div', { class: 'notice' }, icon('warn'), h('span', null, 'Razorpay test mode: pay with the test card 4111 1111 1111 1111 or the UPI ID success@razorpay. No real money moves.')));
     tiles.replaceChildren(
       statTile('PAID · 30 DAYS', sumsText(s, 'paid30d'), 'After refunds'),
       statTile('AWAITING PAYMENT', sumsText(s, 'awaitingAmount'), plural(s.reduce((a, x) => a + x.awaitingCount, 0), 'order')),
@@ -951,7 +951,7 @@ function PaymentsView() {
             o.paidAt && dd('Paid', fmtStamp(o.paidAt)),
             o.amountRefunded > 0 && dd('Refunded', moneyMinor(o.amountRefunded, o.currency)),
             o.kind === 'booking' && o.status === 'pending' && dd('Places held until', fmtStamp(o.expiresAt)),
-            o.providerUrl && dd('Stripe', h('a', { href: o.providerUrl, target: '_blank', rel: 'noopener' }, 'Open in Stripe ', icon('external', 14))))),
+            o.providerUrl && dd('Razorpay', h('a', { href: o.providerUrl, target: '_blank', rel: 'noopener' }, 'Open in Razorpay ', icon('external', 14))))),
         h('section', null, label('Contact'),
           h('div', { class: 'contact' },
             h('a', { class: 'btn small', href: 'mailto:' + o.email }, icon('mail', 16), o.email),
@@ -962,7 +962,7 @@ function PaymentsView() {
         (refundable || o.status === 'pending') && h('section', { class: 'danger-zone contact' },
           refundable && h('button', {
             class: 'btn danger', type: 'button',
-            onclick: () => act('refund', `Refund ${moneyMinor(o.amount - o.amountRefunded, o.currency)} to ${o.name}? It goes back to the card that paid${o.kind === 'booking' ? ', and their places are freed' : ''}.`, 'Refund sent to Stripe')
+            onclick: () => act('refund', `Refund ${moneyMinor(o.amount - o.amountRefunded, o.currency)} to ${o.name}? It goes back to the card, UPI or bank account that paid${o.kind === 'booking' ? ', and their places are freed' : ''}.`, 'Refund sent to Razorpay')
           }, icon('undo', 16), 'Refund in full'),
           o.status === 'pending' && h('button', {
             class: 'btn danger', type: 'button',

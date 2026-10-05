@@ -11,7 +11,8 @@
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
     "check": "node --env-file-if-exists=.env scripts/check-setup.js",
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.js",
-    "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js"
+    "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
@@ -22,7 +23,6 @@
     "fastify": "^5.12.5",
     "ioredis": "^6.0.0",
     "jose": "^6.2.12",
-    "postgres": "^3.4.9",
-    "stripe": "^23.0.0"
+    "postgres": "^3.4.9"
   }
 }

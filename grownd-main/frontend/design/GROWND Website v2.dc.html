@@ -692,7 +692,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opa
 <a href="/register" style="min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink,#F2F5FF);text-decoration:none" style-hover="color:var(--brand-ink,#C6F534)">Register interest</a>
 </nav>
 </div>
-<p style="margin:0;padding-top:24px;border-top:1px solid var(--hair,#2C3757);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:var(--muted,#9FACC9)">CARD PAYMENTS ARE HANDLED BY STRIPE. GROWND NEVER SEES YOUR CARD DETAILS.</p>
+<p style="margin:0;padding-top:24px;border-top:1px solid var(--hair,#2C3757);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px;font-weight:500;letter-spacing:0.08em;color:var(--muted,#9FACC9)">PAYMENTS ARE HANDLED BY RAZORPAY. GROWND NEVER SEES YOUR CARD OR UPI DETAILS.</p>
 </div>
 <div aria-hidden="true" style="overflow:hidden;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(88px,21vw,320px);line-height:0.78;letter-spacing:-0.05em;text-align:center;color:transparent;-webkit-text-stroke:1.5px rgba(var(--ink-rgb,242,245,255),0.14);margin-bottom:-0.06em;user-select:none;white-space:nowrap">GROWND</div>
 </footer>
@@ -1068,7 +1068,7 @@ class Component extends DCLogic {
   }
   money(n) {
     const c = this.state.live && this.state.live.settings.currency, d = n % 1 ? 2 : 0;
-    try { if (c) return new Intl.NumberFormat('en-GB', { style: 'currency', currency: c, minimumFractionDigits: d }).format(n); } catch (_) {}
+    try { if (c) return new Intl.NumberFormat('en-IN', { style: 'currency', currency: c, minimumFractionDigits: d }).format(n); } catch (_) {}
     return n.toFixed(d);
   }
   fromPrice() {
@@ -1090,7 +1090,7 @@ class Component extends DCLogic {
   mission(m, i = 0) {
     const t = this.T[m.type];
     const lv = this.state.live && this.state.live.missions[m.slug], cost = lv ? (lv.price == null ? '' : this.money(lv.price)) : '[PRICE]', pay = !!(lv && cost && this.state.live.payments && this.state.live.payments.enabled), events = (lv ? lv.events : m.events).map(e => this.ev(e, m.ages)).map(e => ({ ...e, bookHref: pay && e.id && e.dated && e.open ? '/checkout?event=' + e.id : '/register/' + m.slug })), next = events.find(e => e.bookHref.indexOf('/checkout') === 0);
-    return { ...m, color: t.color, typeName: t.name, typeSlug: t.slug, code: 'MISSION ' + m.no, agesText: 'AGES ' + m.ages, lenText: m.mins + ' MIN', groupText: 'UP TO ' + m.cap, price: cost ? cost + ' / ' + m.unit : 'Price on request', priceText: cost || 'On request', perUnit: cost ? 'per ' + m.unit : '', bookHref: next ? next.bookHref : '/register/' + m.slug, payNote: next ? 'Book a date and pay securely by card. Want us to come to you instead? Register interest.' : 'No payment at this stage. Register interest sends your details to the GROWND team.', worth: m.worth.map(w => (w === '[INSURANCE AND DBS DETAILS]' ? this.site().insurance : w)), href: '/missions/' + m.slug, registerHref: '/register/' + m.slug, delay: (i % 3) * 80 + 'ms', evs: events, ev: events.find(e => e.open) || events[0] || this.ev(['A', 'A', 0], m.ages), hasEvents: events.length > 0, noEvents: events.length === 0, resultHref: '/quiz/' + t.slug,
+    return { ...m, color: t.color, typeName: t.name, typeSlug: t.slug, code: 'MISSION ' + m.no, agesText: 'AGES ' + m.ages, lenText: m.mins + ' MIN', groupText: 'UP TO ' + m.cap, price: cost ? cost + ' / ' + m.unit : 'Price on request', priceText: cost || 'On request', perUnit: cost ? 'per ' + m.unit : '', bookHref: next ? next.bookHref : '/register/' + m.slug, payNote: next ? 'Book a date and pay securely by UPI or card. Want us to come to you instead? Register interest.' : 'No payment at this stage. Register interest sends your details to the GROWND team.', worth: m.worth.map(w => (w === '[INSURANCE AND DBS DETAILS]' ? this.site().insurance : w)), href: '/missions/' + m.slug, registerHref: '/register/' + m.slug, delay: (i % 3) * 80 + 'ms', evs: events, ev: events.find(e => e.open) || events[0] || this.ev(['A', 'A', 0], m.ages), hasEvents: events.length > 0, noEvents: events.length === 0, resultHref: '/quiz/' + t.slug,
       nextText: events.length ? (events.find(e => e.open) || events[0]).when : 'No dates yet',
       placesText: events.length ? (events.find(e => e.open) || events[0]).pill : 'Register interest', placesBg: events.length ? (events.find(e => e.open) || events[0]).pillBg : 'var(--muted,#9FACC9)' };
   }

@@ -11,7 +11,7 @@ All schema changes live in `migrations/` as plain SQL, applied in filename order
 | `registrations` | Every register-form submission, with a status (`new`, `contacted`, `confirmed`, `cancelled`) and internal notes. |
 | `settings`      | Site-wide values: currency, timezone label, reply time, safety note.                  |
 | `orders`        | Payments. A `booking` is places on a date paid on the site; a `request` is a payment link sent from a registration. Amounts are in the currency's smallest unit (pence). The `id` is a random UUID because it doubles as the customer's private link. |
-| `payment_events`| Every Stripe webhook already handled, so a repeated delivery is ignored.             |
+| `payment_events`| Every payment webhook already handled, so a repeated delivery is ignored.            |
 
 How places stay correct: a booking takes its places from `events.places_left` in the same transaction that creates the order, and only if enough are left. `orders.places_held` records how many it holds. When an order is cancelled, expires, fails or is refunded, the places go back and `places_held` drops to 0, so they can only ever be returned once. At any moment, places left plus places held on that date's orders equals the places you set.
 

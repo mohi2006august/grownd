@@ -1,6 +1,6 @@
 import { badRequest, notFound } from '../lib/errors.js';
 import { contactDetails, int, isId } from '../lib/validate.js';
-import { parseWebhook, webhooksEnabled } from '../payments/stripe.js';
+import { parseWebhook, webhooksEnabled } from '../payments/provider.js';
 import { cancelBooking, createBooking, getPublicOrder, handleProviderEvent, isOrderId, startRequestPayment } from '../services/orders.js';
 
 function cleanBooking(body) {
@@ -64,10 +64,10 @@ export default async function paymentRoutes(app) {
       bodyLimit: 1024 * 1024,
       config: { rateLimit: false } // never throttle the payment provider
     }, async (request, reply) => {
-      if (!webhooksEnabled) return reply.code(503).send({ error: 'Webhooks are not configured: set STRIPE_WEBHOOK_SECRET.' });
+      if (!webhooksEnabled) return reply.code(503).send({ error: 'Webhooks are not configured: set RAZORPAY_WEBHOOK_SECRET.' });
       let event;
       try {
-        event = parseWebhook(request.body, request.headers['stripe-signature']);
+        event = parseWebhook(request.body, request.headers);
       } catch {
         return reply.code(400).send({ error: 'Invalid signature.' });
       }

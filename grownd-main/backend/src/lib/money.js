@@ -1,5 +1,5 @@
 // Amounts are stored and sent to the payment provider in the currency's smallest unit
-// (pence, cents; whole yen for zero-decimal currencies). Prices are edited in normal units.
+// (paise, pence, cents; whole yen for zero-decimal currencies). Prices are edited in normal units.
 
 const digitsCache = new Map();
 
@@ -16,5 +16,5 @@ export const toMinor = (amount, currency) => Math.round(amount * 10 ** currencyD
 export const fromMinor = (minor, currency) => minor / 10 ** currencyDigits(currency);
 
 export function formatMoney(minor, currency) {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency.toUpperCase() }).format(fromMinor(minor, currency));
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency.toUpperCase() }).format(fromMinor(minor, currency));
 }

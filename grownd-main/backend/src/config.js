@@ -40,9 +40,11 @@ function browserSafeSupabaseKey(name) {
   return key;
 }
 
-function stripeSecretKey(name) {
-  const key = env[name] || '';
-  if (key.startsWith('pk_')) throw new ConfigError(`${name} holds a publishable key (pk_...). Use the secret key (sk_... or rk_...).`);
+function razorpayKeyId(name) {
+  const key = (env[name] || '').trim();
+  if (key && !/^rzp_(test|live)_\w+$/.test(key)) {
+    throw new ConfigError(`${name} should look like rzp_test_... or rzp_live_... (Razorpay -> Account & Settings -> API Keys). The key secret goes in RAZORPAY_KEY_SECRET.`);
+  }
   return key;
 }
 
@@ -94,14 +96,15 @@ export const config = Object.freeze({
   // Public address of the site, used in payment return links and in payment links sent to customers.
   siteUrl: (env.SITE_URL || defaultSiteUrl()).replace(/\/+$/, ''),
 
-  // Online payments (Stripe). Without the secret key the site keeps "register interest" only.
+  // Online payments (Razorpay). Without the key id and secret the site keeps "register interest" only.
   // The webhook secret is required in production; locally payments also work without it.
-  stripeSecretKey: stripeSecretKey('STRIPE_SECRET_KEY'),
-  stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET || '',
-  // Only for pointing at stripe-mock or a test double.
-  stripeApiBase: env.STRIPE_API_BASE || '',
-  // How long a booking holds its places while the customer pays. Stripe needs at least 30 minutes.
-  bookingHoldMinutes: Math.min(24 * 60, Math.max(30, int(env.BOOKING_HOLD_MINUTES, 30))),
+  razorpayKeyId: razorpayKeyId('RAZORPAY_KEY_ID'),
+  razorpayKeySecret: (env.RAZORPAY_KEY_SECRET || '').trim(),
+  razorpayWebhookSecret: (env.RAZORPAY_WEBHOOK_SECRET || '').trim(),
+  // Only for pointing at a test double.
+  razorpayApiBase: (env.RAZORPAY_API_BASE || 'https://api.razorpay.com').replace(/\/+$/, ''),
+  // How long a booking holds its places while the customer pays. Razorpay links need at least 15 minutes.
+  bookingHoldMinutes: Math.min(24 * 60, Math.max(20, int(env.BOOKING_HOLD_MINUTES, 30))),
   // How long a payment link sent from the dashboard stays valid.
   paymentLinkDays: Math.min(60, Math.max(1, int(env.PAYMENT_LINK_DAYS, 14))),
   // How often each process checks for unpaid orders past their deadline.
