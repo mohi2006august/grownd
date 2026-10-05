@@ -100,8 +100,10 @@ That's enough to try payments locally: a payment is recorded the moment the cust
 ### 3. Try a booking
 1. In the dashboard, set the currency to `INR` in **Settings**, and make sure a mission has a **price** and an upcoming **date**.
 2. On the site, open that mission, click **Book this date** and pay on Razorpay's test page with either of these:
-   - **UPI:** `success@razorpay`
-   - **Card:** `4111 1111 1111 1111`, any future expiry date and any CVV. On the test bank page, choose **Success**.
+   - **Netbanking:** pick any bank, then click **Success** on Razorpay's test bank page.
+   - **UPI:** under **Show All Options → UPI**, enter `success@razorpay`.
+
+   Avoid test card numbers you find online. Many are international cards, which new Indian accounts don't accept ("International cards are not supported").
 3. You land on **You're booked!** The booking shows in the dashboard under **Payments**, where you can also try a refund.
 
 To test a quote, open a registration in the dashboard, create a **payment link**, and open it.

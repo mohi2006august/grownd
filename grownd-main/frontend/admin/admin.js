@@ -819,7 +819,7 @@ function PaymentsView() {
     fill(notice,
       !data.payments.enabled && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Online payments are off. Add the Razorpay keys to the backend (see SETUP.md). Until then the site only takes registrations of interest.')),
       data.payments.enabled && !data.payments.webhooks && h('div', { class: 'notice warn' }, icon('warn'), h('span', null, 'Razorpay webhooks are off. Payments are confirmed when customers return to the site, but refunds made in the Razorpay dashboard will not show here. Set RAZORPAY_WEBHOOK_SECRET (production needs it).')),
-      data.payments.enabled && data.payments.testMode && h('div', { class: 'notice' }, icon('warn'), h('span', null, 'Razorpay test mode: pay with the test card 4111 1111 1111 1111 or the UPI ID success@razorpay. No real money moves.')));
+      data.payments.enabled && data.payments.testMode && h('div', { class: 'notice' }, icon('warn'), h('span', null, 'Razorpay test mode: pay by Netbanking (choose Success on the test bank page) or with the UPI ID success@razorpay. No real money moves.')));
     tiles.replaceChildren(
       statTile('PAID · 30 DAYS', sumsText(s, 'paid30d'), 'After refunds'),
       statTile('AWAITING PAYMENT', sumsText(s, 'awaitingAmount'), plural(s.reduce((a, x) => a + x.awaitingCount, 0), 'order')),
