@@ -2,10 +2,7 @@ import Fastify, { LogController } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import fastifyStatic from '@fastify/static';
 import underPressure from '@fastify/under-pressure';
-import fs from 'node:fs';
-import path from 'node:path';
 import v8 from 'node:v8';
 import { config } from './config.js';
 import { DB_UNAVAILABLE, sql } from './db.js';
@@ -16,26 +13,6 @@ import healthRoutes from './routes/health.js';
 import paymentRoutes from './routes/payments.js';
 import publicRoutes from './routes/public.js';
 
-// The built site (`npm run build` writes dist/ in the app folder), served locally only. Found from the
-// working directory rather than this file's location, so Vercel's bundler leaves it out of the API function.
-const SITE_BUILD = config.serveFrontend ? findSiteBuild() : null;
-function findSiteBuild() {
-  for (let dir = process.cwd(), i = 0; i < 3; i++, dir = path.dirname(dir)) {
-    if (fs.existsSync(path.join(dir, 'dist', '404.html'))) return path.join(dir, 'dist') + path.sep;
-  }
-  return null;
-}
-
-function pageUrl(url) {
-  const [pathname, query] = url.split(/\?(.*)/s);
-  if (pathname.length < 2 || pathname.endsWith('/') || pathname.startsWith('/api/') || path.extname(pathname)) return url;
-  let name;
-  try { name = decodeURIComponent(pathname); } catch { return url; }
-  const file = path.join(SITE_BUILD, `${name}.html`);
-  if (!file.startsWith(SITE_BUILD) || !fs.existsSync(file)) return url;
-  return `${pathname}.html${query !== undefined ? `?${query}` : ''}`;
-}
-
 export async function buildApp() {
   const app = Fastify({
     logger: { level: config.logLevel, redact: ['req.headers.authorization'] },
@@ -45,9 +22,7 @@ export async function buildApp() {
     bodyLimit: 16 * 1024,
     requestTimeout: 15_000,
     keepAliveTimeout: 72_000, // longer than common load balancer idle timeouts (60s), avoiding stray 502s
-    return503OnClosing: true,
-    // Locally, /missions is the page missions.html even though a missions/ folder exists (as on Vercel).
-    ...(SITE_BUILD && { rewriteUrl: req => pageUrl(req.url) })
+    return503OnClosing: true
   });
 
   // ---- protection ----
@@ -63,11 +38,12 @@ export async function buildApp() {
   }
 
   // Load shedding: when the event loop or memory is saturated, answer 503 quickly instead of
-  // slowing to a crawl or running out of memory.
+  // slowing to a crawl or running out of memory. Off in tests (0), where a busy run is not overload.
+  const shed = !config.testing;
   await app.register(underPressure, {
-    maxEventLoopDelay: 1000,
-    maxEventLoopUtilization: 0.98,
-    maxHeapUsedBytes: Math.floor(v8.getHeapStatistics().heap_size_limit * 0.9),
+    maxEventLoopDelay: shed ? 1000 : 0,
+    maxEventLoopUtilization: shed ? 0.98 : 0,
+    maxHeapUsedBytes: shed ? Math.floor(v8.getHeapStatistics().heap_size_limit * 0.9) : 0,
     retryAfter: 10,
     pressureHandler: (request, reply) => reply
       .code(503)
@@ -125,9 +101,6 @@ export async function buildApp() {
   });
 
   app.setNotFoundHandler((request, reply) => {
-    if (SITE_BUILD && request.method === 'GET' && !request.url.startsWith('/api/')) {
-      return reply.code(404).type('text/html; charset=utf-8').send(fs.createReadStream(path.join(SITE_BUILD, '404.html')));
-    }
     return reply.code(404).send({ error: 'Not found.' });
   });
 
@@ -143,13 +116,6 @@ export async function buildApp() {
   await app.register(publicRoutes);
   await app.register(paymentRoutes);
   await app.register(adminRoutes);
-
-  // Local convenience: serve the built site (dist/, from `npm run build`) and the dashboard from the
-  // same origin as the API, with the same clean addresses as Vercel (/missions/x -> missions/x.html).
-  if (config.serveFrontend) {
-    if (SITE_BUILD) await app.register(fastifyStatic, { root: SITE_BUILD, prefix: '/', extensions: ['html'], redirect: true });
-    else app.log.warn('No site build found in dist/. Run "npm run build" (npm run dev does it for you).');
-  }
 
   return app;
 }

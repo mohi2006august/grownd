@@ -1,0 +1,51 @@
+# Runs on every pull request and on pushes to main: the payment tests against a throwaway Postgres,
+# the TypeScript check and production build, and the SEO check of the built site.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: grownd-main
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: grownd-main/package-lock.json
+      - run: npm ci
+
+      - name: Payment tests
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+
+      # Type-checks too. Without a database the pages build with their placeholders.
+      - name: Build
+        run: npm run build
+
+      - name: SEO check
+        run: |
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:4000/ && break; sleep 1; done
+          npm run check:site || { cat server.log; exit 1; }

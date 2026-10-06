@@ -74,7 +74,7 @@ With `SUPABASE_SERVICE_ROLE_KEY` set, `npm run create-admin -- you@yourdomain.co
 ```bash
 npm run dev
 ```
-Open <http://localhost:4000/admin/> and sign in. Then:
+Open <http://localhost:4000/admin> and sign in. Then:
 - **Settings:** set the currency (`INR` for rupees), timezone label, reply time and safety note.
 - **Missions & dates:** set prices and add dates.
 
@@ -100,8 +100,10 @@ That's enough to try payments locally: a payment is recorded the moment the cust
 ### 3. Try a booking
 1. In the dashboard, set the currency to `INR` in **Settings**, and make sure a mission has a **price** and an upcoming **date**.
 2. On the site, open that mission, click **Book this date** and pay on Razorpay's test page with either of these:
-   - **UPI:** `success@razorpay`
-   - **Card:** `4111 1111 1111 1111`, any future expiry date and any CVV. On the test bank page, choose **Success**.
+   - **Netbanking:** pick any bank, then click **Success** on Razorpay's test bank page.
+   - **UPI:** under **Show All Options → UPI**, enter `success@razorpay`.
+
+   Avoid test card numbers you find online. Many are international cards, which new Indian accounts don't accept ("International cards are not supported").
 3. You land on **You're booked!** The booking shows in the dashboard under **Payments**, where you can also try a refund.
 
 To test a quote, open a registration in the dashboard, create a **payment link**, and open it.
@@ -118,11 +120,11 @@ Do Part 1 first: the tables and your admin login are created from your computer.
 ### 1. Point Vercel at the app folder
 In Vercel, open your project, then **Settings → Build and Deployment**:
 - **Root Directory:** `grownd-main` (the folder that contains `vercel.json`). Save.
-- **Framework Preset:** **Other**. Leave Build Command, Output Directory and Install Command on their defaults, because `vercel.json` sets everything.
+- **Framework Preset:** **Next.js** (`vercel.json` says so too). Leave Build Command, Output Directory and Install Command on their defaults. If you turned on an **Override** for any of them earlier, turn it off.
 
 If the Root Directory is `grownd-main/backend`, Vercel runs only the backend, for every page, and never deploys the website. That is what produces `FUNCTION_INVOCATION_FAILED`.
 
-With the app folder as the root, Vercel runs `npm run build`, its CDN serves the website and dashboard from `dist/`, and one Vercel Function answers `/api/*`. A daily Vercel Cron job tidies up unpaid bookings.
+With the app folder as the root, Vercel builds the Next.js app: its CDN serves the pages, the booking page and the dashboard, and Vercel Functions run the API under `/api/*`. A daily Vercel Cron job tidies up unpaid bookings.
 
 ### 2. Add the environment variables
 Go to **Settings → Environment Variables**. Add these for *Production* and *Preview*, copying the values from your `backend/.env`:
@@ -157,7 +159,7 @@ Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed v
 2. Redeploy so the new variable takes effect.
 
 ### 5. Check it
-- `https://grownd-beige.vercel.app` shows the website, and `/admin/` signs you in.
+- `https://grownd-beige.vercel.app` shows the website, and `/admin` signs you in.
 - `/readyz` answers `{"status":"ready"}`, which means the database is reachable.
 - If a setting is missing, `/api/...` answers with a message naming it, and the website still loads.
 
@@ -174,7 +176,7 @@ Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed v
 3. **Webhook:** add the webhook from Part 3, step 4 again in **Live Mode**, with its own secret in `RAZORPAY_WEBHOOK_SECRET`. Production refuses to take payments without it.
 4. **Rate limits:** set `REDIS_URL` (Upstash) in Vercel. For extra protection, add Vercel Firewall rate-limit rules for `/api/checkout` and `/api/registrations`.
 5. **Supabase:** consider the Pro plan before launch, for no pausing, daily backups and more connections.
-6. **Not using Vercel?** The API also runs as a normal server. Build the container from the app folder with `docker build -f backend/Dockerfile .`. On the server, set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. Then run `npm run build` and host `dist/` on any CDN that forwards `/api/*` to it (see `frontend/README.md`).
+6. **Not using Vercel?** Any Node 22+ host works: run `npm ci`, `npm run build`, then `npm start`, which serves the site and the API together on port 4000. Set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. (`backend/Dockerfile` builds an API-only image if you host the API separately.)
 
 ## If something goes wrong
 Run `npm run check`; it names the problem and the fix. The usual ones are:

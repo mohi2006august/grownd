@@ -1,47 +1,48 @@
 # SEO for GROWND
 
-What is set up, how to keep it right, and how to grow it. The words that appear in search results live in [frontend/seo.mjs](frontend/seo.mjs). `npm run build` turns them into the site, and `npm run check:site` checks the result.
+What is set up, how to keep it right, and how to grow it. The words that appear in search results live in [lib/seo.ts](lib/seo.ts), and the missions' own words in [lib/missions.ts](lib/missions.ts). `npm run check:site` checks a running copy of the site (`npm run build && npm start` first).
 
 ## What is in place
 
 | Item | What the site does now | Where |
 | --- | --- | --- |
-| Clean URLs | Every page has a real address: `/missions/slime-chemistry`, `/quiz/chemist`, `/about`. Old `#/` links redirect to the clean address. `.html` endings and trailing slashes redirect too. | `vercel.json` (`cleanUrls`), router in the design source |
-| Meta titles | Unique per page, under 60 characters, with the keyword first. Example: *Slime Chemistry Science Birthday Party, Ages 5-8 \| GROWND*. | `frontend/seo.mjs` |
-| Meta descriptions | Unique per page, under 160 characters. | `frontend/seo.mjs` |
-| One h1 per page | Each page has exactly one h1. The quiz now has a descriptive h1, and its questions are h2. | design source, checked by `check:site` |
-| Heading order | No skipped levels: h1, then h2, then h3. Fixed on the home, missions, mission, quiz and result pages. | design source |
-| Canonical tags | Every indexable page points at its own `https://` address. The missions filter (`/missions?cat=…`) points at `/missions`, so filters don't create duplicate pages. | build |
-| Share image (og:image) | A 1200×630 image for every page: one for the brand, one for the quiz, one per mission and one per scientist type. Each is 58-77 KB, well under WhatsApp's 300 KB limit, and has alt text. | `frontend/assets/og/`, made by `frontend/tools/make-images.mjs` |
-| Schema markup | Every page carries JSON-LD for the Organization, WebSite and WebPage. Inner pages add a BreadcrumbList, mission pages add a Service with age range, and dated events add an Event with price and availability once the dashboard has dates. | `frontend/seo.mjs`, `ldEvents()` in the design source |
-| sitemap.xml | Lists the 14 pages worth finding in search. Pages kept out of search are not listed. | build writes `/sitemap.xml` |
-| robots.txt | Lets everything be crawled except `/admin` and `/api/`, and points at the sitemap. | build writes `/robots.txt` |
-| noindex | Register, thank-you, The Lab (thin until it has content), checkout, admin, the 404 page and the API stay out of search, via meta tags and `X-Robots-Tag` headers. | `frontend/seo.mjs`, `vercel.json` |
-| Enforce HTTPS | Vercel redirects `http://` to `https://`. HSTS tells browsers to only ever use HTTPS. Every canonical and share link is `https://`. | `vercel.json` |
-| Internal links | All links are real `<a href>` links that crawlers can follow. Every page lists the missions, and mission pages link to related missions and their scientist type. | design source, build |
-| Crawlers without JavaScript | Each page also contains a plain-HTML version of its content and links. Browsers remove it once the live page starts. This covers Bing's first pass, AI search crawlers and link previews. | build |
-| Broken links | None. `npm run check:site` checks every internal link on every page. | `frontend/tools/check-site.mjs` |
-| Alt text | The site has no photos yet, only placeholders. The drawings have descriptions, icons are hidden from screen readers, the placeholders say what photo goes there, and share images have alt text. See [Adding photos](#adding-photos). | design source |
+| Clean URLs | Every page has a real address: `/missions/slime-chemistry`, `/quiz/chemist`, `/about`. Old `#/` links redirect to the clean address. `.html` endings and trailing slashes redirect too. | `app/` folders, `next.config.ts`, `app/layout.tsx` |
+| Meta titles | Unique per page, under 60 characters, with the keyword first. Example: *Slime Chemistry Science Birthday Party, Ages 5-8 \| GROWND*. | `lib/seo.ts` |
+| Meta descriptions | Unique per page, under 160 characters. | `lib/seo.ts` |
+| One h1 per page | Each page has exactly one h1. The quiz now has a descriptive h1, and its questions are h2. | pages in `app/(site)/`, checked by `check:site` |
+| Heading order | No skipped levels: h1, then h2, then h3. Fixed on the home, missions, mission, quiz and result pages. | pages in `app/(site)/` |
+| Canonical tags | Every indexable page points at its own `https://` address. The missions filter (`/missions?cat=…`) points at `/missions`, so filters don't create duplicate pages. | `lib/seo.ts` |
+| Share image (og:image) | A 1200×630 image for every page: one for the brand, one for the quiz, one per mission and one per scientist type. Each is 58-77 KB, well under WhatsApp's 300 KB limit, and has alt text. | `public/og/`, made by `scripts/make-images.mjs` |
+| Schema markup | Every page carries JSON-LD for the Organization, WebSite and WebPage. Inner pages add a BreadcrumbList, mission pages add a Service with age range, and dated events add an Event with price and availability once the dashboard has dates. | `lib/seo.ts`, events in `app/(site)/missions/[slug]/page.tsx` |
+| sitemap.xml | Lists the 14 pages worth finding in search. Pages kept out of search are not listed. | `app/sitemap.ts` |
+| robots.txt | Lets everything be crawled except `/admin` and `/api/`, and points at the sitemap. | `app/robots.ts` |
+| noindex | Register, thank-you, The Lab (thin until it has content), checkout, admin, the 404 page and the API stay out of search, via meta tags and `X-Robots-Tag` headers. | `lib/seo.ts`, `next.config.ts` |
+| Enforce HTTPS | Vercel redirects `http://` to `https://`. HSTS tells browsers to only ever use HTTPS. Every canonical and share link is `https://`. | Vercel, `next.config.ts` |
+| Internal links | All links are real `<a href>` links that crawlers can follow. Every page lists the missions, and mission pages link to related missions and their scientist type. | pages in `app/(site)/` |
+| Crawlers without JavaScript | Every page is rendered on the server, so its full content, links, prices and dates are in the HTML itself. This covers Bing's first pass, AI search crawlers and link previews. | Next.js |
+| Broken links | None. `npm run check:site` checks every internal link on every page. | `scripts/check-site.mjs` |
+| Alt text | The site has no photos yet, only placeholders. The drawings have descriptions, icons are hidden from screen readers, the placeholders say what photo goes there, and share images have alt text. See [Adding photos](#adding-photos). | pages in `app/(site)/` |
 | Compressed images | Share images are JPEG at about 70 KB each, and icons are small PNGs. Fonts are WOFF2. Vercel compresses HTML, CSS and JS with Brotli. | |
-| Mobile | Tested at 375 px wide: nothing wider than the screen on any page, and every page has one h1. The ticket card is now laid out properly on phones, and small links are now at least 40-44 px tall so they're easy to tap. | design source |
+| Mobile | Tested at 375 px wide: nothing wider than the screen on any page, and every page has one h1. The ticket card is now laid out properly on phones, and small links are now at least 40-44 px tall so they're easy to tap. | pages in `app/(site)/` |
 | Core Web Vitals | See below. | |
 
 ### Core Web Vitals
 
-The old page was one 500 KB self-unpacking file that loaded React from unpkg.com and fonts from Google. Now pages load React, the page runtime and fonts from GROWND's own domain. Those files have content hashes in their names, so browsers keep them for a year. The runtime is minified, and the three main fonts are preloaded.
+Every page arrives as finished HTML with its content, prices and dates already in place. React, the page code and the fonts load from GROWND's own domain; their file names carry content hashes, so browsers keep them for a year. The three main fonts are preloaded.
 
-Lighthouse, mobile, compressed as Vercel serves it, home page:
+Lighthouse, mobile, measured locally on the production build (`npm run build && npm start`), before and after the move to Next.js:
 
-| | Before | After |
-| --- | --- | --- |
-| Performance | 86 | **92** |
-| SEO | 82 | **100** |
-| Accessibility | 91 | **100** |
-| Best practices | 100 | **100** |
-| First Contentful Paint | 1.8 s | **0.85 s** |
-| Largest Contentful Paint | 2.7 s (needs improvement) | **2.3 s (good)** |
-| Layout shift (CLS) | 0.006 | **0** |
-| Data downloaded | 251 KB | **170 KB** |
+| | Original page | Static build | Next.js (now) |
+| --- | --- | --- | --- |
+| Performance | 86 | 92 | **95** (home), 96 (mission, quiz), 92 (missions) |
+| SEO | 82 | 100 | **100** on all four |
+| Accessibility | 91 | 100 | **100** on all four |
+| Best practices | 100 | 100 | **100** on all four |
+| First Contentful Paint | 1.8 s | 0.85 s | **0.8-1.1 s** |
+| Largest Contentful Paint | 2.7 s | 2.3 s | **2.7-3.2 s** |
+| Layout shift (CLS) | 0.006 | 0 | **0** |
+
+The largest element is the big heading, and it counts as painted only once its words finish sliding in (about 1.5 s of animation). To bring LCP under 2.5 s, shorten or remove that entrance animation in `components/home/Hero.tsx` and on the other page headings. Vercel's CDN answers faster than a laptop, so real numbers are usually better.
 
 Real visitors' numbers appear in Search Console under **Core Web Vitals** about four weeks after launch.
 
@@ -50,9 +51,9 @@ Real visitors' numbers appear in Search Console under **Core Web Vitals** about 
 Search results show what is on the page, so replace the placeholders first:
 
 - In the dashboard: prices, currency (`INR`), dates, reply time and the safety note. These fill `[PRICE]`, `[DATE]`, `[CITY …]`, `[RESPONSE TIME]` and `[INSURANCE AND DBS DETAILS]`.
-- In the design source: `MISSION CONTROL / [CITY]`, the team names (`[TEAM LEAD]`, `[TECH LEAD]`, `[CONTENT LEAD]`) and the photos (`[PHOTO …]`, `[VIDEO …]`).
+- In the code: `MISSION CONTROL / [CITY]`, the team names (`[TEAM LEAD]`, `[TECH LEAD]`, `[CONTENT LEAD]` in `lib/missions.ts`) and the photos (`[PHOTO …]`, `[VIDEO …]`).
 - The mission notes mention **DBS checks**, which are a UK thing. For India, say what you actually do, for example police verification and child-safety training.
-- In `frontend/seo.mjs`, fill `site.email` and `site.sameAs` (your Instagram, YouTube and Facebook pages) once they exist.
+- In `lib/seo.ts`, fill `site.email` and `site.sameAs` (your Instagram, YouTube and Facebook pages) once they exist.
 
 ## Google Search Console
 
@@ -82,9 +83,9 @@ Real photos help a lot, both in image search and for trust. When you add them:
 
 ## Changing things
 
-- **Words in search results:** edit `frontend/seo.mjs`, then run `npm run build` and `npm run check:site`.
-- **A mission's title, line or colour:** edit the design source, then redraw the share images with `npm install --no-save puppeteer-core`, then `node frontend/tools/make-images.mjs`.
-- **A new page in the app:** add it to the router (`path()` and `parsePath()` in the design source) and to `pages()` in `frontend/seo.mjs`.
+- **Words in search results:** edit `lib/seo.ts`, then run `npm run build`, `npm start` and (in a second terminal) `npm run check:site`.
+- **A mission's title, line or colour:** edit `lib/missions.ts`, then redraw the share images with `npm install --no-save puppeteer-core`, then `node scripts/make-images.mjs`.
+- **A new page:** add a folder with a `page.tsx` under `app/(site)/` that exports `metadata = metadataFor("/its-address")`, and add the page to `PAGES` in `lib/seo.ts`. Indexable pages go into the sitemap automatically.
 
 ## Backlink strategy
 

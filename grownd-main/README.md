@@ -3,12 +3,19 @@
 The GROWND science-experience website, its booking and payments API, and the admin dashboard the team uses to manage registrations, payments, prices and dates.
 
 ```
-frontend/          the website; `npm run build` turns it into dist/, served from a CDN
-  design/          the site's source: every page, its logic and the mission data
-  seo.mjs          titles, descriptions, share images and structured data for each page
-  build.mjs        builds dist/: one HTML file per page, hashed assets, sitemap, robots.txt
-  site/            the booking/payment page (checkout.html)
-  admin/           admin dashboard (plain HTML/CSS/JS, Supabase Auth sign-in)
+app/               the website (Next.js App Router, TypeScript): one folder per address
+  (site)/          the public pages; (site)/missions/[slug]/page.tsx is /missions/slime-chemistry
+  api/             hands every /api/* request to the backend, in the same deployment
+  sitemap.ts, robots.ts, manifest.ts
+components/        page parts: header and footer, mission cards, quiz, register form, animations
+lib/
+  missions.ts      the missions, scientist types, quiz and team: the words on the site
+  seo.ts           titles, descriptions, share images and structured data for every page
+  live.ts, view.ts reads prices, dates and places from the backend and formats them (en-IN)
+  api-bridge.ts    runs the backend inside Next.js
+public/            served as they are: fonts, share images (og/), icons, and
+  checkout.html    the booking/payment page (plain HTML/CSS/JS, at /checkout)
+  admin/           admin dashboard (plain HTML/CSS/JS, Supabase Auth sign-in, at /admin)
 backend/           API: Node + Fastify, stateless, talks to Supabase Postgres and Razorpay
   src/
     routes/        HTTP layer: public, payments, admin, cron, health. Validation and status codes only
@@ -17,37 +24,37 @@ backend/           API: Node + Fastify, stateless, talks to Supabase Postgres an
     lib/           cache, errors, money, validation helpers
     app.js         plugins, protection, error handling
     server.js      start-up, payment reconciliation, graceful shutdown (long-running servers)
-    index.js       entry point; optional multi-core worker supervisor
+    index.js       entry point when the API runs on its own server; optional multi-core workers
   scripts/         check (setup checker), db:migrate, create-admin
-  Dockerfile       for container hosts (not needed on Vercel)
+  test/            payment tests (npm test)
+  Dockerfile       API-only image for container hosts (not needed on Vercel)
 database/
   migrations/      SQL schema for Supabase, applied in order
-api/index.js       Vercel Function: runs the backend for /api/* on Vercel
-vercel.json        Vercel: builds the site, serves dist/ from the CDN, the function for /api/*, daily cron
+scripts/           check-site.mjs (SEO check of a running site), make-images.mjs (share images, icons)
+design/            the original design-tool files the site was converted from (reference only)
+next.config.ts     security headers, redirects from old addresses, /checkout and /admin
+vercel.json        Vercel: a Next.js app, plus the daily cron
 package.json       npm workspace root: `npm install` here installs the backend too
 ```
 
-Each folder has its own README with the details. **New here? Start with [SETUP.md](SETUP.md).** Search engine setup, Search Console and the backlink plan are in [SEO.md](SEO.md).
+`backend/` and `database/` have READMEs with the details. **New here? Start with [SETUP.md](SETUP.md).** Search engine setup, Search Console and the backlink plan are in [SEO.md](SEO.md).
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
-  V[Visitors] --> CDN[CDN / static host<br/>frontend/site + admin]
+  V[Visitors] --> CDN[Vercel CDN<br/>pre-built pages, booking page, dashboard]
   A[Admins] --> CDN
-  CDN -- "/api/*" --> LB[Load balancer]
-  LB --> API1[API instance]
-  LB --> API2[API instance]
-  LB --> APIn[API instance ...]
-  API1 & API2 & APIn --> POOL[Supabase pooler<br/>Supavisor]
+  CDN -- "/api/*, page refresh" --> FN[Next.js on Vercel Functions<br/>pages + API, scales out]
+  FN --> POOL[Supabase pooler<br/>Supavisor]
   POOL --> PG[(Supabase Postgres)]
   A -. sign in .-> AUTH[Supabase Auth]
   V -. UPI / card details .-> RZP[Razorpay payment page]
-  API1 & API2 & APIn <-. payment links, refunds, webhooks .-> RZP
-  API1 & API2 & APIn -. shared rate limits, optional .-> R[(Redis)]
+  FN <-. payment links, refunds, webhooks .-> RZP
+  FN -. shared rate limits, optional .-> R[(Redis)]
 ```
 
-- **Visitors** load static pages from a CDN: one HTML file per page (`/missions/slime-chemistry`, `/quiz`, ...) with its own title, description and share image, so search engines and link previews see every page. The site calls `GET /api/content` (prices, dates, site details), `POST /api/registrations` (register interest) and the checkout endpoints.
+- **Visitors** get pages that Next.js builds ahead of time and serves from the CDN. Every address (`/missions/slime-chemistry`, `/quiz`, ...) arrives as complete HTML with its own title, description, share image, and the current prices and dates. Each page is rebuilt in the background at most once a minute, so dashboard changes show within a minute while visitor numbers never reach the database. In the browser, React takes over for the quiz, filters, form and animations. The site calls `GET /api/content` (prices, dates, site details), `POST /api/registrations` (register interest) and the checkout endpoints.
 - **Payments** happen on Razorpay's hosted payment page (UPI, cards, netbanking, wallets), so card and UPI details never touch GROWND's servers. Razorpay tells the API what happened through signed webhooks.
 - **Admins** sign in with Supabase Auth in the dashboard. The API verifies the token on every request and requires `app_metadata.role = "admin"`.
 - **The database** is only reachable through the API. Row Level Security blocks Supabase's auto-generated REST API for these tables.
@@ -85,7 +92,7 @@ Locally, the keys alone are enough to take test payments: a payment is recorded 
 
 | Concern | What the system does |
 | --- | --- |
-| Lots of visitors | The site is static on a CDN. `/api/content` is built once per 30 s per instance, kept as a ready-made JSON string, and shared by concurrent requests (no stampede on a cold cache). It also sends CDN cache headers, so the CDN absorbs most traffic. Database load stays flat however many people visit. |
+| Lots of visitors | Pages are pre-built and served from the CDN, refreshed at most once a minute. `/api/content` is built once per 30 s per instance, kept as a ready-made JSON string, and shared by concurrent requests (no stampede on a cold cache). It also sends CDN cache headers, so the CDN absorbs most traffic. Database load stays flat however many people visit. |
 | Lots of sign-ups at once | **Group commit:** sign-ups arriving within 5 ms of each other are saved in one multi-row INSERT. A spike costs dozens of database round trips instead of thousands. If the database rejects one row, the rest of its batch is still saved. |
 | A rush for one date | Place holds are single conditional UPDATEs on one row. Once a date is full, further attempts fail fast without waiting on Razorpay. |
 | More traffic than one machine | API instances are stateless; add more behind a load balancer. On a VM, `WEB_CONCURRENCY` runs one worker per CPU core and restarts any that die. |
@@ -120,24 +127,39 @@ npm install
 npm run check                            # checks backend/.env and every service, says what to fix
 npm run db:migrate                       # creates the tables
 npm run create-admin -- you@example.com --keep  # makes a Supabase user an admin (SETUP.md, step 6)
-npm run dev                              # builds the site, then starts the API
+npm run dev                              # the site and the API together, at localhost:4000
 ```
 
-Then open http://localhost:4000 for the site and http://localhost:4000/admin/ for the dashboard. After editing anything in `frontend/`, run `npm run build` and refresh; `npm run check:site` checks the build for SEO problems.
+Then open http://localhost:4000 for the site and http://localhost:4000/admin for the dashboard. Pages update as you save. To try the production version, run `npm run build` and `npm start`; then `npm run check:site` (in a second terminal) checks it for SEO problems. `npm test` runs the payment tests, and `npm run typecheck` checks the TypeScript.
 
 ## Deploy
 
 **On Vercel** (the setup used for grownd-beige.vercel.app): set the project's Root Directory to this folder, add the environment variables and deploy. [SETUP.md](SETUP.md), Part 3, lists every setting.
 
-`vercel.json` makes Vercel run `npm run build` and serve `dist/` from its CDN with clean addresses, and one Vercel Function (`api/index.js`) run the backend for `/api/*` with Fluid compute. A daily Vercel Cron job calls `/api/cron/reconcile`, because serverless has no long-running timer. The API's caching headers let the CDN answer `/api/content` too. Set `REDIS_URL` (Upstash) so rate limits are shared across instances.
+`vercel.json` tells Vercel this is a Next.js app. Vercel builds the pages and serves them from its CDN, and runs the rest (page refreshes, and the API under `/api/*`) as Vercel Functions with Fluid compute. A daily Vercel Cron job calls `/api/cron/reconcile`, because serverless has no long-running timer. The API's caching headers let the CDN answer `/api/content` too. Set `REDIS_URL` (Upstash) so rate limits are shared across instances.
 
-**On a container host** (Render, Railway, Fly.io, Cloud Run, ECS):
-1. Build from this folder: `docker build -f backend/Dockerfile .`
-2. Set the variables from `backend/.env.example`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
-3. Use `/readyz` as the health check, autoscale on CPU, and add `REDIS_URL` once you run more than one instance.
-4. Run `npm run build` (with `SITE_URL` set to your address) and host `dist/` on a CDN that forwards `/api/*` to the API (see `frontend/README.md`).
+**On any Node host** (Render, Railway, Fly.io, a VM): run `npm ci`, `npm run build`, then `npm start`, which serves the site and the API together on port 4000. Set the variables from `backend/.env.example`, plus `NODE_ENV=production`, `SITE_URL` and `TRUST_PROXY=1`, and use `/readyz` as the health check. Add `REDIS_URL` once you run more than one instance. `backend/Dockerfile` builds an API-only image if you would rather host the API separately.
 
 Either way, run `npm run db:migrate` against Supabase from your computer, and point the Razorpay webhook at `https://YOUR-SITE/api/payments/webhook` (SETUP.md, Part 3).
+
+## The website
+
+| Address | Page |
+| --- | --- |
+| `/` | Home |
+| `/missions` (`?cat=birthday`, `&city=…` filter it) | All missions |
+| `/missions/<slug>` | One mission, e.g. `/missions/slime-chemistry` |
+| `/quiz`, `/quiz/<type>` | Scientist quiz, and each result (`biologist`, `chemist`, `physicist`, `engineer`) |
+| `/about`, `/lab` | Who we are; The Lab |
+| `/register`, `/register/<slug>`, `/thank-you` | Register interest |
+| `/checkout?event=ID`, `/checkout?order=ID` | Book a date and pay; a payment link or an order's confirmation |
+| `/admin` | Dashboard |
+
+- **Words, missions, quiz and team:** `lib/missions.ts`. **Search titles and descriptions:** `lib/seo.ts` (see [SEO.md](SEO.md)). **Layout:** the page in `app/(site)/` and its parts in `components/`.
+- **Filled in from the dashboard:** prices and currency, dates, times and timezone, venues and cities, reply time, and the safety note.
+- **Still plain copy, to edit in the code:** the team names (`[TEAM LEAD]`, `[TECH LEAD]`, `[CONTENT LEAD]` in `lib/missions.ts`), `MISSION CONTROL / [CITY]`, and the photo and video slots (`[PHOTO …]`, `[VIDEO …]`; see "Adding photos" in [SEO.md](SEO.md)).
+- The booking page and the dashboard are plain HTML/JS in `public/`. Their Content-Security-Policy (in `checkout.html` and `admin/index.html`) allows only this site and, for the dashboard, `*.supabase.co`. Add a custom Supabase domain there if you use one.
+- Customers type their card or UPI details on Razorpay's page, never on this site. If payments are switched off, the booking buttons fall back to **Register interest**.
 
 ## Before launch
 
@@ -145,5 +167,5 @@ Either way, run `npm run db:migrate` against Supabase from your computer, and po
 - Switch Razorpay to live keys and a live webhook only after a full test-mode run-through.
 - Publish booking terms, a privacy policy and a cancellation and refund policy, and link them from the site. Razorpay asks for them during account activation.
 - Check with an accountant whether prices need GST shown or added. Tax is not calculated yet.
-- Edit the copy placeholders the dashboard does not manage, listed in `frontend/README.md`.
+- Edit the copy placeholders the dashboard does not manage, listed under [The website](#the-website).
 - New registrations and bookings show up in the dashboard, and Razorpay emails customers their receipts, but the GROWND team is not emailed about them yet. That is the next feature worth adding.
