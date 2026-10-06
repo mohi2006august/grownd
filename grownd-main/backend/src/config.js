@@ -73,6 +73,7 @@ function defaultSiteUrl() {
 
 export const config = Object.freeze({
   production,
+  testing: env.NODE_ENV === 'test',
   onVercel,
   port: int(env.PORT, 4000),
   host: env.HOST || '0.0.0.0',
@@ -114,8 +115,5 @@ export const config = Object.freeze({
 
   corsOrigins: list(env.CORS_ORIGINS),
   redisUrl: env.REDIS_URL || '',
-  contentCacheSeconds: Math.max(1, int(env.CONTENT_CACHE_SECONDS, 30)),
-  // Serve frontend/site and frontend/admin from this process. Handy locally; a CDN does it in
-  // production (and on Vercel the static files never reach the Function).
-  serveFrontend: bool(env.SERVE_FRONTEND, !production && !onVercel)
+  contentCacheSeconds: Math.max(1, int(env.CONTENT_CACHE_SECONDS, 30))
 });

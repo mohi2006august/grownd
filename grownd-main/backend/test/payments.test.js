@@ -131,7 +131,7 @@ describe('payments with Razorpay', { skip, concurrency: false }, () => {
     eventId = await freshEvent(10);
 
     Object.assign(process.env, {
-      NODE_ENV: 'test', LOG_LEVEL: 'silent', SERVE_FRONTEND: 'false',
+      NODE_ENV: 'test', LOG_LEVEL: 'silent',
       DATABASE_URL: DB, SUPABASE_URL: 'http://127.0.0.1:9', SUPABASE_ANON_KEY: 'sb_publishable_test',
       SITE_URL: 'https://grownd.test',
       RAZORPAY_KEY_ID: KEY_ID, RAZORPAY_KEY_SECRET: KEY_SECRET, RAZORPAY_WEBHOOK_SECRET: WEBHOOK_SECRET,

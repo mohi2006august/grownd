@@ -1,0 +1,17 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { SiteChrome } from "@/components/SiteChrome";
+
+export const metadata: Metadata = {
+  title: { absolute: "Page Not Found | GROWND" },
+  description: "The page you wanted is not here. Browse GROWND's science missions for children aged 5 to 12 instead.",
+  robots: { index: false, follow: true }
+};
+
+export default function NotFound() {
+  return (
+    <SiteChrome>
+      <div style={{ width: "100%", maxWidth: "1440px", margin: "0 auto", padding: "clamp(48px,8vw,120px) clamp(20px,4vw,48px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "clamp(32px,5vw,64px)", alignItems: "center" }}><div style={{ display: "flex", flexDirection: "column", gap: "24px" }}><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: "0.08em", fontWeight: "500", color: "var(--brand-ink,#C6F534)" }}>ERROR 404 / EXPERIMENT FAILED</span><h1 style={{ margin: "0", fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(46px,6.4vw,84px)", lineHeight: "0.95", fontWeight: "700", letterSpacing: "-0.025em" }}>This one did not react.</h1><p style={{ margin: "0", maxWidth: "600px", fontSize: "18px", lineHeight: "28px", color: "var(--muted,#9FACC9)" }}>The page you wanted is not here. Good scientists write down what went wrong, so if a GROWND link sent you here, tell us and we will fix it.</p><div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}><Link href="/" style={{ display: "inline-flex", alignItems: "center", minHeight: "52px", padding: "12px 24px", borderRadius: "14px", background: "var(--brand,#C6F534)", color: "var(--on-brand,#0A0E1A)", fontSize: "16px", fontWeight: "700", textDecoration: "none" }}>Back to the lab</Link><Link href="/missions" style={{ display: "inline-flex", alignItems: "center", minHeight: "52px", padding: "12px 24px", borderRadius: "14px", border: "2px solid var(--hair-strong,#6B7CAB)", color: "var(--ink,#F2F5FF)", fontSize: "16px", fontWeight: "700", textDecoration: "none" }}>Browse all missions</Link></div></div><div aria-label="Lab notebook" style={{ padding: "32px", borderRadius: "24px", background: "rgba(var(--surface-rgb,18,24,41),0.5)", backdropFilter: "blur(18px) saturate(150%)", WebkitBackdropFilter: "blur(18px) saturate(150%)", border: "1px solid rgba(var(--ink-rgb,242,245,255),0.09)", display: "flex", flexDirection: "column", gap: "14px", fontFamily: "'JetBrains Mono',monospace", fontSize: "15px", lineHeight: "22px", fontWeight: "500" }}><span style={{ fontSize: "13px", letterSpacing: "0.08em", color: "var(--muted,#9FACC9)" }}>LAB NOTEBOOK / ENTRY 404</span><div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "10px 16px", paddingTop: "14px", borderTop: "1px solid var(--hair,#2C3757)" }}><span style={{ color: "var(--muted,#9FACC9)" }}>EXPECTED</span><span>A page</span><span style={{ color: "var(--muted,#9FACC9)" }}>OBSERVED</span><span>Nothing at all</span><span style={{ color: "var(--muted,#9FACC9)" }}>VARIABLE</span><span>The address</span><span style={{ color: "var(--muted,#9FACC9)" }}>RESULT</span><span><span style={{ display: "inline-flex", padding: "2px 10px", borderRadius: "999px", background: "var(--danger,#FF7A7A)", color: "var(--on-accent,#0A0E1A)", fontSize: "13px", fontWeight: "700" }}>No reaction</span></span><span style={{ color: "var(--muted,#9FACC9)" }}>NEXT STEP</span><span>Try again, change one thing</span></div></div></div>
+    </SiteChrome>
+  );
+}
