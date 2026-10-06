@@ -1,9 +1,10 @@
 /** An error with an HTTP status and a message that is safe to show to the person. */
 export class HttpError extends Error {
-  constructor(statusCode, message, errors) {
+  constructor(statusCode, message, errors, code) {
     super(message);
     this.statusCode = statusCode;
     this.errors = errors;
+    this.code = code; // for the dashboard to act on, e.g. "mfa_required"
   }
 }
 

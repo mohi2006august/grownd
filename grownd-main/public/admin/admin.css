@@ -339,3 +339,9 @@ details.past-dates[open] summary { margin-bottom: 10px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* two-step sign-in */
+.login-card .qr { justify-self: center; width: 200px; height: 200px; padding: 10px; border-radius: 14px; background: #fff; }
+.login-card .secret { display: block; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--hair); background: var(--deep); font: 500 14px/1.5 var(--mono); letter-spacing: 0.08em; word-break: break-all; user-select: all; }
+.login-card .small { font-size: 13px; }
+.code-input { font-family: var(--mono); font-size: 24px; letter-spacing: 0.35em; text-align: center; }

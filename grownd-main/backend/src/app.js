@@ -85,7 +85,7 @@ export async function buildApp() {
   app.setErrorHandler((err, request, reply) => {
     if (err instanceof HttpError) {
       if (err.cause) request.log.error({ err: err.cause }, err.message); // e.g. the payment provider's own error
-      return reply.code(err.statusCode).send(err.errors ? { error: err.message, errors: err.errors } : { error: err.message });
+      return reply.code(err.statusCode).send({ error: err.message, ...(err.errors && { errors: err.errors }), ...(err.code && { code: err.code }) });
     }
     if (DB_UNAVAILABLE.has(err.code)) {
       request.log.error({ err }, 'database unavailable');

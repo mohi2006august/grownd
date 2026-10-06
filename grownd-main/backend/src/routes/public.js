@@ -43,6 +43,12 @@ export default async function publicRoutes(app) {
   app.post('/api/registrations', {
     config: { rateLimit: { max: 30, timeWindow: '1 hour' } }
   }, async (request, reply) => {
+    // "website" is a hidden field on the form that only bots fill in. They get the usual answer, so
+    // they move on, but nothing is saved.
+    if (typeof request.body?.website === 'string' && request.body.website.trim()) {
+      reply.code(201);
+      return { ok: true };
+    }
     const reg = cleanRegistration(request.body);
     if (!writes.tryAcquire()) throw busy();
     try {

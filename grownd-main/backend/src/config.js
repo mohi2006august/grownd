@@ -93,6 +93,8 @@ export const config = Object.freeze({
   supabaseAnonKey: browserSafeSupabaseKey('SUPABASE_ANON_KEY'),
   // Only needed for older projects that still sign tokens with the shared HS256 secret.
   supabaseJwtSecret: env.SUPABASE_JWT_SECRET || '',
+  // Admins also enter a code from an authenticator app (two-step sign-in). "off" turns that off.
+  adminMfa: env.ADMIN_MFA !== 'off',
 
   // Public address of the site, used in payment return links and in payment links sent to customers.
   siteUrl: (env.SITE_URL || defaultSiteUrl()).replace(/\/+$/, ''),

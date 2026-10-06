@@ -73,6 +73,8 @@ export default async function adminRoutes(app) {
 
   // Everything below needs a signed-in admin.
   app.register(async function authed(app) {
+    // Customer details: never kept by a browser cache, proxy or CDN, even on a refused request.
+    app.addHook('onRequest', async (request, reply) => { reply.header('Cache-Control', 'no-store'); });
     app.addHook('onRequest', requireAdmin);
 
     app.get('/api/admin/me', async request => request.admin);

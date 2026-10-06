@@ -30,14 +30,15 @@ backend/           API: Node + Fastify, stateless, talks to Supabase Postgres an
   Dockerfile       API-only image for container hosts (not needed on Vercel)
 database/
   migrations/      SQL schema for Supabase, applied in order
-scripts/           check-site.mjs (SEO check of a running site), make-images.mjs (share images, icons)
+scripts/           check-site.mjs (SEO check of a running site), make-images.mjs (share images, icons),
+                   vendor.mjs (copies the dashboard sign-in library into public/ before dev and build)
 design/            the original design-tool files the site was converted from (reference only)
 next.config.ts     security headers, redirects from old addresses, /checkout and /admin
 vercel.json        Vercel: a Next.js app, plus the daily cron
 package.json       npm workspace root: `npm install` here installs the backend too
 ```
 
-`backend/` and `database/` have READMEs with the details. **New here? Start with [SETUP.md](SETUP.md).** Search engine setup, Search Console and the backlink plan are in [SEO.md](SEO.md).
+`backend/` and `database/` have READMEs with the details. **New here? Start with [SETUP.md](SETUP.md).** Search engine setup, Search Console and the backlink plan are in [SEO.md](SEO.md). What keeps the site safe, and the security settings only you can switch on, are in [SECURITY.md](SECURITY.md).
 
 ## How it fits together
 
@@ -56,7 +57,7 @@ flowchart LR
 
 - **Visitors** get pages that Next.js builds ahead of time and serves from the CDN. Every address (`/missions/slime-chemistry`, `/quiz`, ...) arrives as complete HTML with its own title, description, share image, and the current prices and dates. Each page is rebuilt in the background at most once a minute, so dashboard changes show within a minute while visitor numbers never reach the database. In the browser, React takes over for the quiz, filters, form and animations. The site calls `GET /api/content` (prices, dates, site details), `POST /api/registrations` (register interest) and the checkout endpoints.
 - **Payments** happen on Razorpay's hosted payment page (UPI, cards, netbanking, wallets), so card and UPI details never touch GROWND's servers. Razorpay tells the API what happened through signed webhooks.
-- **Admins** sign in with Supabase Auth in the dashboard. The API verifies the token on every request and requires `app_metadata.role = "admin"`.
+- **Admins** sign in with Supabase Auth in the dashboard: a password plus a code from an authenticator app. The API verifies the token on every request and requires `app_metadata.role = "admin"` and the second step (`aal2`).
 - **The database** is only reachable through the API. Row Level Security blocks Supabase's auto-generated REST API for these tables.
 
 ## Payments
@@ -100,7 +101,7 @@ Locally, the keys alone are enough to take test payments: a payment is recorded 
 | Overload | Instead of crashing, the API answers `503` with `Retry-After`: when the event loop or memory is saturated, when too many sign-ups or checkouts are queued in a process, or when a query can't finish within 5 s. |
 | Abuse | Per-IP rate limits: 30 sign-ups and 30 checkouts per hour, 1,200 content reads/minute, 300 other API calls/minute; Razorpay webhooks are never throttled. With several instances, set `REDIS_URL` so they share counters. If Redis goes down, requests are allowed rather than blocked. |
 | Operations | `/healthz` (liveness, still answers under load) and `/readyz` (checks the database). Graceful shutdown drains requests on deploy. Structured JSON logs record only slow and failed requests. |
-| Security | Strict input validation with friendly messages; small body limits; no secrets in the browser; Bearer tokens verified locally against Supabase's signing keys; signed webhooks; unguessable order links that never expose phone numbers or notes; CSV export defused against spreadsheet formulas; Content-Security-Policy on the dashboard and checkout. |
+| Security | Two-step sign-in for admins; Content-Security-Policy on every page; no table reachable through Supabase's public API; strict input validation with friendly messages; small body limits; no secrets in the browser; Bearer tokens verified locally against Supabase's signing keys; signed webhooks; unguessable order links that never expose phone numbers or notes; CSV export defused against spreadsheet formulas; Content-Security-Policy on the dashboard and checkout. |
 
 ### Measured
 

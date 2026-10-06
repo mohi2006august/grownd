@@ -74,7 +74,7 @@ With `SUPABASE_SERVICE_ROLE_KEY` set, `npm run create-admin -- you@yourdomain.co
 ```bash
 npm run dev
 ```
-Open <http://localhost:4000/admin> and sign in. Then:
+Open <http://localhost:4000/admin> and sign in. The first time, the dashboard asks you to set up two-step sign-in: install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator or Authy), scan the QR code, and type the 6-digit code it shows. Save the setup key in a password manager; it restores the codes on a new phone. From then on you sign in with your password and the current code. Then:
 - **Settings:** set the currency (`INR` for rupees), timezone label, reply time and safety note.
 - **Missions & dates:** set prices and add dates.
 

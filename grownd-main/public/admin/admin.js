@@ -1,8 +1,7 @@
 // GROWND admin dashboard. Plain DOM, no build step.
-// Sign-in is Supabase Auth; every API call to /api/admin carries the Supabase access token.
-
-// Pinned so a new release can never change the dashboard under you.
-const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm';
+// Sign-in is Supabase Auth (password, then a code from an authenticator app); every API call to
+// /api/admin carries the Supabase access token. supabase-js is served from this site
+// (/admin/vendor/supabase.js, copied from node_modules by scripts/vendor.mjs), never from a CDN.
 
 const app = document.getElementById('app');
 const toastHost = document.getElementById('toast');
@@ -195,10 +194,11 @@ const byDate = (a, b) => (a.date || '9999').localeCompare(b.date || '9999') || (
 // ---------- API ----------
 
 class ApiError extends Error {
-  constructor(message, status, errors) {
+  constructor(message, status, errors, code) {
     super(message);
     this.status = status;
     this.errors = errors || {};
+    this.code = code;
   }
 }
 
@@ -227,7 +227,9 @@ async function api(path, { method = 'GET', body } = {}) {
     body: body === undefined ? undefined : JSON.stringify(body)
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(data.error || 'Something went wrong.', res.status, data.errors);
+  // Two-step sign-in was switched on while this session was open: ask for a code.
+  if (res.status === 403 && data.code === 'mfa_required' && me) renderMfa().catch(() => signedOut('Please sign in again.'));
+  if (!res.ok) throw new ApiError(data.error || 'Something went wrong.', res.status, data.errors, data.code);
   return data;
 }
 
@@ -278,12 +280,11 @@ function renderLogin(message) {
         const { error } = await supabase.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
         if (error) throw new Error(/invalid login/i.test(error.message) ? 'That email and password do not match.' : error.message);
         try {
-          me = await api('/me');
+          await enter();
         } catch (x) {
           await supabase.auth.signOut({ scope: 'local' });
           throw x;
         }
-        start();
       } catch (x) {
         err.textContent = x.message;
         btn.disabled = false;
@@ -301,6 +302,102 @@ function renderLogin(message) {
   app.replaceChildren(h('main', { class: 'login' }, form));
   document.title = 'Sign in · GROWND Admin';
   email.focus();
+}
+
+// ---------- two-step sign-in ----------
+
+/** Opens the dashboard, or asks for an authenticator-app code first if the API wants one. */
+async function enter() {
+  try {
+    me = await api('/me');
+  } catch (x) {
+    if (x.code === 'mfa_required') return renderMfa();
+    throw x;
+  }
+  start();
+}
+
+/**
+ * Asks for the 6-digit code from the admin's authenticator app. The first time, it shows a QR code
+ * to add GROWND to the app (Google Authenticator, Microsoft Authenticator, Authy, 1Password...).
+ */
+async function renderMfa() {
+  shell = null;
+  me = null;
+  const { data: factors, error } = await supabase.auth.mfa.listFactors();
+  if (error) throw error;
+  const verified = factors.totp.find(f => f.status === 'verified');
+  let factorId = verified?.id;
+
+  const err = h('p', { class: 'form-error', role: 'alert' });
+  const code = h('input', { class: 'input code-input', type: 'text', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: '6', required: true, spellcheck: 'false' });
+  const btn = h('button', { class: 'btn primary', type: 'submit' }, verified ? 'Continue' : 'Turn on two-step sign-in');
+  const other = h('button', { class: 'btn ghost', type: 'button', onclick: signOut }, 'Sign in as someone else');
+  const show = (...kids) => {
+    app.replaceChildren(h('main', { class: 'login' }, h('form', { class: 'login-card', onsubmit: verify }, h('div', { class: 'brand' }, brand()), ...kids)));
+    document.title = 'Two-step sign-in · GROWND Admin';
+  };
+
+  async function verify(e) {
+    e.preventDefault();
+    err.textContent = '';
+    const digits = code.value.replace(/\D/g, '');
+    if (digits.length !== 6) {
+      err.textContent = 'Enter the 6-digit code from the app.';
+      code.focus();
+      return;
+    }
+    btn.disabled = true;
+    try {
+      const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code: digits });
+      if (error) throw new Error(/invalid|expired|code/i.test(error.message) ? 'That code did not work. The app shows a new one every 30 seconds: type the one showing now.' : error.message);
+      await enter();
+    } catch (x) {
+      err.textContent = x.message;
+      btn.disabled = false;
+      code.select();
+    }
+  }
+
+  if (verified) {
+    show(
+      h('div', null, h('h1', null, 'Enter your code'), h('p', { class: 'muted' }, 'Open your authenticator app and type the 6-digit code it shows for GROWND.')),
+      field('Code', code), err, btn, other);
+    code.focus();
+    return;
+  }
+
+  // First time: explain, then (on click) make the QR code. Nothing changes on the account until then.
+  const begin = h('button', { class: 'btn primary', type: 'button' }, 'Set it up');
+  show(
+    h('div', null, h('h1', null, 'Protect your account'),
+      h('p', { class: 'muted' }, 'Admins sign in with their password and a 6-digit code from an authenticator app on their phone, such as Google Authenticator or Microsoft Authenticator. Someone who learns your password still cannot get in.')),
+    err, begin, other);
+  begin.focus();
+  begin.addEventListener('click', async () => {
+    begin.disabled = true;
+    err.textContent = '';
+    try {
+      // Leftovers from a setup that was never finished.
+      for (const f of factors.all.filter(f => f.factor_type === 'totp' && f.status !== 'verified')) {
+        const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
+        if (error) throw error;
+      }
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'GROWND dashboard' });
+      if (error) throw error;
+      factorId = data.id;
+      show(
+        h('div', null, h('h1', null, 'Scan this code'), h('p', { class: 'muted' }, 'In your authenticator app, add an account and scan this code. Then type the 6-digit code the app shows.')),
+        h('img', { class: 'qr', src: data.totp.qr_code, width: '200', height: '200', alt: 'QR code to add GROWND to your authenticator app' }),
+        h('p', { class: 'muted small' }, 'Cannot scan it? Choose "enter a setup key" in the app and type:'),
+        h('code', { class: 'secret' }, data.totp.secret),
+        field('Code from the app', code), err, btn, other);
+      code.focus();
+    } catch (x) {
+      err.textContent = x.message || 'Two-step sign-in could not be set up. Try again.';
+      begin.disabled = false;
+    }
+  });
 }
 
 function signedOut(message) {
@@ -1233,7 +1330,7 @@ function SettingsView() {
       h('h2', { id: 'acct-h' }, 'Other admins'),
       h('p', null, 'To add someone, or reset a forgotten password, run this in the backend folder:'),
       h('code', { class: 'quote code' }, 'npm run create-admin -- name@example.com'),
-      h('p', { class: 'muted' }, 'Add --revoke to take access away.'),
+      h('p', { class: 'muted' }, 'Add --revoke to take access away, or --reset-mfa when someone loses the phone with their authenticator app.'),
       h('div', { class: 'form-actions' }, h('button', { class: 'btn', type: 'button', onclick: signOut }, 'Sign out')));
   }
 
@@ -1258,8 +1355,8 @@ window.addEventListener('hashchange', route);
     const res = await fetch('/api/admin/config');
     if (!res.ok) throw new Error();
     const { supabaseUrl, supabaseAnonKey } = await res.json();
-    const { createClient } = await import(SUPABASE_JS);
-    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    // window.supabase is the library from /admin/vendor/supabase.js (loaded by index.html).
+    supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: true, autoRefreshToken: true, storageKey: 'grownd-admin-auth' }
     });
   } catch {
@@ -1272,13 +1369,11 @@ window.addEventListener('hashchange', route);
     if (event === 'SIGNED_OUT') setTimeout(() => signedOut('You were signed out.'), 0);
   });
   const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    try {
-      me = await api('/me');
-    } catch {
-      me = null;
-    }
+  if (!data.session) return renderLogin();
+  try {
+    await enter();
+  } catch {
+    me = null;
+    renderLogin();
   }
-  if (me) start();
-  else renderLogin();
 })();
