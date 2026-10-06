@@ -74,6 +74,8 @@ if (!set('SUPABASE_ANON_KEY')) {
       ok(`Supabase project ${host.endsWith('.supabase.co') ? host.split('.')[0] : host} answers, and the anon key works`);
       if (r.body?.disable_signup) ok('Public sign-ups are off (only admins you create can sign in)');
       else note('Anyone can create an account in your Supabase project.', 'Supabase -> Authentication -> Sign In / Providers -> turn off "Allow new users to sign up". Add admins with npm run create-admin.');
+      if (env.ADMIN_MFA === 'off') note('Two-step sign-in for admins is off (ADMIN_MFA=off), so a stolen password is enough to open the dashboard.', 'Remove ADMIN_MFA from the settings.');
+      else ok('Admins need a code from an authenticator app as well as their password');
     } else if (r.status === 401 || r.status === 403) {
       fix('Supabase rejected SUPABASE_ANON_KEY.', 'Copy the publishable / anon key again from Project Settings -> API Keys.');
     } else {
@@ -178,6 +180,17 @@ if (!set('DATABASE_URL')) {
           const [{ n }] = await sql`select count(*)::int as n from auth.users where raw_app_meta_data->>'role' = 'admin'`;
           if (n) ok(`${n} admin account${n === 1 ? '' : 's'} can sign in to the dashboard`);
           else fix('No admin account yet.', 'npm run create-admin -- you@example.com');
+        }
+
+        // Supabase's public Data API answers to the anon key that every browser has. No table may be open to it.
+        const [{ hasAnon }] = await sql`select exists (select 1 from pg_roles where rolname = 'anon') as "hasAnon"`;
+        if (hasAnon) {
+          const open = (await sql`
+            select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+            where n.nspname = 'public' and c.relkind = 'r'
+              and (not c.relrowsecurity or has_table_privilege('anon', c.oid, 'select, insert, update, delete'))`).map(r => r.relname);
+          if (open.length) fix(`These tables can be read or changed with the public anon key: ${open.join(', ')}.`, 'npm run db:migrate, then run this check again.');
+          else ok("No table can be read or changed through Supabase's public Data API");
         }
 
         if (!missing.length) {

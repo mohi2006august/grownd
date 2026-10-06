@@ -293,4 +293,21 @@ describe('payments with Razorpay', { skip, concurrency: false }, () => {
     const paidAgain = await app.inject({ method: 'POST', url: `/api/orders/${order.id}/pay` });
     assert.equal(paidAgain.statusCode, 409);
   });
+
+  test('a sign-up from a spam bot looks accepted but is not saved', async () => {
+    const count = async () => Number((await sql`select count(*) from registrations`)[0].count);
+    const before = await count();
+    const bot = await app.inject({ method: 'POST', url: '/api/registrations', payload: { name: 'Cheap pills', email: 'bot@spam.example', consent: true, website: 'https://spam.example' } });
+    assert.equal(bot.statusCode, 201);
+    assert.equal(await count(), before);
+    const person = await app.inject({ method: 'POST', url: '/api/registrations', payload: { name: 'Asha', email: 'asha@example.com', consent: true, website: '' } });
+    assert.equal(person.statusCode, 201, person.body);
+    assert.equal(await count(), before + 1);
+  });
+
+  test('the admin API refuses requests without a sign-in, and never lets them be cached', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/admin/registrations' });
+    assert.equal(res.statusCode, 401);
+    assert.equal(res.headers['cache-control'], 'no-store');
+  });
 });

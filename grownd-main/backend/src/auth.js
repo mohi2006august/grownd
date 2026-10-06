@@ -5,7 +5,9 @@ import { HttpError } from './lib/errors.js';
 // Admins sign in with Supabase Auth in the dashboard and send the access token as a Bearer token.
 // Tokens are verified locally (signature, issuer, audience, expiry), so no network or database
 // call is needed per request. An admin is a user whose app_metadata.role is "admin"; only the
-// service role can set app_metadata, so users cannot grant it to themselves.
+// service role can set app_metadata, so users cannot grant it to themselves. Admins must also have
+// passed two-step sign-in (a code from an authenticator app), which Supabase records as "aal2" in
+// the token, so a stolen password alone does not open the dashboard.
 
 const issuer = `${config.supabaseUrl}/auth/v1`;
 const jwks = createRemoteJWKSet(new URL(`${issuer}/.well-known/jwks.json`), { cacheMaxAge: 10 * 60 * 1000 });
@@ -31,6 +33,9 @@ export async function verifyAdmin(token) {
     throw signIn();
   }
   if (payload.app_metadata?.role !== 'admin') throw new HttpError(403, 'This account does not have admin access.');
+  if (config.adminMfa && payload.aal !== 'aal2') {
+    throw new HttpError(403, 'Enter the code from your authenticator app to continue.', undefined, 'mfa_required');
+  }
   return { id: payload.sub, email: payload.email };
 }
 

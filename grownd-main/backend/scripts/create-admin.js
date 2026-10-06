@@ -2,6 +2,8 @@
 //   npm run create-admin -- you@example.com            create, or reset the password of, an admin
 //   npm run create-admin -- you@example.com --keep     grant admin to an existing user, keep their password
 //   npm run create-admin -- you@example.com --revoke   remove admin access
+//   npm run create-admin -- you@example.com --reset-mfa  lost phone: remove their two-step sign-in, so the
+//                                                       dashboard asks them to set it up again
 // Needs DATABASE_URL in backend/.env. Creating a user or setting a password also needs SUPABASE_URL and
 // SUPABASE_SERVICE_ROLE_KEY. Without the secret key, add the user in the Supabase dashboard
 // (Authentication -> Users -> Add user) and run this with --keep.
@@ -14,8 +16,8 @@ const filled = v => Boolean(v) && !/YOUR-|\[YOUR/.test(v);
 const hasKey = filled(SUPABASE_URL) && filled(SUPABASE_SERVICE_ROLE_KEY);
 const NO_KEY_HELP = 'Creating a login or setting a password needs SUPABASE_SERVICE_ROLE_KEY in backend/.env. Without it: add the user in Supabase (Authentication -> Users -> Add user, tick "Auto Confirm User"), then run this again with --keep.';
 
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !['', '--keep', '--revoke'].includes(flag)) {
-  console.error('Usage: npm run create-admin -- you@example.com [--keep | --revoke]');
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !['', '--keep', '--revoke', '--reset-mfa'].includes(flag)) {
+  console.error('Usage: npm run create-admin -- you@example.com [--keep | --revoke | --reset-mfa]');
   process.exit(1);
 }
 if (!filled(DATABASE_URL)) {
@@ -89,7 +91,13 @@ async function setRole(id, admin) {
 try {
   const [existing] = await sql`select id from auth.users where lower(email) = lower(${email}) limit 1`;
 
-  if (flag === '--revoke') {
+  if (flag === '--reset-mfa') {
+    if (!existing) throw new Error(`No user with the email ${email}.`);
+    const removed = await sql`delete from auth.mfa_factors where user_id = ${existing.id}`;
+    console.log(removed.count
+      ? `Removed two-step sign-in from ${email}. Next time they sign in, the dashboard asks them to set it up on their new phone.`
+      : `${email} had no two-step sign-in set up.`);
+  } else if (flag === '--revoke') {
     if (!existing) throw new Error(`No user with the email ${email}.`);
     await setRole(existing.id, false);
     console.log(`Removed admin access from ${email}. Their current session lasts until its token expires (about an hour).`);

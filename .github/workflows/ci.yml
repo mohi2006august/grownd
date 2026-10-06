@@ -7,6 +7,10 @@ on:
   push:
     branches: [main]
 
+# The workflow only reads the code; it cannot push, comment or change settings.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -34,6 +38,10 @@ jobs:
           cache: npm
           cache-dependency-path: grownd-main/package-lock.json
       - run: npm ci
+
+      # Fails when a package the site runs on has a known high or critical security hole.
+      - name: Known vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Payment tests
         run: npm test
