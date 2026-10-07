@@ -8,6 +8,8 @@ try {
 }
 
 const dev = process.env.NODE_ENV !== "production";
+// Browser error reports go to Sentry's servers, when error alerts are on (NEXT_PUBLIC_SENTRY_DSN).
+const sentryOrigin = (() => { try { return new URL(process.env.NEXT_PUBLIC_SENTRY_DSN || "").origin; } catch { return ""; } })();
 
 const security = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
@@ -33,7 +35,7 @@ const siteCsp = csp({
   "script-src": `'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
   "style-src": "'self' 'unsafe-inline'",
   "img-src": "'self' data: blob:",
-  "connect-src": dev ? "'self' ws: wss:" : "'self'",
+  "connect-src": ["'self'", dev && "ws: wss:", sentryOrigin].filter(Boolean).join(" "),
   "frame-src": "'none'"
 });
 // The booking page and the dashboard are plain files with no inline code at all, so theirs is stricter.

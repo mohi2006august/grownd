@@ -1,6 +1,7 @@
 import { badRequest, notFound } from '../lib/errors.js';
 import { contactDetails, int, isId } from '../lib/validate.js';
 import { parseWebhook, webhooksEnabled } from '../payments/provider.js';
+import { sendTeamEmail } from '../services/notify.js';
 import { cancelBooking, createBooking, getPublicOrder, handleProviderEvent, isOrderId, startRequestPayment } from '../services/orders.js';
 
 function cleanBooking(body) {
@@ -35,6 +36,7 @@ export default async function paymentRoutes(app) {
     if (!isOrderId(request.params.id)) throw orderGone();
     const order = await getPublicOrder(request.params.id, { sync: request.query.sync === '1' });
     if (!order) throw orderGone();
+    if (order.status === 'paid') app.later(sendTeamEmail); // just paid: tell the team
     reply.header('Cache-Control', 'no-store');
     return order;
   });
@@ -72,6 +74,7 @@ export default async function paymentRoutes(app) {
         return reply.code(400).send({ error: 'Invalid signature.' });
       }
       await handleProviderEvent(event); // a thrown error answers 500, and the provider retries later
+      app.later(sendTeamEmail);
       return { received: true };
     });
   });

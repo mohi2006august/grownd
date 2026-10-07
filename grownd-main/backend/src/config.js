@@ -116,6 +116,11 @@ export const config = Object.freeze({
   cronSecret: env.CRON_SECRET || '',
 
   corsOrigins: list(env.CORS_ORIGINS),
+  // Emails to the team about new registrations and payments, through Resend. Off until both are set.
+  resendApiKey: env.RESEND_API_KEY || '',
+  notifyEmails: list(env.NOTIFY_EMAIL),
+  notifyFrom: env.NOTIFY_FROM || 'GROWND <onboarding@resend.dev>',
+  resendApiBase: (env.RESEND_API_BASE || 'https://api.resend.com').replace(/\/+$/, ''),
   redisUrl: env.REDIS_URL || '',
   contentCacheSeconds: Math.max(1, int(env.CONTENT_CACHE_SECONDS, 30))
 });

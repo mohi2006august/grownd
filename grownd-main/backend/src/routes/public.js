@@ -3,6 +3,7 @@ import { concurrencyLimit } from '../lib/cache.js';
 import { badRequest, busy } from '../lib/errors.js';
 import { contactDetails, int, isoDate, oneOf, text } from '../lib/validate.js';
 import { getContentJson } from '../services/content.js';
+import { sendTeamEmail } from '../services/notify.js';
 import { createRegistration } from '../services/registrations.js';
 
 const VENUES = ['Our home', 'A hall we have booked', 'School', 'Not decided yet'];
@@ -53,6 +54,7 @@ export default async function publicRoutes(app) {
     if (!writes.tryAcquire()) throw busy();
     try {
       await createRegistration(reg);
+      app.later(sendTeamEmail);
       reply.code(201);
       return { ok: true };
     } finally {

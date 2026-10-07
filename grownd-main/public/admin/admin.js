@@ -15,7 +15,10 @@ const TYPES = {
 const STATUSES = [['new', 'New'], ['contacted', 'Contacted'], ['confirmed', 'Confirmed'], ['cancelled', 'Cancelled']];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
 const AGE_LABEL = { '5-8': '5-8', '7-11': '7-11', '8-12': '8-12', mixed: 'Mixed ages, 5-12' };
-const SETTING_LABEL = { currency: 'currency', timezone: 'timezone label', responseTime: 'reply time', insuranceNote: 'safety and checks note' };
+const SETTING_LABEL = {
+  currency: 'currency', timezone: 'timezone label', responseTime: 'reply time', insuranceNote: 'safety and checks note',
+  businessName: 'business name', contactEmail: 'contact email', contactPhone: 'contact phone', address: 'business address'
+};
 const NAV = [
   ['overview', 'Overview', 'grid'],
   ['registrations', 'Registrations', 'inbox'],
@@ -1265,15 +1268,23 @@ function SettingsView() {
   function siteForm(s) {
     const inputs = {
       currency: h('input', { class: 'input', type: 'text', maxlength: '3', value: s.currency, placeholder: 'INR', autocapitalize: 'characters', spellcheck: 'false' }),
-      timezone: h('input', { class: 'input', type: 'text', maxlength: '40', value: s.timezone, placeholder: 'UK time' }),
+      timezone: h('input', { class: 'input', type: 'text', maxlength: '40', value: s.timezone, placeholder: 'IST' }),
       responseTime: h('input', { class: 'input', type: 'text', maxlength: '60', value: s.responseTime, placeholder: 'one working day' }),
-      insuranceNote: h('textarea', { class: 'textarea', maxlength: '400', value: s.insuranceNote, placeholder: 'e.g. Fully insured. Every GROWND scientist holds an enhanced DBS check.' })
+      insuranceNote: h('textarea', { class: 'textarea', maxlength: '400', value: s.insuranceNote, placeholder: 'e.g. Fully insured. Every GROWND scientist is police-verified and trained in child safety.' }),
+      businessName: h('input', { class: 'input', type: 'text', maxlength: '120', value: s.businessName, placeholder: 'GROWND Science Experiences LLP', autocomplete: 'organization' }),
+      contactEmail: h('input', { class: 'input', type: 'email', maxlength: '120', value: s.contactEmail, placeholder: 'hello@grownd.in', spellcheck: 'false' }),
+      contactPhone: h('input', { class: 'input', type: 'tel', maxlength: '30', value: s.contactPhone, placeholder: '+91 98765 43210' }),
+      address: h('textarea', { class: 'textarea', maxlength: '300', value: s.address, placeholder: 'Registered address, with city and PIN code' })
     };
     const fields = {
       currency: field('Currency code', inputs.currency, { hint: 'Three letters, like INR for rupees. Every price on the site uses it.' }),
       timezone: field('Timezone label', inputs.timezone, { hint: 'Shown after event times. A single date can override it.' }),
       responseTime: field('Reply time', inputs.responseTime, { hint: 'Completes “We reply within …” on the register page.', span: true }),
-      insuranceNote: field('Safety and checks', inputs.insuranceNote, { hint: 'Shown on the home page and on every mission page.', span: true })
+      insuranceNote: field('Safety and checks', inputs.insuranceNote, { hint: 'Shown on the home page and on every mission page.', span: true }),
+      businessName: field('Business name', inputs.businessName, { hint: 'Your registered (legal) name. Used in the terms, privacy and refund policies.', span: true }),
+      contactEmail: field('Contact email', inputs.contactEmail, { hint: 'Shown on the contact page and in the policies.' }),
+      contactPhone: field('Contact phone', inputs.contactPhone, { hint: 'Shown on the contact page.' }),
+      address: field('Business address', inputs.address, { hint: 'Shown on the contact page. Razorpay checks it matches your KYC.', span: true })
     };
     const formError = h('p', { class: 'form-error', role: 'alert' });
     return h('section', { class: 'panel', 'aria-labelledby': 'site-h' },

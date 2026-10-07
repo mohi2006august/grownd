@@ -271,6 +271,29 @@ try {
 }
 
 // ---------------------------------------------------------------------------
+heading('Team emails and error alerts (optional)');
+
+if (set('RESEND_API_KEY') && set('NOTIFY_EMAIL')) {
+  if (!env.RESEND_API_KEY.startsWith('re_')) fix('RESEND_API_KEY should start with re_.', 'Copy it again from resend.com -> API Keys.');
+  else ok(`New registrations and payments are emailed to ${env.NOTIFY_EMAIL}`);
+} else if (set('RESEND_API_KEY') || set('NOTIFY_EMAIL')) {
+  fix('Team emails need both RESEND_API_KEY and NOTIFY_EMAIL.', 'SETUP.md, Part 5.');
+} else {
+  note('Nobody is emailed about new registrations or payments; they only show in the dashboard.', 'SETUP.md, Part 5: add RESEND_API_KEY and NOTIFY_EMAIL.');
+}
+if (set('NEXT_PUBLIC_SENTRY_DSN')) {
+  try {
+    const dsn = new URL(env.NEXT_PUBLIC_SENTRY_DSN);
+    if (!dsn.username || !/sentry\.io$/.test(dsn.hostname)) throw new Error();
+    ok('Errors on the site and in the API are reported to Sentry');
+  } catch {
+    fix('NEXT_PUBLIC_SENTRY_DSN does not look like a Sentry DSN.', 'Sentry -> Project Settings -> Client Keys (DSN). It looks like https://abc123@o123.ingest.sentry.io/456');
+  }
+} else {
+  note('No error alerts: if something breaks, nobody is told.', 'SETUP.md, Part 5: add NEXT_PUBLIC_SENTRY_DSN.');
+}
+
+// ---------------------------------------------------------------------------
 console.log('');
 if (problems) {
   console.log(`${problems} thing${problems === 1 ? '' : 's'} to fix${notes ? `, ${notes} note${notes === 1 ? '' : 's'}` : ''}. Fix them, then run npm run check again.`);

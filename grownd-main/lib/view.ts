@@ -11,7 +11,13 @@ export function siteDetails(live: Live | null) {
     currency: s?.currency || "[CURRENCY]",
     timezone: s?.timezone || "[TIMEZONE]",
     responseTime: s?.responseTime || "[RESPONSE TIME]",
-    insurance: s?.insuranceNote || "[INSURANCE AND DBS DETAILS]"
+    insurance: s?.insuranceNote || "[INSURANCE AND DBS DETAILS]",
+    businessName: s?.businessName || "[BUSINESS NAME]",
+    email: s?.contactEmail || "[CONTACT EMAIL]",
+    phone: s?.contactPhone || "[CONTACT PHONE]",
+    address: s?.address || "[BUSINESS ADDRESS]",
+    hasEmail: Boolean(s?.contactEmail),
+    hasPhone: Boolean(s?.contactPhone)
   };
 }
 
