@@ -13,7 +13,13 @@ import healthRoutes from './routes/health.js';
 import paymentRoutes from './routes/payments.js';
 import publicRoutes from './routes/public.js';
 
-export async function buildApp() {
+/**
+ * The API as a Fastify app. Options, both optional:
+ *   onError(err, context)  report an unexpected error (Next.js passes Sentry's)
+ *   defer(task)            run a task after the answer is sent (Next.js passes after(), so it also
+ *                          finishes on serverless; a long-running server just runs it)
+ */
+export async function buildApp({ onError, defer } = {}) {
   const app = Fastify({
     logger: { level: config.logLevel, redact: ['req.headers.authorization'] },
     // Per-request logs are noise at scale; slow and failed requests are logged below instead.
@@ -24,6 +30,16 @@ export async function buildApp() {
     keepAliveTimeout: 72_000, // longer than common load balancer idle timeouts (60s), avoiding stray 502s
     return503OnClosing: true
   });
+
+  const report = (err, context) => {
+    try { onError?.(err, context); } catch { /* reporting must never break an answer */ }
+  };
+  const runLater = defer || (task => { setImmediate(task); });
+  /** app.later(fn): work such as team emails that should not hold up the answer. */
+  app.decorate('later', fn => runLater(() => Promise.resolve().then(fn).catch(err => {
+    app.log.error({ err }, 'background task failed');
+    report(err, { task: 'background' });
+  })));
 
   // ---- protection ----
 
@@ -84,15 +100,22 @@ export async function buildApp() {
 
   app.setErrorHandler((err, request, reply) => {
     if (err instanceof HttpError) {
-      if (err.cause) request.log.error({ err: err.cause }, err.message); // e.g. the payment provider's own error
+      if (err.cause) {
+        request.log.error({ err: err.cause }, err.message); // e.g. the payment provider's own error
+        report(err.cause, { route: request.routeOptions?.url, message: err.message });
+      }
       return reply.code(err.statusCode).send({ error: err.message, ...(err.errors && { errors: err.errors }), ...(err.code && { code: err.code }) });
     }
     if (DB_UNAVAILABLE.has(err.code)) {
       request.log.error({ err }, 'database unavailable');
+      report(err, { route: request.routeOptions?.url, message: 'database unavailable' });
       return reply.code(503).header('Retry-After', '5').send({ error: 'We are having trouble saving right now. Please try again in a moment.' });
     }
     const status = err.statusCode >= 400 && err.statusCode < 500 ? err.statusCode : 500;
-    if (status === 500) request.log.error({ err }, 'unhandled error');
+    if (status === 500) {
+      request.log.error({ err }, 'unhandled error');
+      report(err, { route: request.routeOptions?.url });
+    }
     const message = status === 413 ? 'That is more text than we can take in one go.'
       : status === 415 ? 'Please send JSON.'
       : status === 500 ? 'Something went wrong on our side. Please try again.'

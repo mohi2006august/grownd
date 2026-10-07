@@ -1,7 +1,9 @@
 import { sql } from '../db.js';
 import { cached } from '../lib/cache.js';
 
-export const SETTING_KEYS = ['currency', 'timezone', 'responseTime', 'insuranceNote'];
+// The business details appear on the contact page and in the terms, privacy and refund policies,
+// which Razorpay checks before it activates live payments.
+export const SETTING_KEYS = ['currency', 'timezone', 'responseTime', 'insuranceNote', 'businessName', 'contactEmail', 'contactPhone', 'address'];
 
 export async function getSettings() {
   const out = Object.fromEntries(SETTING_KEYS.map(k => [k, '']));

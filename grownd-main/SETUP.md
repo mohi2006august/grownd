@@ -142,6 +142,8 @@ Go to **Settings → Environment Variables**. Add these for *Production* and *Pr
 | `REDIS_URL` | Recommended before launch. Add **Upstash Redis** from the Vercel Marketplace and paste its `rediss://...` URL, so rate limits count across all Vercel instances instead of per instance. |
 | `GOOGLE_SITE_VERIFICATION` | Optional: the code from Google Search Console's HTML-tag method ([SEO.md](SEO.md)). |
 | `SITE_URL` | Optional: the site's address, e.g. `https://grownd.in`. Without it, Vercel's production domain is used for search links, share images and payment return links. |
+| `RESEND_API_KEY`, `NOTIFY_EMAIL` | Optional: team emails about new registrations and payments (Part 5). |
+| `NEXT_PUBLIC_SENTRY_DSN` | Optional: error alerts (Part 5). |
 
 Not needed on Vercel:
 - `PORT`, `NODE_ENV`, `TRUST_PROXY` and `WEB_CONCURRENCY`: Vercel handles these.
@@ -171,12 +173,37 @@ Push to `main`, or redeploy from **Deployments → ⋯ → Redeploy**. Changed v
 
 ## Part 4: Going live
 
-1. **Razorpay:** complete **Account Activation** (KYC): business details, PAN, bank account and the website address. Razorpay checks that the site shows prices, contact details, and terms, privacy and refund policies, so publish those first.
-2. **Live keys:** switch the dashboard to **Live Mode**, go to **Account & Settings → API Keys → Generate Live Key**, and put the Key Id (`rzp_live_...`) and Key Secret in Vercel.
-3. **Webhook:** add the webhook from Part 3, step 4 again in **Live Mode**, with its own secret in `RAZORPAY_WEBHOOK_SECRET`. Production refuses to take payments without it.
-4. **Rate limits:** set `REDIS_URL` (Upstash) in Vercel. For extra protection, add Vercel Firewall rate-limit rules for `/api/checkout` and `/api/registrations`.
-5. **Supabase:** consider the Pro plan before launch, for no pausing, daily backups and more connections.
-6. **Not using Vercel?** Any Node 22+ host works: run `npm ci`, `npm run build`, then `npm start`, which serves the site and the API together on port 4000. Set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. (`backend/Dockerfile` builds an API-only image if you host the API separately.)
+1. **Business details and policies:** in the dashboard, under **Settings**, fill in the business name, contact email, phone and address. They appear on the contact page (`/contact`) and in the terms (`/terms`), privacy policy (`/privacy`) and cancellation and refund policy (`/refunds`). Those three are drafts written for a small Indian business: read them, change the refund rules in `lib/policies.ts` if you work differently, and have a lawyer or CA look them over.
+2. **Razorpay:** complete **Account Activation** (KYC): business details, PAN, bank account and the website address. Razorpay checks that the site shows prices, contact details, terms, a privacy policy, a refund policy and how services are delivered. The footer of every page links to all of them.
+3. **Live keys:** switch the dashboard to **Live Mode**, go to **Account & Settings → API Keys → Generate Live Key**, and put the Key Id (`rzp_live_...`) and Key Secret in Vercel.
+4. **Webhook:** add the webhook from Part 3, step 4 again in **Live Mode**, with its own secret in `RAZORPAY_WEBHOOK_SECRET`. Production refuses to take payments without it.
+5. **Rate limits:** set `REDIS_URL` (Upstash) in Vercel. For extra protection, add Vercel Firewall rate-limit rules for `/api/checkout` and `/api/registrations`.
+6. **Supabase:** consider the Pro plan before launch, for no pausing, daily backups and more connections.
+7. **Not using Vercel?** Any Node 22+ host works: run `npm ci`, `npm run build`, then `npm start`, which serves the site and the API together on port 4000. Set `NODE_ENV=production`, `SITE_URL=https://your-site`, and `TRUST_PROXY=1` behind a load balancer. (`backend/Dockerfile` builds an API-only image if you host the API separately.)
+
+---
+
+## Part 5: Team emails and error alerts
+
+Both are optional and free at GROWND's size. `npm run check` shows whether they are on.
+
+### Emails about new registrations and payments
+The team gets an email when someone registers interest or pays, with their details and a link to the dashboard. During a rush, sign-ups are grouped into one email a minute; nothing is missed or sent twice. If a single person registered, **Reply** in your email app goes straight to them.
+
+1. Sign up at <https://resend.com> **with the inbox that should get the emails**. The free plan sends 3,000 emails a month.
+2. Go to **API Keys → Create API key** (permission: *Sending access*). Copy the key (`re_...`).
+3. In Vercel (and `backend/.env` for local use), add `RESEND_API_KEY` with that key and `NOTIFY_EMAIL` with your inbox. Redeploy.
+
+Until you verify a domain in Resend, emails come from `onboarding@resend.dev` and can only go to the email you signed up with. With your own domain (for example `grownd.in`): in Resend, open **Domains → Add Domain** and add the DNS records it shows at your domain registrar. Then set `NOTIFY_FROM` to `GROWND <team@grownd.in>`, and `NOTIFY_EMAIL` can list several people, separated by commas.
+
+### Error alerts
+Sentry records errors on the site and in the API (a failed payment check, a database outage, a broken page) and emails you about new ones.
+
+1. Sign up at <https://sentry.io> (the free Developer plan is enough) and create a project. Choose **Next.js** as the platform.
+2. Copy the **DSN** it shows (also under **Project Settings → Client Keys**). It looks like `https://abc123@o123.ingest.sentry.io/456`.
+3. In Vercel, add `NEXT_PUBLIC_SENTRY_DSN` with that value, and redeploy.
+
+Reports leave out form contents, cookies and IP addresses, as the privacy policy (`/privacy`) promises (`lib/sentry-options.ts`).
 
 ## If something goes wrong
 Run `npm run check`; it names the problem and the fix. The usual ones are:

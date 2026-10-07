@@ -216,13 +216,18 @@ export default async function adminRoutes(app) {
 
     app.put('/api/admin/settings', async request => {
       const b = request.body || {}, errors = {}, values = {};
-      const limits = { currency: 3, timezone: 40, responseTime: 60, insuranceNote: 400 };
-      const labels = { currency: 'Currency', timezone: 'Timezone', responseTime: 'Reply time', insuranceNote: 'Safety note' };
+      const limits = { currency: 3, timezone: 40, responseTime: 60, insuranceNote: 400, businessName: 120, contactEmail: 120, contactPhone: 30, address: 300 };
+      const labels = {
+        currency: 'Currency', timezone: 'Timezone', responseTime: 'Reply time', insuranceNote: 'Safety note',
+        businessName: 'Business name', contactEmail: 'Contact email', contactPhone: 'Contact phone', address: 'Address'
+      };
       for (const k of SETTING_KEYS) if (k in b) values[k] = text(errors, k, b[k], { max: limits[k], label: labels[k] });
       if (values.currency) {
         values.currency = values.currency.toUpperCase();
-        if (!/^[A-Z]{3}$/.test(values.currency)) errors.currency = 'Use a three-letter currency code, like GBP or EUR.';
+        if (!/^[A-Z]{3}$/.test(values.currency)) errors.currency = 'Use a three-letter currency code, like INR.';
       }
+      if (values.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.contactEmail)) errors.contactEmail = 'That email does not look right.';
+      if (values.contactPhone && !/^\+?[\d\s()-]{7,}$/.test(values.contactPhone)) errors.contactPhone = 'Use digits, spaces and an optional + at the start, like +91 98765 43210.';
       if (Object.keys(errors).length) throw badRequest(errors);
       const saved = await saveSettings(values);
       contentChanged();

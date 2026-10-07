@@ -1,6 +1,7 @@
 import { buildApp } from './app.js';
 import { config } from './config.js';
 import { paymentsEnabled, testMode, webhooksEnabled } from './payments/provider.js';
+import { notifyEnabled, sendTeamEmail } from './services/notify.js';
 import { reconcileOverdue } from './services/orders.js';
 
 export async function start() {
@@ -24,6 +25,12 @@ export async function start() {
     app.log.warn('online payments are off: set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to turn them on');
   }
 
+  // Team emails that are still waiting (the one-a-minute limit held them back).
+  const notifyTimer = notifyEnabled ? setInterval(() => {
+    sendTeamEmail().catch(err => app.log.warn({ err }, 'team email failed; retrying next round'));
+  }, 60_000) : null;
+  notifyTimer?.unref();
+
   // Graceful shutdown: stop taking new connections, let in-flight requests finish,
   // close the database pool, then exit. Forced after 10 seconds.
   let closing = false;
@@ -32,6 +39,7 @@ export async function start() {
     closing = true;
     app.log.info({ signal }, 'shutting down');
     clearInterval(reconcileTimer);
+    clearInterval(notifyTimer);
     setTimeout(() => {
       app.log.error('forced exit: shutdown took longer than 10s');
       process.exit(1);

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
+import { sendTeamEmail } from '../services/notify.js';
 import { reconcileOverdue } from '../services/orders.js';
 
 function sameSecret(given, expected) {
@@ -9,7 +10,7 @@ function sameSecret(given, expected) {
 }
 
 // Scheduled jobs. Vercel Cron calls these with "Authorization: Bearer <CRON_SECRET>"; any other
-// scheduler can do the same. Long-running servers also run the reconciler on a timer (server.js).
+// scheduler can do the same. Long-running servers also run these on a timer (server.js).
 export default async function cronRoutes(app) {
   app.get('/api/cron/reconcile', { config: { rateLimit: false } }, async request => {
     if (!config.cronSecret || !sameSecret(request.headers.authorization || '', `Bearer ${config.cronSecret}`)) {
@@ -22,6 +23,8 @@ export default async function cronRoutes(app) {
       settled += n;
       if (n < 100) break;
     }
-    return { settled };
+    // And a team email with anything that has not gone out yet.
+    const emailed = await sendTeamEmail({ force: true });
+    return { settled, emailed };
   });
 }

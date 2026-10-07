@@ -19,7 +19,7 @@ public/            served as they are: fonts, share images (og/), icons, and
 backend/           API: Node + Fastify, stateless, talks to Supabase Postgres and Razorpay
   src/
     routes/        HTTP layer: public, payments, admin, cron, health. Validation and status codes only
-    services/      business logic; all SQL lives here (orders.js holds the payment rules)
+    services/      business logic; all SQL lives here (orders.js: payment rules; notify.js: team emails)
     payments/      the only code that knows about Razorpay, behind a small provider-neutral interface
     lib/           cache, errors, money, validation helpers
     app.js         plugins, protection, error handling
@@ -154,10 +154,11 @@ Either way, run `npm run db:migrate` against Supabase from your computer, and po
 | `/about`, `/lab` | Who we are; The Lab |
 | `/register`, `/register/<slug>`, `/thank-you` | Register interest |
 | `/checkout?event=ID`, `/checkout?order=ID` | Book a date and pay; a payment link or an order's confirmation |
+| `/contact`, `/terms`, `/privacy`, `/refunds` | Contact details and the policies (text in `lib/policies.ts`; business details from Settings) |
 | `/admin` | Dashboard |
 
 - **Words, missions, quiz and team:** `lib/missions.ts`. **Search titles and descriptions:** `lib/seo.ts` (see [SEO.md](SEO.md)). **Layout:** the page in `app/(site)/` and its parts in `components/`.
-- **Filled in from the dashboard:** prices and currency, dates, times and timezone, venues and cities, reply time, and the safety note.
+- **Filled in from the dashboard:** prices and currency, dates, times and timezone, venues and cities, reply time, the safety note, and the business name, email, phone and address.
 - **Still plain copy, to edit in the code:** the team names (`[TEAM LEAD]`, `[TECH LEAD]`, `[CONTENT LEAD]` in `lib/missions.ts`), `MISSION CONTROL / [CITY]`, and the photo and video slots (`[PHOTO …]`, `[VIDEO …]`; see "Adding photos" in [SEO.md](SEO.md)).
 - The booking page and the dashboard are plain HTML/JS in `public/`. Their Content-Security-Policy (in `checkout.html` and `admin/index.html`) allows only this site and, for the dashboard, `*.supabase.co`. Add a custom Supabase domain there if you use one.
 - Customers type their card or UPI details on Razorpay's page, never on this site. If payments are switched off, the booking buttons fall back to **Register interest**.
@@ -169,4 +170,5 @@ Either way, run `npm run db:migrate` against Supabase from your computer, and po
 - Publish booking terms, a privacy policy and a cancellation and refund policy, and link them from the site. Razorpay asks for them during account activation.
 - Check with an accountant whether prices need GST shown or added. Tax is not calculated yet.
 - Edit the copy placeholders the dashboard does not manage, listed under [The website](#the-website).
-- New registrations and bookings show up in the dashboard, and Razorpay emails customers their receipts, but the GROWND team is not emailed about them yet. That is the next feature worth adding.
+- Fill in the business details in the dashboard's **Settings**, and review the terms, privacy and refund policies (`/terms`, `/privacy`, `/refunds`; text in `lib/policies.ts`). Razorpay checks them during activation.
+- Switch on team emails and error alerts ([SETUP.md](SETUP.md), Part 5) so new registrations, payments and problems reach you.

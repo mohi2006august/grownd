@@ -6,5 +6,8 @@ declare module "@/backend/src/services/content.js" {
 
 declare module "@/backend/src/app.js" {
   import type { FastifyInstance } from "fastify";
-  export function buildApp(): Promise<FastifyInstance>;
+  export function buildApp(options?: {
+    onError?: (err: unknown, context: Record<string, unknown>) => void;
+    defer?: (task: () => Promise<void> | void) => void;
+  }): Promise<FastifyInstance & { later(fn: () => unknown): void }>;
 }

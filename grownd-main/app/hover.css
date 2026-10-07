@@ -99,3 +99,4 @@
 .rg0-9:active{transform:scale(0.98) !important}
 .st0-1:hover{box-shadow:0 0 32px rgba(198,245,52,0.35) !important;color:var(--on-accent,#0A0E1A) !important}
 .st0-2:hover{border-color:var(--ink,#F2F5FF) !important;color:var(--ink,#F2F5FF) !important}
+.gr-foot-link:hover{color:var(--ink,#F2F5FF) !important;text-decoration:underline !important}

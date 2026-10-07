@@ -22,7 +22,7 @@ export const SITE_URL = (
   (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:4000")
 ).replace(/\/+$/, "");
 
-type Kind = "WebPage" | "CollectionPage" | "AboutPage";
+type Kind = "WebPage" | "CollectionPage" | "AboutPage" | "ContactPage";
 type Crumb = [name: string, path?: string];
 
 export interface PageSeo {
@@ -134,7 +134,27 @@ export const PAGES: PageSeo[] = [
     description: "GROWND is a small team running hands-on STEM missions for children aged 5-12. The person who plans your mission is the person who turns up to run it.",
     index: true, image: "default", imageAlt: "The GROWND team", kind: "AboutPage", crumbs: [["Who we are"]]
   },
+  {
+    path: "/contact", title: "Contact GROWND | Science Parties and Workshops for Kids",
+    description: "Email, phone and address for GROWND. Ask about science birthday parties, workshops and school events for ages 5-12, and a real person replies.",
+    index: true, image: "default", imageAlt: "Contact GROWND", kind: "ContactPage", crumbs: [["Contact"]]
+  },
   // Thin or private pages: reachable, but kept out of search results.
+  {
+    path: "/terms", title: "Terms and Conditions | GROWND",
+    description: "The terms for booking a GROWND science session: bookings, payments through Razorpay, delivery, safety on the day, and how disputes are handled.",
+    index: false, image: "default", imageAlt: "GROWND", kind: "WebPage", crumbs: [["Terms and conditions"]]
+  },
+  {
+    path: "/privacy", title: "Privacy Policy | GROWND",
+    description: "What GROWND collects when you register or book, why, who processes it, how long it is kept, and your rights under India's DPDP Act, 2023.",
+    index: false, image: "default", imageAlt: "GROWND", kind: "WebPage", crumbs: [["Privacy policy"]]
+  },
+  {
+    path: "/refunds", title: "Cancellation and Refund Policy | GROWND",
+    description: "What you get back if you cancel or move a GROWND booking, what happens if we cancel, and how refunds reach you through Razorpay.",
+    index: false, image: "default", imageAlt: "GROWND", kind: "WebPage", crumbs: [["Cancellation and refunds"]]
+  },
   {
     path: "/lab", title: "The Lab: Experiments for Young Scientists | GROWND",
     description: "Experiments of the week, home challenges and achievement badges for young scientists. Opening after the first GROWND missions run.",

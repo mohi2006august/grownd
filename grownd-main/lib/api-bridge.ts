@@ -1,12 +1,18 @@
 // Runs the GROWND API (backend/, Fastify) inside Next.js route handlers, so the site and its API
 // deploy as one app. Requests are handed to Fastify in memory, with no extra network hop.
 import type { FastifyInstance } from "fastify";
+import { after } from "next/server";
+import { reportError } from "@/lib/report";
 
 let ready: Promise<FastifyInstance> | undefined;
 
 function loadApi() {
   ready ??= import("@/backend/src/app.js")
-    .then(m => m.buildApp())
+    .then(m => m.buildApp({
+      onError: reportError,
+      // after(): finish background work (team emails) after answering, even on serverless.
+      defer: task => { try { after(task); } catch { void task(); } }
+    }))
     .then(async app => { await app.ready(); return app; });
   ready.catch(() => { ready = undefined; }); // try again on the next request
   return ready;

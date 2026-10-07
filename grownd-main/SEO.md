@@ -14,9 +14,9 @@ What is set up, how to keep it right, and how to grow it. The words that appear 
 | Canonical tags | Every indexable page points at its own `https://` address. The missions filter (`/missions?cat=…`) points at `/missions`, so filters don't create duplicate pages. | `lib/seo.ts` |
 | Share image (og:image) | A 1200×630 image for every page: one for the brand, one for the quiz, one per mission and one per scientist type. Each is 58-77 KB, well under WhatsApp's 300 KB limit, and has alt text. | `public/og/`, made by `scripts/make-images.mjs` |
 | Schema markup | Every page carries JSON-LD for the Organization, WebSite and WebPage. Inner pages add a BreadcrumbList, mission pages add a Service with age range, and dated events add an Event with price and availability once the dashboard has dates. | `lib/seo.ts`, events in `app/(site)/missions/[slug]/page.tsx` |
-| sitemap.xml | Lists the 14 pages worth finding in search. Pages kept out of search are not listed. | `app/sitemap.ts` |
+| sitemap.xml | Lists the 15 pages worth finding in search. Pages kept out of search are not listed. | `app/sitemap.ts` |
 | robots.txt | Lets everything be crawled except `/admin` and `/api/`, and points at the sitemap. | `app/robots.ts` |
-| noindex | Register, thank-you, The Lab (thin until it has content), checkout, admin, the 404 page and the API stay out of search, via meta tags and `X-Robots-Tag` headers. | `lib/seo.ts`, `next.config.ts` |
+| noindex | Register, thank-you, The Lab (thin until it has content), the terms, privacy and refund policies, checkout, admin, the 404 page and the API stay out of search, via meta tags and `X-Robots-Tag` headers. | `lib/seo.ts`, `next.config.ts` |
 | Enforce HTTPS | Vercel redirects `http://` to `https://`. HSTS tells browsers to only ever use HTTPS. Every canonical and share link is `https://`. | Vercel, `next.config.ts` |
 | Internal links | All links are real `<a href>` links that crawlers can follow. Every page lists the missions, and mission pages link to related missions and their scientist type. | pages in `app/(site)/` |
 | Crawlers without JavaScript | Every page is rendered on the server, so its full content, links, prices and dates are in the HTML itself. This covers Bing's first pass, AI search crawlers and link previews. | Next.js |
@@ -65,7 +65,7 @@ Search results show what is on the page, so replace the placeholders first:
 6. Open **Sitemaps** and submit `sitemap.xml`.
 7. Optional: in [Bing Webmaster Tools](https://www.bing.com/webmasters), choose **Import from Google Search Console**. That covers Bing, DuckDuckGo and ChatGPT search, which uses Bing's index.
 
-Then check **Pages** after a week: the 14 sitemap pages should move to *Indexed*.
+Then check **Pages** after a week: the 15 sitemap pages should move to *Indexed*.
 
 ## Your own domain
 

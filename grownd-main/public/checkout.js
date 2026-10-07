@@ -221,7 +221,8 @@ async function bookingPage(eventId) {
     h('div', null,
       payButton,
       h('p', { class: 'pay-note', style: { 'margin-top': '14px' } }, icon('lock', 16),
-        `You pay on Razorpay's secure page, by UPI, card, netbanking or wallet. We hold your ${perChild ? 'places' : 'booking'} for ${data.payments.holdMinutes} minutes while you do.`)));
+        `You pay on Razorpay's secure page, by UPI, card, netbanking or wallet. We hold your ${perChild ? 'places' : 'booking'} for ${data.payments.holdMinutes} minutes while you do.`),
+      h('p', { class: 'pay-note terms-note' }, 'By paying you agree to the ', h('a', { href: '/terms' }, 'terms'), ' and the ', h('a', { href: '/refunds' }, 'cancellation and refund policy'), '.')));
 
   const summary = h('aside', { class: 'card summary', style: { '--type': TYPE_COLOR[mission.type] || 'var(--brand)' }, 'aria-label': 'Your booking' },
     h('p', { class: 'mono muted' }, 'Your booking'),

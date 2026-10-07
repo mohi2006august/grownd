@@ -21,7 +21,10 @@ export interface LiveMission {
 }
 
 export interface Live {
-  settings: { currency: string; timezone: string; responseTime: string; insuranceNote: string };
+  settings: {
+    currency: string; timezone: string; responseTime: string; insuranceNote: string;
+    businessName: string; contactEmail: string; contactPhone: string; address: string;
+  };
   payments: { enabled: boolean; holdMinutes: number };
   missions: Record<string, LiveMission>;
 }
