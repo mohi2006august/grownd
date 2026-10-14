@@ -23,15 +23,15 @@
     "create-admin": "npm run create-admin -w backend --"
   },
   "devDependencies": {
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "typescript": "7.0.2"
   },
   "dependencies": {
-    "@sentry/nextjs": "11.5.0",
-    "@supabase/supabase-js": "2.117.2",
-    "next": "16.3.8",
+    "@sentry/nextjs": "11.6.0",
+    "@supabase/supabase-js": "2.117.3",
+    "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   }
